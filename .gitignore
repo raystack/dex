@@ -13,3 +13,14 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+dist/
+coverage/
+config.yaml
+.vscode
+.air.toml
+.idea/
+tmp/
+
+expt/
+requests.http

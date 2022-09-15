@@ -1,0 +1,48 @@
+# HTTP/gRPC server configurations.
+service:
+  # host forms the bind address along with port. In container environments
+  # it might be necessary to set this to 0.0.0.0 (leaving this config empty
+  # has the same effect)
+  host: localhost
+
+  # port forms the bind address along with host.
+  port: 8080
+
+log:
+  # level can be one of debug, info, warn, error.
+  # This configuration is case-insensitive.
+  level: info
+
+# instrumentation/metrics related configurations.
+telemetry:
+  # debug_addr is used for exposing the pprof, zpages & `/metrics` endpoints. if
+  # not set, all of the above are disabled.
+  debug_addr: "localhost:8081"
+
+  # enable_cpu enables collection of runtime CPU metrics. available in `/metrics`.
+  enable_cpu: true
+
+  # enable_memory enables collection of runtime memory metrics. available via `/metrics`.
+  enable_memory: true
+
+  # sampling_fraction indicates the sampling rate for tracing. 1 indicates all traces
+  # are collected and 0 means no traces.
+  sampling_fraction: 1
+
+  # service_name is the identifier used in trace exports, NewRelic, etc for the
+  # dex instance.
+  service_name: "dex"
+
+  # enable_newrelic enables exporting NewRelic instrumentation in addition to the
+  # OpenCensus.
+  enable_newrelic: false
+
+  # newrelic_api_key must be a valid NewRelic License key.
+  newrelic_api_key: "dummydummydummydummydummydummydummydummy"
+
+  # enable_otel_agent enables the OpenTelemetry Exporter for both traces and views.
+  enable_otel_agent: false
+
+  # otel_agent_addr is the addr of OpenTelemetry Collector/Agent. This is where the
+  # opene-telemetry exporter will publish the collected traces/views to.
+  otel_agent_addr: "localhost:8088"

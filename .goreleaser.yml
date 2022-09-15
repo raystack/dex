@@ -1,0 +1,80 @@
+project_name: dex
+
+release:
+  prerelease: auto
+  draft: true
+
+builds:
+  - main: ./main.go
+    id: "dex"
+    binary: dex
+    flags: [ -a ]
+    ldflags:
+      - -X github.com/odpf/dex/pkg/version.Version={{.Tag}}
+      - -X github.com/odpf/dex/pkg/version.Commit={{.FullCommit}}
+      - -X github.com/odpf/dex/pkg/version.BuildTime={{.Date}}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - replacements:
+      darwin: macos
+      linux: linux
+      windows: windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs'
+      - '^test'
+      - '^build'
+      - '^ci'
+      - '^chore'
+      - '^refactor'
+
+dockers:
+  - goos: linux
+    goarch: amd64
+    ids:
+      - dex
+    dockerfile: Dockerfile
+    image_templates:
+      - 'docker.io/odpf/{{.ProjectName}}:latest'
+      - 'docker.io/odpf/{{.ProjectName}}:{{ .Version }}'
+      - 'docker.io/odpf/{{.ProjectName}}:{{ .Version }}-amd64'
+
+brews:
+  - name: dex
+    homepage: "https://github.com/odpf/dex"
+    description: "Infrastructure orchestration tool."
+    tap:
+      owner: odpf
+      name: homebrew-tap
+    license: "Apache 2.0"
+    folder: Formula
+    dependencies:
+      - name: git
+    install: |-
+      bin.install "dex"
+    commit_author:
+      name: Shivaprasad Bhat
+      email: shiv.ylp@gmail.com
