@@ -5,6 +5,7 @@ go 1.18
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.0
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
+	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/newrelic/go-agent/v3 v3.18.2
 	github.com/newrelic/go-agent/v3/integrations/nrgorilla v1.1.1
@@ -17,11 +18,9 @@ require (
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
 	google.golang.org/protobuf v1.28.1
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/alecthomas/chroma v0.8.2 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -91,4 +90,5 @@ require (
 	google.golang.org/grpc v1.46.2 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
