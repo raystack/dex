@@ -16,7 +16,7 @@
 
 dist/
 coverage/
-config.yaml
+/config.yaml
 .vscode
 .air.toml
 .idea/

@@ -6,7 +6,7 @@ import (
 	"github.com/odpf/dex/pkg/version"
 )
 
-func cmdVersion() *cobra.Command {
+func versionCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Show version information",
