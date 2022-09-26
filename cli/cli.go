@@ -8,11 +8,12 @@ import (
 
 type CDK struct {
 	Config *cmdx.Config
+	Auth   *cmdx.Config
 }
 
 // New root command.
 func New() *cobra.Command {
-	var cmd = &cobra.Command{
+	cmd := &cobra.Command{
 		Use:           "dex <command> <subcommand> [flags]",
 		Short:         "Data experience console",
 		Long:          "Data experience console.",
@@ -30,12 +31,16 @@ func New() *cobra.Command {
 		},
 	}
 
-	cdk := &CDK{Config: cmdx.SetConfig("dex")}
+	cdk := &CDK{
+		Config: cmdx.SetConfig("dex"),
+		Auth:   cmdx.SetConfig("auth"),
+	}
 
 	cmd.AddCommand(
 		serverCommand(),
-		configCmd(cdk),
 		versionCmd(),
+		configCmd(cdk),
+		loginCmd(cdk),
 	)
 
 	// Help topics.

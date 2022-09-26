@@ -6,9 +6,9 @@ COVERAGE_DIR=coverage
 BUILD_DIR=dist
 EXE=dex
 
-.PHONY: all build clean tidy format test test-coverage
+.PHONY: all format clean build test test-coverage
 
-all: clean test build format lint
+all: clean format test lint build 
 
 tidy:
 	@echo "Tidy up go.mod..."

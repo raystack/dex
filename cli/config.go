@@ -5,10 +5,25 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 )
 
 type ClientConfig struct {
 	Host string `yaml:"host" cmdx:"host"`
+}
+
+type OAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+	Endpoint     oauth2.Endpoint
+	Audience     string
+}
+
+type AuthConfig struct {
+	OAuth        OAuthConfig
+	AccessToken  string
+	RefreshToken string
+	Expiry       int64
 }
 
 func configCmd(cdk *CDK) *cobra.Command {
@@ -47,7 +62,7 @@ func configInitCommand(cdk *CDK) *cobra.Command {
 }
 
 func configListCommand(cdk *CDK) *cobra.Command {
-	var cmd = &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List client configuration settings",
 		Example: heredoc.Doc(`
