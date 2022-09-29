@@ -26,11 +26,15 @@ lint:
 	@echo "Running lint checks using golangci-lint..."
 	@golangci-lint run
 
+generate:
+	@echo "Running go-generate..."
+	@go generate ./...
+	@echo "Running swagger-generate..."
+	@swagger generate client -t generated -f swagger.yml
+
 clean: tidy
 	@echo "Cleaning up build directories..."
 	@rm -rf ${COVERAGE_DIR} ${BUILD_DIR}
-	@echo "Running go-generate..."
-	@go generate ./...
 
 test: tidy
 	@mkdir -p ${COVERAGE_DIR}

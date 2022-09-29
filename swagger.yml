@@ -1,11 +1,16 @@
-openapi: 3.0.3
+produces:
+  - application/json
+consumes:
+  - application/json
+schemes:
+  - http
+  - https
+swagger: "2.0"
+
 info:
-  title: DEX APIs
+  title:  dex_api
   description: DEX API sepcifications.
   version: 0.1.0
-
-servers:
-  - url: /api/v1
 
 paths:
   /projects:
@@ -16,16 +21,12 @@ paths:
       responses:
         "200":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProjectArray"
+          schema:
+            $ref: "#/definitions/ProjectArray"
         "500":
           description: internal error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /projects/{id}:
     get:
       summary: Get project by id.
@@ -34,38 +35,28 @@ paths:
       parameters:
         - in: path
           name: id
+          type: string
           required: true
-          schema:
-            type: string
-            example: "foo"
           description: Unique identifier of the project.
       responses:
         "200":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Project"
+          schema:
+            $ref: "#/definitions/Project"
         "404":
           description: project not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: internal error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /projects/{projectId}/firehoses:
     parameters:
       - in: path
         name: projectId
+        type: string
         required: true
-        schema:
-          type: string
-          example: "foo"
         description: Unique identifier of the project.
     get:
       summary: Get list of firehoses.
@@ -74,168 +65,142 @@ paths:
       parameters:
         - in: query
           name: team
+          type: string
           required: false
-          schema:
-            type: string
-            example: "pricing"
           description: Return firehoses belonging to only this team.
         - in: query
           name: cluster
+          type: string
           required: false
-          schema:
-            type: string
-            example: "application"
           description: Return firehoses belonging to only this cluster.
         - in: query
           name: status
+          type: string
+          enum:
+            - "RUNNING"
+            - "STOPPED"
           required: false
-          schema:
-            type: string
-            enum:
-              - "RUNNING"
-              - "STOPPED"
-            example: "RUNNING"
           description: Return firehoses only with this status.
         - in: query
           name: topic_name
+          type: string
           required: false
-          schema:
-            type: string
-            example: "booking-events"
           description: Return firehoses that are consuming from this topic.
         - in: query
           name: stream_name
+          type: string
           required: false
-          schema:
-            type: string
-            example: "mainstream"
           description: |
             Return firehoses that are consuming from this stream.
             Usually stream refers to the kafka cluster.
         - in: query
           name: sink_type
+          type: string
+          enum:
+            - "LOG"
+            - "HTTP"
+            - "POSTGRES"
+            - "INFLUXDB"
+            - "ELASTIC"
+            - "REDIS"
+            - "GRPC"
+            - "PROMETHEUS"
+            - "BIGQUERY"
+            - "BLOB"
           required: false
-          schema:
-            $ref: "#/components/schemas/FirehoseSinkType"
           description: Return firehoses with this sink type.
       responses:
         "200":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/FirehoseArray"
+          schema:
+            $ref: "#/definitions/FirehoseArray"
         "500":
           description: internal error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
     post:
       summary: Create a new firehose.
       description: Create and deploy a new firehose as per the configurations in the body.
       operationId: createFirehose
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Firehose"
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/Firehose"
       responses:
         "201":
           description: Successfully created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Firehose"
+          schema:
+            $ref: "#/definitions/Firehose"
         "409":
           description: A firehose with same unique identifier already exists.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: internal error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /projects/{projectId}/firehoses/{firehoseUrn}:
     parameters:
       - in: path
         name: projectId
+        type: string
         required: true
-        schema:
-          type: string
-          example: "foo"
         description: Unique identifier of the project.
       - in: path
         name: firehoseUrn
+        type: string
         required: true
-        schema:
-          type: string
-          example: "orn:entropy:firehose:project-x:foo"
         description: URN of the firehose.
     get:
       summary: Get firehose by URN.
+      operationId: getFirehose
       description: Get firehose by URN.
       responses:
         "200":
           description: Found firehose with given URN
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Firehose"
+          schema:
+            $ref: "#/definitions/Firehose"
         "404":
           description: Firehose with given URN was not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: internal error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
     put:
       summary: Update firehose configurations.
       description: Update firehose configurations.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                configs:
-                  $ref: "#/components/schemas/FirehoseConfig"
+      operationId: updateFirehose
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              config:
+                type: object
+                $ref: "#/definitions/FirehoseConfig"
       responses:
         "200":
           description: Found firehose with given URN
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Firehose"
+          schema:
+            $ref: "#/definitions/Firehose"
         "400":
           description: Update request is not valid.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Firehose with given URN was not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: internal error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
-components:
-  schemas:
+definitions:
     ErrorResponse:
       type: object
       properties:
@@ -256,7 +221,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/Project"
+            $ref: "#/definitions/Project"
     Project:
       type: object
       properties:
@@ -292,7 +257,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/Firehose"
+            $ref: "#/definitions/Firehose"
     Firehose:
       type: object
       properties:
@@ -327,9 +292,9 @@ components:
           type: string
           example: "data_engineering"
         configs:
-          $ref: "#/components/schemas/FirehoseConfig"
+          $ref: "#/definitions/FirehoseConfig"
         state:
-          $ref: "#/components/schemas/FirehoseState"
+          $ref: "#/definitions/FirehoseState"
 
     FirehoseConfig:
       type: object
@@ -355,7 +320,7 @@ components:
         consumer_group_id:
           type: string
         sink_type:
-          $ref: "#/components/schemas/FirehoseSinkType"
+          $ref: "#/definitions/FirehoseSinkType"
         stop_date:
           type: string
         namespace:
@@ -380,7 +345,7 @@ components:
           type: string
     FirehoseSinkType:
       type: string
-      enum: 
+      enum:
         - "LOG"
         - "HTTP"
         - "POSTGRES"
