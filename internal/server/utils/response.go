@@ -11,7 +11,9 @@ func WriteJSON(w http.ResponseWriter, status int, v interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 
-	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Printf("error: failed to write 'v' JSON: %v", err)
+	if status != http.StatusNoContent {
+		if err := json.NewEncoder(w).Encode(v); err != nil {
+			log.Printf("error: failed to write 'v' JSON: %v", err)
+		}
 	}
 }
