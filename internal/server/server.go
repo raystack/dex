@@ -38,7 +38,7 @@ func Serve(ctx context.Context, addr string, nrApp *newrelic.Application, logger
 	// Setup API routes. Refer swagger.yml
 	apiRouter := httpRouter.PathPrefix("/api/").Subrouter()
 	projectsv1.Routes(apiRouter, shieldClient)
-	firehosesv1.Routes(apiRouter, entropyClient)
+	firehosesv1.Routes(apiRouter, entropyClient, shieldClient)
 
 	logger.Info("starting server", zap.String("addr", addr))
 	return mux.Serve(ctx, addr, mux.WithHTTP(httpRouter))
