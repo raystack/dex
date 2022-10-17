@@ -9,6 +9,6 @@ import (
 
 // Routes installs project management APIs to router.
 func Routes(r *mux.Router, shieldClient shieldv1beta1.ShieldServiceClient) {
-	r.HandleFunc("/projects", listProjects(shieldClient)).Methods(http.MethodGet)
-	r.HandleFunc("/projects/{id}", getProject(shieldClient)).Methods(http.MethodGet)
+	r.HandleFunc("/projects", handleListProjects(shieldClient)).Methods(http.MethodGet)
+	r.HandleFunc("/projects/{id}", handleGetProject(shieldClient)).Methods(http.MethodGet)
 }

@@ -17,10 +17,13 @@ const (
 )
 
 func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) {
-	r.Handle("/projects/{projectId}/firehoses", listFirehoses(client)).Methods(http.MethodGet)
-	r.Handle("/projects/{projectId}/firehoses", createFirehose(client, shieldClient)).Methods(http.MethodPost)
+	// read APIs
+	r.Handle("/projects/{projectId}/firehoses", handleListFirehoses(client)).Methods(http.MethodGet)
 	r.Handle("/projects/{projectId}/firehoses/{urn}", getFirehose(client)).Methods(http.MethodGet)
-	r.Handle("/projects/{projectId}/firehoses/{urn}", updateFirehose(client)).Methods(http.MethodPut)
-	r.Handle("/projects/{projectId}/firehoses/{urn}", deleteFirehose(client)).Methods(http.MethodDelete)
-	r.Handle("/projects/{projectId}/firehoses/{urn}/reset", resetOffset(client)).Methods(http.MethodPost)
+
+	// write APIs
+	r.Handle("/projects/{projectId}/firehoses", handleCreateFirehose(client, shieldClient)).Methods(http.MethodPost)
+	r.Handle("/projects/{projectId}/firehoses/{urn}", handleUpdateFirehose(client, shieldClient)).Methods(http.MethodPut)
+	r.Handle("/projects/{projectId}/firehoses/{urn}", handleDeleteFirehose(client)).Methods(http.MethodDelete)
+	r.Handle("/projects/{projectId}/firehoses/{urn}/reset", handleResetFirehose(client)).Methods(http.MethodPost)
 }

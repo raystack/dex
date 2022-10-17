@@ -62,7 +62,7 @@ type moduleConfigFirehoseDef struct {
 }
 
 func mapFirehoseToResource(def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
-	cfg, err := def.Configs.toConfigStruct()
+	cfg, err := def.Configs.toConfigStruct(prj)
 	if err != nil {
 		return nil, errors.ErrInternal.WithCausef(err.Error())
 	}
@@ -133,11 +133,14 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 	return &def, nil
 }
 
-func (fc firehoseConfigs) toConfigStruct() (*structpb.Value, error) {
+func (fc firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
+	metadata := prj.GetMetadata().AsMap()
+	telegrafConf, _ := metadata["telegraf"].(map[string]interface{})
+
 	return toProtobufStruct(moduleConfig{
 		State:    "RUNNING",
 		StopTime: fc.StopDate,
-		Telegraf: nil,
+		Telegraf: telegrafConf,
 		Firehose: moduleConfigFirehoseDef{
 			Replicas:           fc.Replicas,
 			KafkaBrokerAddress: fc.BootstrapServers,

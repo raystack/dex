@@ -1,6 +1,7 @@
 package firehose
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -30,7 +31,7 @@ type resetRequestBody struct {
 	DateTime *time.Time `json:"date_time"`
 }
 
-func listFirehoses(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleListFirehoses(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rpcReq := &entropyv1beta1.ListResourcesRequest{Kind: kindFirehose}
 
@@ -55,7 +56,7 @@ func listFirehoses(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc
 	}
 }
 
-func createFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
+func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		projectID := mux.Vars(r)[pathParamProjectID]
 		prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
@@ -111,28 +112,8 @@ func getFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urn := mux.Vars(r)[pathParamURN]
 
-		getResReq := &entropyv1beta1.GetResourceRequest{Urn: urn}
-		resp, err := client.GetResource(r.Context(), getResReq)
-		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
-		} else if resp.GetResource() == nil {
-			utils.WriteErr(w, errors.ErrNotFound)
-			return
-		}
-
-		res := resp.GetResource()
-		if res.GetKind() != kindFirehose {
-			utils.WriteErr(w, errors.ErrNotFound)
-			return
-		}
-
-		def, err := mapResourceToFirehose(res, false)
+		// Ensure that the URN refers to a valid firehose resource.
+		def, err := getFirehoseResource(r.Context(), client, urn)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -142,22 +123,26 @@ func getFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	}
 }
 
-func updateFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		urn := mux.Vars(r)[pathParamURN]
-		curRes, err := client.GetResource(r.Context(), &entropyv1beta1.GetResourceRequest{Urn: urn})
+		pathVars := mux.Vars(r)
+		projectID := pathVars[pathParamProjectID]
+		urn := pathVars[pathParamURN]
+
+		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
 		if err != nil {
 			st := status.Convert(err)
 			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound.
-					WithMsgf(firehoseNotFound).
-					WithCausef(st.Message()))
+				utils.WriteErr(w, errors.ErrNotFound)
 			} else {
 				utils.WriteErr(w, err)
 			}
 			return
-		} else if curRes.GetResource().GetKind() != kindFirehose {
-			utils.WriteErr(w, errors.ErrNotFound.WithMsgf(firehoseNotFound))
+		}
+
+		// Ensure that the URN refers to a valid firehose resource.
+		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+			utils.WriteErr(w, err)
 			return
 		}
 
@@ -169,7 +154,7 @@ func updateFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFun
 			return
 		}
 
-		cfgStruct, err := updReq.Configs.toConfigStruct()
+		cfgStruct, err := updReq.Configs.toConfigStruct(getProjectResponse.GetProject())
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -208,11 +193,17 @@ func updateFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFun
 	}
 }
 
-func deleteFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleDeleteFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rpcReq := &entropyv1beta1.DeleteResourceRequest{Urn: mux.Vars(r)[pathParamURN]}
+		urn := mux.Vars(r)[pathParamURN]
 
-		_, err := client.DeleteResource(r.Context(), rpcReq)
+		// Ensure that the URN refers to a valid firehose resource.
+		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		_, err := client.DeleteResource(r.Context(), &entropyv1beta1.DeleteResourceRequest{Urn: urn})
 		if err != nil {
 			st := status.Convert(err)
 			if st.Code() == codes.NotFound {
@@ -227,22 +218,13 @@ func deleteFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFun
 	}
 }
 
-func resetOffset(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urn := mux.Vars(r)[pathParamURN]
-		curRes, err := client.GetResource(r.Context(), &entropyv1beta1.GetResourceRequest{Urn: urn})
-		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound.
-					WithMsgf(firehoseNotFound).
-					WithCausef(st.Message()))
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
-		} else if curRes.GetResource().GetKind() != kindFirehose {
-			utils.WriteErr(w, errors.ErrNotFound.WithMsgf(firehoseNotFound))
+
+		// Ensure that the URN refers to a valid firehose resource.
+		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+			utils.WriteErr(w, err)
 			return
 		}
 
@@ -259,7 +241,7 @@ func resetOffset(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 		}
 
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
-			Urn:    curRes.GetResource().GetUrn(),
+			Urn:    urn,
 			Action: actionResetOffset,
 			Params: paramsStruct,
 			Labels: map[string]string{}, // TODO: shield labels.
@@ -288,4 +270,21 @@ func resetOffset(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 
 		utils.WriteJSON(w, http.StatusOK, firehoseDef)
 	}
+}
+
+func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServiceClient, firehoseURN string) (*firehoseDefinition, error) {
+	resp, err := client.GetResource(ctx, &entropyv1beta1.GetResourceRequest{Urn: firehoseURN})
+	if err != nil {
+		st := status.Convert(err)
+		if st.Code() == codes.NotFound {
+			return nil, errors.ErrNotFound.
+				WithMsgf(firehoseNotFound).
+				WithCausef(st.Message())
+		}
+		return nil, err
+	} else if resp.GetResource().GetKind() != kindFirehose {
+		return nil, errors.ErrNotFound.WithMsgf(firehoseNotFound)
+	}
+
+	return mapResourceToFirehose(resp.GetResource(), false)
 }
