@@ -20,9 +20,11 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.8.0
 	go.buf.build/odpf/gw/odpf/proton v1.1.106
+	go.buf.build/odpf/gwv/odpf/proton v1.1.135
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
+	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
 )
 
@@ -97,6 +99,8 @@ require (
 	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	go.buf.build/odpf/gw/grpc-ecosystem/grpc-gateway v1.1.44 // indirect
+	go.buf.build/odpf/gwv/envoyproxy/protoc-gen-validate v1.1.7 // indirect
+	go.buf.build/odpf/gwv/grpc-ecosystem/grpc-gateway v1.1.46 // indirect
 	go.mongodb.org/mongo-driver v1.10.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
@@ -109,7 +113,6 @@ require (
 	google.golang.org/api v0.84.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
-	google.golang.org/grpc v1.49.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

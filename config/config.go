@@ -7,10 +7,20 @@ import (
 	"github.com/odpf/dex/pkg/telemetry"
 )
 
+type shieldConfig struct {
+	Addr string `mapstructure:"addr"`
+}
+
+type entropyConfig struct {
+	Addr string `mapstructure:"addr"`
+}
+
 // Config contains the application configuration.
 type Config struct {
 	Log       logger.LogConfig `mapstructure:"log"`
 	Service   serveConfig      `mapstructure:"service"`
+	Shield    shieldConfig     `mapstructure:"shield"`
+	Entropy   entropyConfig    `mapstructure:"entropy"`
 	Telemetry telemetry.Config `mapstructure:"telemetry"`
 }
 

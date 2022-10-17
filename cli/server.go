@@ -6,7 +6,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/spf13/cobra"
+	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
+	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/odpf/dex/config"
 	"github.com/odpf/dex/internal/server"
@@ -72,5 +76,18 @@ func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap
 	ctx, cancel := context.WithCancel(baseCtx)
 	defer cancel()
 
-	return server.Serve(ctx, cfg.Service.Addr(), nrApp, zapLog)
+	shieldConn, err := grpc.Dial(cfg.Shield.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+
+	entropyConn, err := grpc.Dial(cfg.Entropy.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+
+	return server.Serve(ctx, cfg.Service.Addr(), nrApp, zapLog,
+		shieldv1beta1.NewShieldServiceClient(shieldConn),
+		entropyv1beta1.NewResourceServiceClient(entropyConn),
+	)
 }

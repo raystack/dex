@@ -199,6 +199,46 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /projects/{projectId}/firehoses/{firehoseUrn}/reset:
+    post:
+      summary: Execute action against the firehose.
+      description: Execute an action against a firehose.
+      operationId: applyAction
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            required:
+              - "to"
+            properties:
+              to:
+                type: string
+                enum:
+                  - "DATETIME"
+                  - "EARLIEST"
+                  - "LATEST"
+              datetime:
+                type: string
+                format: date-time
+                example: "2022-10-10T10:10:10.100Z"
+      responses:
+        "200":
+          description: Found firehose with given URN
+          schema:
+            $ref: "#/definitions/Firehose"
+        "400":
+          description: Update request is not valid.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
 definitions:
     ErrorResponse:

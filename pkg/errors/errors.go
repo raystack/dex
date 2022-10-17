@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -16,19 +17,46 @@ var (
 
 // Common error categories. Use `ErrX.WithXXX()` to clone and add context.
 var (
-	ErrInvalid     = Error{Code: "bad_request", Message: "Request is not valid"}
-	ErrNotFound    = Error{Code: "not_found", Message: "Requested entity not found"}
-	ErrConflict    = Error{Code: "conflict", Message: "An entity with conflicting identifier exists"}
-	ErrInternal    = Error{Code: "internal_error", Message: "Some unexpected error occurred"}
-	ErrUnsupported = Error{Code: "unsupported", Message: "Requested feature is not supported"}
+	ErrInvalid = Error{
+		Code:    "bad_request",
+		Message: "Request is not valid",
+		Status:  http.StatusBadRequest,
+	}
+
+	ErrNotFound = Error{
+		Code:    "not_found",
+		Message: "Requested entity not found",
+		Status:  http.StatusNotFound,
+	}
+
+	ErrConflict = Error{
+		Code:    "conflict",
+		Message: "An entity with conflicting identifier exists",
+		Status:  http.StatusConflict,
+	}
+
+	ErrInternal = Error{
+		Code:    "internal_error",
+		Message: "Some unexpected error occurred",
+		Status:  http.StatusInternalServerError,
+	}
 )
 
-// Error represents any error returned by the system components along with any
+// Error represents any error returned by the Entropy components along with any
 // relevant context.
 type Error struct {
+	Op      string `json:"op"`
 	Code    string `json:"code"`
 	Cause   string `json:"cause,omitempty"`
 	Message string `json:"message"`
+	Status  int    `json:"status"`
+}
+
+// WithOp can be used to add the name of the op where the error occurred.
+func (err Error) WithOp(name string) Error {
+	cloned := err.clone()
+	cloned.Op = name
+	return cloned
 }
 
 // WithCausef returns clone of err with the cause added. Use this when
@@ -36,7 +64,7 @@ type Error struct {
 // which may be written in log for debugging purposes. Cause will be shown
 // to the user only when the Message is empty.
 func (err Error) WithCausef(format string, args ...interface{}) Error {
-	cloned := err
+	cloned := err.clone()
 	cloned.Cause = fmt.Sprintf(format, args...)
 	return cloned
 }
@@ -46,7 +74,7 @@ func (err Error) WithCausef(format string, args ...interface{}) Error {
 // If the message is set to empty string, cause will be displayed to the
 // user.
 func (err Error) WithMsgf(format string, args ...interface{}) Error {
-	cloned := err
+	cloned := err.clone()
 	cloned.Message = fmt.Sprintf(format, args...)
 	return cloned
 }
@@ -66,7 +94,19 @@ func (err Error) Error() string {
 	if err.Message != "" {
 		return strings.ToLower(err.Message)
 	}
-	return fmt.Sprintf("%s: %s", err.Code, err.Cause)
+	msg := fmt.Sprintf("%s: %s", err.Code, err.Cause)
+	if err.Op == "" {
+		return msg
+	}
+	return fmt.Sprintf("%s: %s", err.Op, msg)
+}
+
+// HTTPStatus returns the http code for the error.
+func (err Error) HTTPStatus() int { return err.Status }
+
+func (err Error) clone() Error {
+	clonedE := err
+	return clonedE
 }
 
 // Errorf returns a formatted error similar to `fmt.Errorf` but uses the

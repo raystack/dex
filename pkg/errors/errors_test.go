@@ -2,6 +2,7 @@ package errors_test
 
 import (
 	goerrors "errors"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,6 +18,7 @@ func Test_E(t *testing.T) {
 			Code:    "internal_error",
 			Cause:   "some native error",
 			Message: "Some unexpected error occurred",
+			Status:  http.StatusInternalServerError,
 		}
 
 		err := errors.New("some native error")
@@ -30,6 +32,7 @@ func Test_E(t *testing.T) {
 			Code:    "not_found",
 			Cause:   "foo not found",
 			Message: "something was not found",
+			Status:  http.StatusNotFound,
 		}
 
 		err := error(errors.ErrNotFound.
@@ -74,7 +77,7 @@ func Test_OneOf(t *testing.T) {
 	group := []error{
 		errors.ErrNotFound,
 		errors.ErrInvalid,
-		errors.ErrUnsupported,
+		errors.ErrConflict,
 	}
 
 	assert.False(t, errors.OneOf(errors.New("failed"), group...))
@@ -127,7 +130,7 @@ func TestError_Is(t *testing.T) {
 			want:  false,
 		},
 		{
-			title: "NonSystemErr",
+			title: "NonEntropyErr",
 			err:   errors.ErrInternal,
 			other: goerrors.New("foo"), // nolint
 			want:  true,
@@ -165,6 +168,7 @@ func TestError_WithCausef(t *testing.T) {
 				Code:    "bad_request",
 				Message: "Request is not valid",
 				Cause:   "foo",
+				Status:  http.StatusBadRequest,
 			},
 		},
 		{
@@ -174,6 +178,7 @@ func TestError_WithCausef(t *testing.T) {
 				Code:    "conflict",
 				Message: "An entity with conflicting identifier exists",
 				Cause:   "hello world",
+				Status:  http.StatusConflict,
 			},
 		},
 	}
@@ -201,6 +206,7 @@ func TestError_WithMsgf(t *testing.T) {
 			want: errors.Error{
 				Code:    "bad_request",
 				Message: "foo",
+				Status:  http.StatusBadRequest,
 			},
 		},
 		{
@@ -209,6 +215,36 @@ func TestError_WithMsgf(t *testing.T) {
 			want: errors.Error{
 				Code:    "bad_request",
 				Message: "hello world",
+				Status:  http.StatusBadRequest,
+			},
+		},
+	}
+
+	for _, tt := range table {
+		tt := tt
+		t.Run(tt.title, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.want, tt.err)
+		})
+	}
+}
+
+func TestError_WithOp(t *testing.T) {
+	t.Parallel()
+
+	table := []struct {
+		title string
+		err   errors.Error
+		want  errors.Error
+	}{
+		{
+			title: "WithOp",
+			err:   errors.ErrInvalid.WithMsgf("foo").WithOp("test"),
+			want: errors.Error{
+				Op:      "test",
+				Code:    "bad_request",
+				Message: "foo",
+				Status:  http.StatusBadRequest,
 			},
 		},
 	}
