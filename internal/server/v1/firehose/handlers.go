@@ -14,7 +14,7 @@ import (
 	"github.com/odpf/dex/pkg/errors"
 )
 
-const firehoseNotFound = "no firehose with give URN"
+const firehoseNotFound = "no firehose with given URN"
 
 type listResponse[T any] struct {
 	Items []T `json:"items"`
