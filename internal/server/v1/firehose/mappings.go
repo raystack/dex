@@ -5,6 +5,7 @@ import (
 	"time"
 
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
+	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -12,16 +13,16 @@ import (
 )
 
 type firehoseDefinition struct {
-	URN         string          `json:"urn"`
-	Name        string          `json:"name"`
-	Team        string          `json:"team"`
-	Title       string          `json:"title"`
-	CreatedAt   time.Time       `json:"created_at"`
-	UpdatedAt   time.Time       `json:"updated_at"`
-	Description string          `json:"description"`
-	Cluster     string          `json:"cluster"`
-	Configs     firehoseConfigs `json:"configs"`
-	State       firehoseState   `json:"state"`
+	URN         string           `json:"urn"`
+	Name        string           `json:"name"`
+	Team        string           `json:"team"`
+	Title       string           `json:"title"`
+	CreatedAt   time.Time        `json:"created_at"`
+	UpdatedAt   time.Time        `json:"updated_at"`
+	Description string           `json:"description"`
+	Cluster     string           `json:"cluster"`
+	Configs     *firehoseConfigs `json:"configs,omitempty"`
+	State       *firehoseState   `json:"state,omitempty"`
 }
 
 type firehoseConfigs struct {
@@ -60,7 +61,7 @@ type moduleConfigFirehoseDef struct {
 	EnvVariables       map[string]string `json:"env_variables"`
 }
 
-func mapFirehoseToResource(def firehoseDefinition) (*entropyv1beta1.Resource, error) {
+func mapFirehoseToResource(def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
 	cfg, err := def.Configs.toConfigStruct()
 	if err != nil {
 		return nil, errors.ErrInternal.WithCausef(err.Error())
@@ -77,7 +78,7 @@ func mapFirehoseToResource(def firehoseDefinition) (*entropyv1beta1.Resource, er
 		Urn:     def.URN,
 		Kind:    kindFirehose,
 		Name:    def.Name,
-		Project: "", // TODO: populate shield project slug (preferable) here.
+		Project: prj.GetSlug(),
 		Labels: map[string]string{
 			"team": def.Team,
 			// TODO: add shield related labels (e.g., created_by)
@@ -86,7 +87,7 @@ func mapFirehoseToResource(def firehoseDefinition) (*entropyv1beta1.Resource, er
 	}, nil
 }
 
-func mapResourceToFirehose(res *entropyv1beta1.Resource) (*firehoseDefinition, error) {
+func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*firehoseDefinition, error) {
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
@@ -96,21 +97,20 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource) (*firehoseDefinition, e
 		return nil, err
 	}
 
-	// Note:
-	// 1. title is user input for "Firehose Name" in console.
-	// 2. name is generated (on the backend) based on title.
-	// TODO: confirm whether we need to retain this.
-	// TODO: confirm whether we need Data/Application representation for cluster.
-
+	labels := res.GetLabels()
 	def := firehoseDefinition{
 		URN:         res.GetUrn(),
 		Name:        res.GetName(),
-		Team:        res.GetLabels()["team"],
+		Title:       labels["title"],
+		Team:        labels["team"],
 		CreatedAt:   res.GetCreatedAt().AsTime(),
 		UpdatedAt:   res.GetUpdatedAt().AsTime(),
-		Description: res.GetLabels()["description"],
-		Cluster:     res.GetLabels()["kube_cluster"],
-		Configs: firehoseConfigs{
+		Description: labels["description"],
+		Cluster:     labels["kube_cluster"],
+	}
+
+	if !onlyMeta {
+		def.Configs = &firehoseConfigs{
 			Image:                 "odpf/entropy",
 			EnvVars:               modConf.Firehose.EnvVariables,
 			Replicas:              modConf.Firehose.Replicas,
@@ -122,12 +122,12 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource) (*firehoseDefinition, e
 			ConsumerGroupID:       modConf.Firehose.KafkaConsumerID,
 			BootstrapServers:      modConf.Firehose.KafkaBrokerAddress,
 			InputSchemaProtoClass: modConf.Firehose.EnvVariables["INPUT_SCHEMA_PROTO_CLASS"],
-		},
-		State: firehoseState{
+		}
+		def.State = &firehoseState{
 			State:        modConf.State,
 			Status:       res.GetState().GetStatus().String(),
 			DeploymentID: res.GetName(), // TODO: extract from output of the resource.
-		},
+		}
 	}
 
 	return &def, nil

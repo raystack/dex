@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
+	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -41,7 +42,7 @@ func listFirehoses(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc
 
 		var arr []firehoseDefinition
 		for _, res := range rpcResp.GetResources() {
-			firehoseDef, err := mapResourceToFirehose(res)
+			firehoseDef, err := mapResourceToFirehose(res, true)
 			if err != nil {
 				utils.WriteErr(w, err)
 				return
@@ -54,8 +55,20 @@ func listFirehoses(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc
 	}
 }
 
-func createFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func createFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		projectID := mux.Vars(r)[pathParamProjectID]
+		prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
 		var def firehoseDefinition
 		if err := json.NewDecoder(r.Body).Decode(&def); err != nil {
 			utils.WriteErr(w, errors.ErrInvalid.
@@ -64,7 +77,7 @@ func createFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFun
 			return
 		}
 
-		res, err := mapFirehoseToResource(def)
+		res, err := mapFirehoseToResource(def, prj.GetProject())
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -84,7 +97,7 @@ func createFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFun
 			return
 		}
 
-		createdFirehose, err := mapResourceToFirehose(rpcResp.GetResource())
+		createdFirehose, err := mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -119,7 +132,7 @@ func getFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 			return
 		}
 
-		def, err := mapResourceToFirehose(res)
+		def, err := mapResourceToFirehose(res, false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -185,7 +198,7 @@ func updateFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFun
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource())
+		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -267,7 +280,7 @@ func resetOffset(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource())
+		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
