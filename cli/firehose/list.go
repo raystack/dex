@@ -13,6 +13,7 @@ import (
 
 func listCommand() *cobra.Command {
 	var limit int
+	var project string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -25,7 +26,9 @@ func listCommand() *cobra.Command {
 
 		client := initClient()
 
-		params := operations.ListFirehosesParams{}
+		params := operations.ListFirehosesParams{
+			ProjectID: project,
+		}
 		res, err := client.Operations.ListFirehoses(&params)
 		if err != nil {
 			return err
@@ -53,6 +56,9 @@ func listCommand() *cobra.Command {
 	}
 
 	cmd.Flags().IntVarP(&limit, "limit", "L", 30, "Maximum number of firehoses to fetch (default 30)")
+
+	cmd.Flags().StringVarP(&project, "project", "n", "", "Name of the project")
+	cmd.MarkFlagRequired("project")
 
 	return cmd
 }
