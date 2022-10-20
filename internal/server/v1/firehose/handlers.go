@@ -3,6 +3,7 @@ package firehose
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/odpf/dex/internal/server/reqctx"
 	"github.com/odpf/dex/internal/server/utils"
@@ -289,4 +291,49 @@ func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServ
 	}
 
 	return mapResourceToFirehose(resp.GetResource(), false)
+}
+
+func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		urn := mux.Vars(r)[pathParamURN]
+
+		getLogReq := &entropyv1beta1.GetLogRequest{
+			Urn:    urn,
+			Filter: nil,
+		}
+		logClient, err := client.GetLog(r.Context(), getLogReq)
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		for {
+			getLogRes, err := logClient.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return
+				}
+				st := status.Convert(err)
+				if st.Code() == codes.NotFound {
+					utils.WriteErr(w, errors.ErrNotFound)
+				} else {
+					utils.WriteErr(w, err)
+				}
+				return
+			}
+			chunk := getLogRes.GetChunk()
+			logChunk, err := protojson.Marshal(chunk)
+			if err != nil {
+				utils.WriteErr(w, err)
+				return
+			}
+
+			utils.WriteJSON(w, http.StatusOK, json.RawMessage(logChunk))
+		}
+	}
 }

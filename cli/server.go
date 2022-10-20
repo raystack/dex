@@ -67,7 +67,7 @@ func startCommand() *cobra.Command {
 		return runServer(cmd.Context(), nrApp, zapLog, cfg)
 	}
 
-	cmd.Flags().StringVarP(&configFile, "config", "c", "./config.yaml", "Config file path")
+	cmd.Flags().StringVarP(&configFile, "config", "c", "./config/config.yaml", "Config file path")
 
 	return cmd
 }
