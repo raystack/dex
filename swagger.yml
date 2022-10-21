@@ -256,13 +256,13 @@ paths:
           required: false
           description: Return logs for selected container.
         - in: query
-          name: since
+          name: sinceSeconds
           type: integer
           minimum: 1
           required: false
           description: Return logs since given seconds ago
         - in: query
-          name: tail
+          name: tailLines
           type: integer
           minimum: 1
           required: false

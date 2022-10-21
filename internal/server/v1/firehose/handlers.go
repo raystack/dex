@@ -21,6 +21,8 @@ import (
 
 const firehoseNotFound = "no firehose with given URN"
 
+var firehoseLogFilterKeys = []string{"pod", "container", "sinceSeconds", "tailLines", "follow", "previous", "timestamps"}
+
 type listResponse[T any] struct {
 	Items []T `json:"items"`
 }
@@ -296,11 +298,20 @@ func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServ
 func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urn := mux.Vars(r)[pathParamURN]
+		queryParams := r.URL.Query()
+
+		filters := map[string]string{}
+		for _, filterKey := range firehoseLogFilterKeys {
+			if queryParams.Has(filterKey) {
+				filters[filterKey] = queryParams.Get(filterKey)
+			}
+		}
 
 		getLogReq := &entropyv1beta1.GetLogRequest{
 			Urn:    urn,
-			Filter: nil,
+			Filter: filters,
 		}
+
 		logClient, err := client.GetLog(r.Context(), getLogReq)
 		if err != nil {
 			st := status.Convert(err)
@@ -315,7 +326,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 		for {
 			getLogRes, err := logClient.Recv()
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					return
 				}
 				st := status.Convert(err)
