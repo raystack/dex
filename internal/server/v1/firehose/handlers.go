@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/odpf/dex/internal/server/reqctx"
 	"github.com/odpf/dex/internal/server/utils"
 	"github.com/odpf/dex/pkg/errors"
 )
@@ -58,7 +59,8 @@ func handleListFirehoses(client entropyv1beta1.ResourceServiceClient) http.Handl
 
 func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		projectID := mux.Vars(r)[pathParamProjectID]
+		projectID := r.Header.Get(headerProjectID)
+
 		prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
 		if err != nil {
 			st := status.Convert(err)
@@ -78,7 +80,7 @@ func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
-		res, err := mapFirehoseToResource(def, prj.GetProject())
+		res, err := mapFirehoseToResource(reqctx.From(r.Context()), def, prj.GetProject())
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -126,7 +128,7 @@ func getFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pathVars := mux.Vars(r)
-		projectID := pathVars[pathParamProjectID]
+		projectID := r.Header.Get(headerProjectID)
 		urn := pathVars[pathParamURN]
 
 		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})

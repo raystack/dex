@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/odpf/dex/internal/server/reqctx"
 	"github.com/odpf/dex/pkg/errors"
 )
 
@@ -61,7 +62,7 @@ type moduleConfigFirehoseDef struct {
 	EnvVariables       map[string]string `json:"env_variables"`
 }
 
-func mapFirehoseToResource(def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
+func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
 	cfg, err := def.Configs.toConfigStruct(prj)
 	if err != nil {
 		return nil, errors.ErrInternal.WithCausef(err.Error())
@@ -80,8 +81,8 @@ func mapFirehoseToResource(def firehoseDefinition, prj *shieldv1beta1.Project) (
 		Name:    def.Name,
 		Project: prj.GetSlug(),
 		Labels: map[string]string{
-			"team": def.Team,
-			// TODO: add shield related labels (e.g., created_by)
+			"team":       def.Team,
+			"created_by": rCtx.UserID,
 		},
 		Spec: spec,
 	}, nil
