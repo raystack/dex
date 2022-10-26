@@ -3,6 +3,7 @@ package firehose
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -297,6 +298,12 @@ func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServ
 
 func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			utils.WriteErr(w, errors.ErrInternal)
+			return
+		}
+
 		urn := mux.Vars(r)[pathParamURN]
 		queryParams := r.URL.Query()
 
@@ -327,6 +334,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 			getLogRes, err := logClient.Recv()
 			if err != nil {
 				if errors.Is(err, io.EOF) {
+					flusher.Flush()
 					return
 				}
 				st := status.Convert(err)
@@ -340,11 +348,13 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 			chunk := getLogRes.GetChunk()
 			logChunk, err := protojson.Marshal(chunk)
 			if err != nil {
+				fmt.Println("err ", err)
 				utils.WriteErr(w, err)
 				return
 			}
 
 			utils.WriteJSON(w, http.StatusOK, json.RawMessage(logChunk))
+			flusher.Flush()
 		}
 	}
 }
