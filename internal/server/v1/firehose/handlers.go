@@ -330,6 +330,8 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 			return
 		}
 
+		w.Header().Set("Transfer-Encoding", "chunked")
+
 		for {
 			getLogRes, err := logClient.Recv()
 			if err != nil {
