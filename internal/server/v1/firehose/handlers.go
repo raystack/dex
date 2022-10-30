@@ -355,7 +355,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 				return
 			}
 
-			utils.WriteJSON(w, http.StatusOK, json.RawMessage(logChunk))
+			utils.WriteLn(w, http.StatusOK, logChunk)
 			flusher.Flush()
 		}
 	}

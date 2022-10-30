@@ -7,6 +7,7 @@ package operations
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
@@ -36,7 +37,7 @@ type ClientService interface {
 
 	GetFirehose(params *GetFirehoseParams, opts ...ClientOption) (*GetFirehoseOK, error)
 
-	GetFirehoseLogs(params *GetFirehoseLogsParams, opts ...ClientOption) (*GetFirehoseLogsOK, error)
+	GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer, opts ...ClientOption) (*GetFirehoseLogsOK, error)
 
 	GetProjectByID(params *GetProjectByIDParams, opts ...ClientOption) (*GetProjectByIDOK, error)
 
@@ -174,7 +175,7 @@ GetFirehoseLogs streams logs for a firehose
 
 Stream logs for a Firehose.
 */
-func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, opts ...ClientOption) (*GetFirehoseLogsOK, error) {
+func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer, opts ...ClientOption) (*GetFirehoseLogsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetFirehoseLogsParams()
@@ -183,11 +184,11 @@ func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, opts ...ClientOp
 		ID:                 "getFirehoseLogs",
 		Method:             "GET",
 		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/logs",
-		ProducesMediaTypes: []string{"application/json"},
+		ProducesMediaTypes: []string{"application/x-ndjson"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetFirehoseLogsReader{formats: a.formats},
+		Reader:             &GetFirehoseLogsReader{formats: a.formats, writer: writer},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}

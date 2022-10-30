@@ -20,6 +20,20 @@ func WriteJSON(w http.ResponseWriter, status int, v interface{}) {
 	}
 }
 
+func WriteLn(w http.ResponseWriter, status int, b []byte) {
+	w.Header().Set("Content-Type", "application/x-ndjson")
+	w.WriteHeader(status)
+
+	b = append(b, '\n')
+
+	if status != http.StatusNoContent {
+		_, err := w.Write(b)
+		if err != nil {
+			log.Printf("error: failed to write line: %v", err)
+		}
+	}
+}
+
 // WriteErr interprets the given error as one of the errors defined
 // in errors package and writes the error response.
 func WriteErr(w http.ResponseWriter, err error) {

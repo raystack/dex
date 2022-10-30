@@ -254,6 +254,8 @@ paths:
       summary: Stream logs for a Firehose.
       description: Stream logs for a Firehose.
       operationId: getFirehoseLogs
+      produces:
+        - "application/x-ndjson"
       parameters:
         - in: path
           name: projectId
@@ -307,7 +309,8 @@ paths:
         "200":
           description: Found logs for given firehose URN.
           schema:
-            $ref: "#/definitions/Logs"
+            type: string
+            format: binary
         "400":
           description: Get logs request is not valid.
           schema:

@@ -18,13 +18,14 @@ import (
 // GetFirehoseLogsReader is a Reader for the GetFirehoseLogs structure.
 type GetFirehoseLogsReader struct {
 	formats strfmt.Registry
+	writer  io.Writer
 }
 
 // ReadResponse reads a server response into the received o.
 func (o *GetFirehoseLogsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 	case 200:
-		result := NewGetFirehoseLogsOK()
+		result := NewGetFirehoseLogsOK(o.writer)
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -53,8 +54,11 @@ func (o *GetFirehoseLogsReader) ReadResponse(response runtime.ClientResponse, co
 }
 
 // NewGetFirehoseLogsOK creates a GetFirehoseLogsOK with default headers values
-func NewGetFirehoseLogsOK() *GetFirehoseLogsOK {
-	return &GetFirehoseLogsOK{}
+func NewGetFirehoseLogsOK(writer io.Writer) *GetFirehoseLogsOK {
+	return &GetFirehoseLogsOK{
+
+		Payload: writer,
+	}
 }
 
 /*
@@ -63,7 +67,7 @@ GetFirehoseLogsOK describes a response with status code 200, with default header
 Found logs for given firehose URN.
 */
 type GetFirehoseLogsOK struct {
-	Payload models.Logs
+	Payload io.Writer
 }
 
 // IsSuccess returns true when this get firehose logs o k response has a 2xx status code
@@ -99,14 +103,14 @@ func (o *GetFirehoseLogsOK) String() string {
 	return fmt.Sprintf("[GET /projects/{projectId}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
 }
 
-func (o *GetFirehoseLogsOK) GetPayload() models.Logs {
+func (o *GetFirehoseLogsOK) GetPayload() io.Writer {
 	return o.Payload
 }
 
 func (o *GetFirehoseLogsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
