@@ -200,10 +200,21 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
   /projects/{projectId}/firehoses/{firehoseUrn}/reset:
+    parameters:
+      - in: path
+        type: string
+        name: projectId
+        description: Identifier for the project.
+        required: true
+      - in: path
+        type: string
+        name: firehoseUrn
+        description: URN of the firehose.
+        required: true
     post:
-      summary: Execute action against the firehose.
-      description: Execute an action against a firehose.
-      operationId: applyAction
+      summary: Reset firehose consumption offset.
+      description: Reset firehose consumption offset.
+      operationId: resetOffset
       parameters:
         - in: path
           name: projectId

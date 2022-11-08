@@ -29,7 +29,9 @@ lint:
 generate:
 	@echo "Running go-generate..."
 	@go generate ./...
-	@echo "Running swagger-generate..."
+	@echo "Cleanup old swagger output..."
+	@rm -rf generated/
+	@mkdir generated
 	@swagger generate client -t generated -f swagger.yml
 
 clean: tidy

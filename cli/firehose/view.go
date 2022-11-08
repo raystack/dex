@@ -10,40 +10,31 @@ import (
 )
 
 func viewCommand() *cobra.Command {
-	var project, name string
-
 	cmd := &cobra.Command{
-		Use:   "view",
+		Use:   "view <project> <name>",
 		Short: "View a firehose",
 		Long:  "Display information about a firehose",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			spinner := printer.Spin("")
+			defer spinner.Stop()
+
+			client := initClient()
+
+			params := operations.GetFirehoseParams{
+				ProjectID:   args[0],
+				FirehoseUrn: args[1],
+			}
+			res, err := client.Operations.GetFirehose(&params)
+			if err != nil {
+				return err
+			}
+			firehose := res.Payload
+
+			fmt.Println(firehose)
+			return nil
+		},
 	}
-
-	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		spinner := printer.Spin("")
-		defer spinner.Stop()
-
-		client := initClient()
-
-		params := operations.GetFirehoseParams{
-			FirehoseUrn: name,
-			ProjectID:   project,
-		}
-		res, err := client.Operations.GetFirehose(&params)
-		if err != nil {
-			return err
-		}
-
-		firehose := res.Payload
-		fmt.Println(firehose)
-
-		return nil
-	}
-
-	cmd.Flags().StringVarP(&name, "name", "n", "", "Firehose URN")
-	cmd.MarkFlagRequired("namespace")
-
-	cmd.Flags().StringVarP(&project, "project", "n", "", "Name of the project")
-	cmd.MarkFlagRequired("project")
 
 	return cmd
 }
