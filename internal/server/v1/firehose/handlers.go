@@ -3,6 +3,8 @@ package firehose
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -11,6 +13,7 @@ import (
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/odpf/dex/internal/server/reqctx"
 	"github.com/odpf/dex/internal/server/utils"
@@ -18,6 +21,8 @@ import (
 )
 
 const firehoseNotFound = "no firehose with given URN"
+
+var firehoseLogFilterKeys = []string{"pod", "container", "sinceSeconds", "tailLines", "follow", "previous", "timestamps"}
 
 type listResponse[T any] struct {
 	Items []T `json:"items"`
@@ -289,4 +294,69 @@ func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServ
 	}
 
 	return mapResourceToFirehose(resp.GetResource(), false)
+}
+
+func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			utils.WriteErr(w, errors.ErrInternal)
+			return
+		}
+
+		urn := mux.Vars(r)[pathParamURN]
+		queryParams := r.URL.Query()
+
+		filters := map[string]string{}
+		for _, filterKey := range firehoseLogFilterKeys {
+			if queryParams.Has(filterKey) {
+				filters[filterKey] = queryParams.Get(filterKey)
+			}
+		}
+
+		getLogReq := &entropyv1beta1.GetLogRequest{
+			Urn:    urn,
+			Filter: filters,
+		}
+
+		logClient, err := client.GetLog(r.Context(), getLogReq)
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		w.Header().Set("Transfer-Encoding", "chunked")
+
+		for {
+			getLogRes, err := logClient.Recv()
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					flusher.Flush()
+					return
+				}
+				st := status.Convert(err)
+				if st.Code() == codes.NotFound {
+					utils.WriteErr(w, errors.ErrNotFound)
+				} else {
+					utils.WriteErr(w, err)
+				}
+				return
+			}
+			chunk := getLogRes.GetChunk()
+			logChunk, err := protojson.Marshal(chunk)
+			if err != nil {
+				fmt.Println("err ", err)
+				utils.WriteErr(w, err)
+				return
+			}
+
+			utils.WriteLn(w, http.StatusOK, logChunk)
+			flusher.Flush()
+		}
+	}
 }

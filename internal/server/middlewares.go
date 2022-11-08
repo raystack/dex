@@ -94,7 +94,19 @@ func requestLogger(lg *zap.Logger) gorillamux.MiddlewareFunc {
 			}
 
 			wrapped := &wrappedWriter{ResponseWriter: wr, Status: http.StatusOK}
-			next.ServeHTTP(wrapped, req)
+
+			var fr http.ResponseWriter
+			flusher, ok := wr.(http.Flusher)
+			if !ok {
+				fr = wrapped
+			} else {
+				fr = struct {
+					*wrappedWriter
+					http.Flusher
+				}{wrapped, flusher}
+			}
+
+			next.ServeHTTP(fr, req)
 			fields = append(fields,
 				zap.String("response_time", time.Since(t).String()),
 				zap.Int("status", wrapped.Status),

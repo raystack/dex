@@ -41,9 +41,10 @@ type firehoseConfigs struct {
 }
 
 type firehoseState struct {
-	State        string `json:"state"`
-	Status       string `json:"status"`
-	DeploymentID string `json:"deployment_id"`
+	State        string                 `json:"state"`
+	Status       string                 `json:"status"`
+	Output       map[string]interface{} `json:"output,omitempty"`
+	DeploymentID string                 `json:"deployment_id"`
 }
 
 type moduleConfig struct {
@@ -133,6 +134,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 			State:        modConf.State,
 			Status:       res.GetState().GetStatus().String(),
 			DeploymentID: res.GetName(), // TODO: extract from output of the resource.
+			Output:       res.GetState().Output.GetStructValue().AsMap(),
 		}
 	}
 

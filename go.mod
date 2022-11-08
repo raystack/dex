@@ -19,7 +19,6 @@ require (
 	github.com/rs/xid v1.4.0
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.8.0
-	go.buf.build/odpf/gw/odpf/proton v1.1.106
 	go.buf.build/odpf/gwv/odpf/proton v1.1.135
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
@@ -98,7 +97,6 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
-	go.buf.build/odpf/gw/grpc-ecosystem/grpc-gateway v1.1.44 // indirect
 	go.buf.build/odpf/gwv/envoyproxy/protoc-gen-validate v1.1.7 // indirect
 	go.buf.build/odpf/gwv/grpc-ecosystem/grpc-gateway v1.1.46 // indirect
 	go.mongodb.org/mongo-driver v1.10.0 // indirect
