@@ -3,7 +3,6 @@ package project
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,10 +15,10 @@ type listResponse[T any] struct {
 	Items []T `json:"items"`
 }
 
-func getProject(client shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
+func handleGetProject(client shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rpcReq := &shieldv1beta1.GetProjectRequest{
-			Id: mux.Vars(r)["id"],
+			Id: r.Header.Get(headerProjectID),
 		}
 
 		rpcResp, err := client.GetProject(r.Context(), rpcReq)
@@ -41,7 +40,7 @@ func getProject(client shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	}
 }
 
-func listProjects(client shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
+func handleListProjects(client shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		listReq := &shieldv1beta1.ListProjectsRequest{}
 

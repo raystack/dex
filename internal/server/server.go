@@ -13,6 +13,7 @@ import (
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"go.uber.org/zap"
 
+	"github.com/odpf/dex/internal/server/reqctx"
 	firehosesv1 "github.com/odpf/dex/internal/server/v1/firehose"
 	projectsv1 "github.com/odpf/dex/internal/server/v1/project"
 )
@@ -31,6 +32,7 @@ func Serve(ctx context.Context, addr string, nrApp *newrelic.Application, logger
 
 	httpRouter.Use(
 		requestID(),
+		reqctx.WithRequestCtx(),
 		withOpenCensus(),
 		requestLogger(logger), // nolint
 	)
