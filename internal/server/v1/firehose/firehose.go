@@ -21,7 +21,7 @@ const (
 func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) {
 	// read APIs
 	r.Handle("/projects/{projectSlug}/firehoses", handleListFirehoses(client)).Methods(http.MethodGet)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}", getFirehose(client)).Methods(http.MethodGet)
+	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleGetFirehose(client)).Methods(http.MethodGet)
 
 	// write APIs
 	r.Handle("/projects/{projectSlug}/firehoses", handleCreateFirehose(client, shieldClient)).Methods(http.MethodPost)

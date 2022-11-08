@@ -110,7 +110,7 @@ func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 	}
 }
 
-func getFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleGetFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urn := mux.Vars(r)[pathParamURN]
 

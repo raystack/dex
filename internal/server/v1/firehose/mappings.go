@@ -89,6 +89,11 @@ func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shie
 }
 
 func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*firehoseDefinition, error) {
+	const (
+		firehoseChart     = "odpf/firehose"
+		firehoseNamespace = "firehose"
+	)
+
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
@@ -112,12 +117,12 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 
 	if !onlyMeta {
 		def.Configs = &firehoseConfigs{
-			Image:                 "odpf/entropy",
+			Image:                 firehoseChart,
 			EnvVars:               modConf.Firehose.EnvVariables,
 			Replicas:              modConf.Firehose.Replicas,
 			SinkType:              modConf.Firehose.EnvVariables["SINK_TYPE"],
 			StopDate:              modConf.StopTime,
-			Namespace:             "firehose",
+			Namespace:             firehoseNamespace,
 			TopicName:             modConf.Firehose.KafkaTopic,
 			StreamName:            modConf.Firehose.EnvVariables["STREAM_NAME"],
 			ConsumerGroupID:       modConf.Firehose.KafkaConsumerID,
@@ -135,11 +140,13 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 }
 
 func (fc firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
+	const defaultState = "RUNNING"
+
 	metadata := prj.GetMetadata().AsMap()
 	telegrafConf, _ := metadata["telegraf"].(map[string]interface{})
 
 	return toProtobufStruct(moduleConfig{
-		State:    "RUNNING",
+		State:    defaultState,
 		StopTime: fc.StopDate,
 		Telegraf: telegrafConf,
 		Firehose: moduleConfigFirehoseDef{
