@@ -72,7 +72,7 @@ type ResetOffsetParams struct {
 
 	/* ProjectID.
 
-	   Identifier for the project.
+	   Unique identifier of the project.
 	*/
 	ProjectID string
 

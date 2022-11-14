@@ -31,8 +31,6 @@ type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
 type ClientService interface {
-	ApplyAction(params *ApplyActionParams, opts ...ClientOption) (*ApplyActionOK, error)
-
 	CreateFirehose(params *CreateFirehoseParams, opts ...ClientOption) (*CreateFirehoseCreated, error)
 
 	GetFirehose(params *GetFirehoseParams, opts ...ClientOption) (*GetFirehoseOK, error)
@@ -47,49 +45,15 @@ type ClientService interface {
 
 	ResetOffset(params *ResetOffsetParams, opts ...ClientOption) (*ResetOffsetOK, error)
 
+	ScaleFirehose(params *ScaleFirehoseParams, opts ...ClientOption) (*ScaleFirehoseOK, error)
+
+	StartFirehose(params *StartFirehoseParams, opts ...ClientOption) (*StartFirehoseOK, error)
+
+	StopFirehose(params *StopFirehoseParams, opts ...ClientOption) (*StopFirehoseOK, error)
+
 	UpdateFirehose(params *UpdateFirehoseParams, opts ...ClientOption) (*UpdateFirehoseOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
-}
-
-/*
-ApplyAction executes action against the firehose
-
-Execute an action against a firehose.
-*/
-func (a *Client) ApplyAction(params *ApplyActionParams, opts ...ClientOption) (*ApplyActionOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewApplyActionParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "applyAction",
-		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/reset",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &ApplyActionReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*ApplyActionOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for applyAction: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
 }
 
 /*
@@ -369,6 +333,126 @@ func (a *Client) ResetOffset(params *ResetOffsetParams, opts ...ClientOption) (*
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for resetOffset: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+ScaleFirehose scales the number of instances of firehose
+
+Scale the number of instances of firehose.
+*/
+func (a *Client) ScaleFirehose(params *ScaleFirehoseParams, opts ...ClientOption) (*ScaleFirehoseOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewScaleFirehoseParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "scaleFirehose",
+		Method:             "POST",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/scale",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ScaleFirehoseReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ScaleFirehoseOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for scaleFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+StartFirehose starts the firehose if it is currently stopped
+
+Start the Firehose if it is currently stopped.
+*/
+func (a *Client) StartFirehose(params *StartFirehoseParams, opts ...ClientOption) (*StartFirehoseOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewStartFirehoseParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "startFirehose",
+		Method:             "POST",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/start",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &StartFirehoseReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*StartFirehoseOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for startFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+StopFirehose stops the firehose if it is currently running
+
+Stop the Firehose if it is currently running.
+*/
+func (a *Client) StopFirehose(params *StopFirehoseParams, opts ...ClientOption) (*StopFirehoseOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewStopFirehoseParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "stopFirehose",
+		Method:             "POST",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/stop",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &StopFirehoseReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*StopFirehoseOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for stopFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

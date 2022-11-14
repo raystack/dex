@@ -279,6 +279,120 @@ func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 	}
 }
 
+func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		urn := mux.Vars(r)[pathParamURN]
+
+		// Ensure that the URN refers to a valid firehose resource.
+		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		var reqBody struct {
+			Replicas int `json:"replicas"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			utils.WriteErr(w, errors.ErrInvalid.WithMsgf("invalid json body").WithCausef(err.Error()))
+			return
+		}
+
+		paramsStruct, err := toProtobufStruct(reqBody)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		rpcReq := &entropyv1beta1.ApplyActionRequest{
+			Urn:    urn,
+			Action: actionScale,
+			Params: paramsStruct,
+			Labels: map[string]string{}, // TODO: shield labels.
+		}
+
+		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.InvalidArgument {
+				utils.WriteErr(w, errors.ErrInvalid.WithCausef(st.Message()))
+			} else if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound.
+					WithMsgf(firehoseNotFound).
+					WithCausef(st.Message()))
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, firehoseDef)
+	}
+}
+
+func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, isStop bool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		urn := mux.Vars(r)[pathParamURN]
+
+		// Ensure that the URN refers to a valid firehose resource.
+		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		var reqBody struct{}
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			utils.WriteErr(w, errors.ErrInvalid.WithMsgf("invalid json body").WithCausef(err.Error()))
+			return
+		}
+
+		paramsStruct, err := toProtobufStruct(reqBody)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		action := actionStart
+		if isStop {
+			action = actionStop
+		}
+		rpcReq := &entropyv1beta1.ApplyActionRequest{
+			Urn:    urn,
+			Action: action,
+			Params: paramsStruct,
+			Labels: map[string]string{}, // TODO: shield labels.
+		}
+
+		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.InvalidArgument {
+				utils.WriteErr(w, errors.ErrInvalid.WithCausef(st.Message()))
+			} else if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound.
+					WithMsgf(firehoseNotFound).
+					WithCausef(st.Message()))
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, firehoseDef)
+	}
+}
+
 func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServiceClient, firehoseURN string) (*firehoseDefinition, error) {
 	resp, err := client.GetResource(ctx, &entropyv1beta1.GetResourceRequest{Urn: firehoseURN})
 	if err != nil {

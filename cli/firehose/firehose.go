@@ -30,6 +30,9 @@ func Command() *cobra.Command {
 		viewCommand(),
 		listCommand(),
 		applyCommand(),
+		scaleCommand(),
+		startCommand(),
+		stopCommand(),
 		resetOffsetCommand(),
 	)
 	return cmd
