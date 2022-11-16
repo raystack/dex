@@ -18,14 +18,13 @@ func startCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient()
-
 			params := &operations.StartFirehoseParams{
 				FirehoseUrn: args[1],
 				ProjectID:   args[0],
 				Body:        struct{}{},
 			}
 
+			client := initClient()
 			_, err := client.Operations.StartFirehose(params)
 			if err != nil {
 				return err

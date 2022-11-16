@@ -18,14 +18,13 @@ func upgradeCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient()
-
 			params := &operations.UpgradeFirehoseParams{
 				FirehoseUrn: args[1],
 				ProjectID:   args[0],
 				Body:        struct{}{},
 			}
 
+			client := initClient()
 			_, err := client.Operations.UpgradeFirehose(params)
 			if err != nil {
 				return err
