@@ -602,6 +602,10 @@ definitions:
       properties:
         image:
           type: string
+        version:
+          type: string
+          readOnly: true
+          example: "1.0.0"
         stream_name:
           type: string
         bootstrap_servers:

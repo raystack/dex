@@ -22,7 +22,9 @@ const (
 	headerProjectID = "X-Shield-Project"
 )
 
-func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) {
+func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient,
+	latestFirehoseVersion string,
+) {
 	// read APIs
 	r.Handle("/projects/{projectSlug}/firehoses", handleListFirehoses(client)).Methods(http.MethodGet)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleGetFirehose(client)).Methods(http.MethodGet)
@@ -37,4 +39,5 @@ func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldCl
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/scale", handleScaleFirehose(client)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/start", handleStartOrStop(client, false)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/stop", handleStartOrStop(client, true)).Methods(http.MethodPost)
+	r.Handle("/projects/{projectSlug}/firehoses/{urn}/upgrade", handleUpgradeFirehose(client, shieldClient, latestFirehoseVersion)).Methods(http.MethodPost)
 }

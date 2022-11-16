@@ -474,3 +474,72 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 		}
 	}
 }
+
+func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient,
+	latestFirehoseVersion string,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		pathVars := mux.Vars(r)
+		projectID := r.Header.Get(headerProjectID)
+		urn := pathVars[pathParamURN]
+
+		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		// Ensure that the URN refers to a valid firehose resource.
+		cur, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		} else if cur.Configs.Version == latestFirehoseVersion {
+			utils.WriteJSON(w, http.StatusNoContent, nil)
+			return
+		}
+
+		cur.Configs.Version = latestFirehoseVersion
+		cfgStruct, err := cur.Configs.toConfigStruct(getProjectResponse.GetProject())
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		rpcReq := &entropyv1beta1.UpdateResourceRequest{
+			Urn:    urn,
+			Labels: map[string]string{}, // TODO: merge shield labels with current value.
+			NewSpec: &entropyv1beta1.ResourceSpec{
+				Configs: cfgStruct,
+			},
+		}
+
+		rpcResp, err := client.UpdateResource(r.Context(), rpcReq)
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.InvalidArgument {
+				utils.WriteErr(w, errors.ErrInvalid.WithCausef(st.Message()))
+			} else if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound.
+					WithMsgf(firehoseNotFound).
+					WithCausef(st.Message()))
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, firehoseDef)
+	}
+}
