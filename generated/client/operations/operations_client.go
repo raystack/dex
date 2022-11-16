@@ -53,6 +53,8 @@ type ClientService interface {
 
 	UpdateFirehose(params *UpdateFirehoseParams, opts ...ClientOption) (*UpdateFirehoseOK, error)
 
+	UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOption) (*UpgradeFirehoseOK, error)
+
 	SetTransport(transport runtime.ClientTransport)
 }
 
@@ -493,6 +495,46 @@ func (a *Client) UpdateFirehose(params *UpdateFirehoseParams, opts ...ClientOpti
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for updateFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+UpgradeFirehose upgrades the firehose to the latest version supported
+
+Upgrade the firehose to the latest version supported.
+*/
+func (a *Client) UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOption) (*UpgradeFirehoseOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpgradeFirehoseParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "upgradeFirehose",
+		Method:             "POST",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/upgrade",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpgradeFirehoseReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpgradeFirehoseOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for upgradeFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

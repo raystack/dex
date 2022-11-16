@@ -33,6 +33,7 @@ func Command() *cobra.Command {
 		scaleCommand(),
 		startCommand(),
 		stopCommand(),
+		upgradeCommand(),
 		resetOffsetCommand(),
 	)
 	return cmd
