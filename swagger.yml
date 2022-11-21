@@ -771,7 +771,18 @@ definitions:
         example: "2022-06-23T16:49:15.885541Z"
         readOnly: true
       variables:
-        type: object
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            type:
+              type: string
+            value:
+              type: string
+            description:
+              type: string
   AlertPolicy:
     type: object
     properties:

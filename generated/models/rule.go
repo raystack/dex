@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -42,7 +43,7 @@ type Rule struct {
 	UpdatedAt strfmt.DateTime `json:"updated_at,omitempty"`
 
 	// variables
-	Variables interface{} `json:"variables,omitempty"`
+	Variables []*RuleVariablesItems0 `json:"variables"`
 }
 
 // Validate validates this rule
@@ -54,6 +55,10 @@ func (m *Rule) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateUpdatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateVariables(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -87,6 +92,32 @@ func (m *Rule) validateUpdatedAt(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Rule) validateVariables(formats strfmt.Registry) error {
+	if swag.IsZero(m.Variables) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Variables); i++ {
+		if swag.IsZero(m.Variables[i]) { // not required
+			continue
+		}
+
+		if m.Variables[i] != nil {
+			if err := m.Variables[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("variables" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("variables" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // ContextValidate validate this rule based on the context it is used
 func (m *Rule) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
@@ -100,6 +131,10 @@ func (m *Rule) ContextValidate(ctx context.Context, formats strfmt.Registry) err
 	}
 
 	if err := m.contextValidateUpdatedAt(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateVariables(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -136,6 +171,26 @@ func (m *Rule) contextValidateUpdatedAt(ctx context.Context, formats strfmt.Regi
 	return nil
 }
 
+func (m *Rule) contextValidateVariables(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Variables); i++ {
+
+		if m.Variables[i] != nil {
+			if err := m.Variables[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("variables" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("variables" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *Rule) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -147,6 +202,52 @@ func (m *Rule) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *Rule) UnmarshalBinary(b []byte) error {
 	var res Rule
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// RuleVariablesItems0 rule variables items0
+//
+// swagger:model RuleVariablesItems0
+type RuleVariablesItems0 struct {
+
+	// description
+	Description string `json:"description,omitempty"`
+
+	// name
+	Name string `json:"name,omitempty"`
+
+	// type
+	Type string `json:"type,omitempty"`
+
+	// value
+	Value string `json:"value,omitempty"`
+}
+
+// Validate validates this rule variables items0
+func (m *RuleVariablesItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this rule variables items0 based on context it is used
+func (m *RuleVariablesItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *RuleVariablesItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *RuleVariablesItems0) UnmarshalBinary(b []byte) error {
+	var res RuleVariablesItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
