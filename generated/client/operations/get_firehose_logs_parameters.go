@@ -369,7 +369,7 @@ func (o *GetFirehoseLogsParams) WriteToRequest(r runtime.ClientRequest, reg strf
 
 	if o.SinceSeconds != nil {
 
-		// query param sinceSeconds
+		// query param since_seconds
 		var qrSinceSeconds int64
 
 		if o.SinceSeconds != nil {
@@ -378,7 +378,7 @@ func (o *GetFirehoseLogsParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		qSinceSeconds := swag.FormatInt64(qrSinceSeconds)
 		if qSinceSeconds != "" {
 
-			if err := r.SetQueryParam("sinceSeconds", qSinceSeconds); err != nil {
+			if err := r.SetQueryParam("since_seconds", qSinceSeconds); err != nil {
 				return err
 			}
 		}
@@ -386,7 +386,7 @@ func (o *GetFirehoseLogsParams) WriteToRequest(r runtime.ClientRequest, reg strf
 
 	if o.TailLines != nil {
 
-		// query param tailLines
+		// query param tail_lines
 		var qrTailLines int64
 
 		if o.TailLines != nil {
@@ -395,7 +395,7 @@ func (o *GetFirehoseLogsParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		qTailLines := swag.FormatInt64(qrTailLines)
 		if qTailLines != "" {
 
-			if err := r.SetQueryParam("tailLines", qTailLines); err != nil {
+			if err := r.SetQueryParam("tail_lines", qTailLines); err != nil {
 				return err
 			}
 		}
