@@ -35,9 +35,15 @@ type ClientService interface {
 
 	GetFirehose(params *GetFirehoseParams, opts ...ClientOption) (*GetFirehoseOK, error)
 
+	GetFirehoseAlertPolicy(params *GetFirehoseAlertPolicyParams, opts ...ClientOption) (*GetFirehoseAlertPolicyOK, error)
+
+	GetFirehoseAlerts(params *GetFirehoseAlertsParams, opts ...ClientOption) (*GetFirehoseAlertsOK, error)
+
 	GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer, opts ...ClientOption) (*GetFirehoseLogsOK, error)
 
 	GetProjectBySlug(params *GetProjectBySlugParams, opts ...ClientOption) (*GetProjectBySlugOK, error)
+
+	ListAlertTemplates(params *ListAlertTemplatesParams, opts ...ClientOption) (*ListAlertTemplatesOK, error)
 
 	ListFirehoses(params *ListFirehosesParams, opts ...ClientOption) (*ListFirehosesOK, error)
 
@@ -54,6 +60,8 @@ type ClientService interface {
 	UpdateFirehose(params *UpdateFirehoseParams, opts ...ClientOption) (*UpdateFirehoseOK, error)
 
 	UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOption) (*UpgradeFirehoseOK, error)
+
+	UpsertFirehoseAlertPolicy(params *UpsertFirehoseAlertPolicyParams, opts ...ClientOption) (*UpsertFirehoseAlertPolicyOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -139,6 +147,86 @@ func (a *Client) GetFirehose(params *GetFirehoseParams, opts ...ClientOption) (*
 }
 
 /*
+GetFirehoseAlertPolicy alerts policy for a firehose
+
+Alert policy for a Firehose.
+*/
+func (a *Client) GetFirehoseAlertPolicy(params *GetFirehoseAlertPolicyParams, opts ...ClientOption) (*GetFirehoseAlertPolicyOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetFirehoseAlertPolicyParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getFirehoseAlertPolicy",
+		Method:             "GET",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/alertPolicy",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetFirehoseAlertPolicyReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetFirehoseAlertPolicyOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getFirehoseAlertPolicy: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+GetFirehoseAlerts triggereds alerts for a firehose
+
+Triggered alerts for a Firehose.
+*/
+func (a *Client) GetFirehoseAlerts(params *GetFirehoseAlertsParams, opts ...ClientOption) (*GetFirehoseAlertsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetFirehoseAlertsParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getFirehoseAlerts",
+		Method:             "GET",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/alerts",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetFirehoseAlertsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetFirehoseAlertsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getFirehoseAlerts: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
 GetFirehoseLogs streams logs for a firehose
 
 Stream logs for a Firehose.
@@ -215,6 +303,46 @@ func (a *Client) GetProjectBySlug(params *GetProjectBySlugParams, opts ...Client
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for getProjectBySlug: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+ListAlertTemplates gets list of alert templates for firehose
+
+Get list of alert templates for firehose.
+*/
+func (a *Client) ListAlertTemplates(params *ListAlertTemplatesParams, opts ...ClientOption) (*ListAlertTemplatesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListAlertTemplatesParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "listAlertTemplates",
+		Method:             "GET",
+		PathPattern:        "/alertTemplates",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ListAlertTemplatesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListAlertTemplatesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for listAlertTemplates: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
@@ -535,6 +663,46 @@ func (a *Client) UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOp
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for upgradeFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+UpsertFirehoseAlertPolicy upserts alert policy for a firehose
+
+Upsert alert policy for a Firehose.
+*/
+func (a *Client) UpsertFirehoseAlertPolicy(params *UpsertFirehoseAlertPolicyParams, opts ...ClientOption) (*UpsertFirehoseAlertPolicyOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpsertFirehoseAlertPolicyParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "upsertFirehoseAlertPolicy",
+		Method:             "PUT",
+		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/alertPolicy",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpsertFirehoseAlertPolicyReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpsertFirehoseAlertPolicyOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for upsertFirehoseAlertPolicy: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

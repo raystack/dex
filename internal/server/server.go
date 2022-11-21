@@ -11,6 +11,7 @@ import (
 	"github.com/odpf/salt/mux"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
+	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
 	"go.uber.org/zap"
 
 	"github.com/odpf/dex/internal/server/reqctx"
@@ -24,6 +25,7 @@ func Serve(ctx context.Context, addr string, nrApp *newrelic.Application, logger
 	latestFirehoseVersion string,
 	shieldClient shieldv1beta1.ShieldServiceClient,
 	entropyClient entropyv1beta1.ResourceServiceClient,
+	sirenClient sirenv1beta1.SirenServiceClient,
 ) error {
 	httpRouter := gorillamux.NewRouter()
 	httpRouter.Use(nrgorilla.Middleware(nrApp))
@@ -41,7 +43,7 @@ func Serve(ctx context.Context, addr string, nrApp *newrelic.Application, logger
 	// Setup API routes. Refer swagger.yml
 	apiRouter := httpRouter.PathPrefix("/api/").Subrouter()
 	projectsv1.Routes(apiRouter, shieldClient)
-	firehosesv1.Routes(apiRouter, entropyClient, shieldClient, latestFirehoseVersion)
+	firehosesv1.Routes(apiRouter, entropyClient, shieldClient, sirenClient, latestFirehoseVersion)
 
 	logger.Info("starting server", zap.String("addr", addr))
 	return mux.Serve(ctx, addr, mux.WithHTTP(httpRouter))

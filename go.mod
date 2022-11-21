@@ -22,6 +22,7 @@ require (
 	go.buf.build/odpf/gwv/odpf/proton v1.1.135
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
+	golang.org/x/exp v0.0.0-20221111204811-129d8d6c17ab
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
@@ -106,7 +107,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/net v0.0.0-20220923203811-8be639271d50 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.84.0 // indirect

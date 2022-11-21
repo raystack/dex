@@ -9,7 +9,7 @@ swagger: "2.0"
 
 info:
   title:  dex_api
-  description: DEX API sepcifications.
+  description: DEX API specifications.
   version: 0.1.0
 
 paths:
@@ -485,6 +485,100 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /projects/{projectId}/firehoses/{firehoseUrn}/alertPolicy:
+    parameters:
+      - in: path
+        name: projectId
+        type: string
+        required: true
+        description: Unique identifier of the project.
+      - in: path
+        name: firehoseUrn
+        type: string
+        required: true
+        description: URN of the firehose.
+    get:
+      summary: Alert policy for a Firehose.
+      description: Alert policy for a Firehose.
+      operationId: getFirehoseAlertPolicy
+      responses:
+        "200":
+          description: Found alert policy for given firehose URN.
+          schema:
+            $ref: "#/definitions/AlertPolicy"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      summary: Upsert alert policy for a Firehose.
+      description: Upsert alert policy for a Firehose.
+      operationId: upsertFirehoseAlertPolicy
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/AlertPolicy"
+      responses:
+        "200":
+          description: Updated alert policy for firehose.
+          schema:
+            $ref: "#/definitions/AlertPolicy"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /projects/{projectId}/firehoses/{firehoseUrn}/alerts:
+    parameters:
+      - in: path
+        name: projectId
+        type: string
+        required: true
+        description: Unique identifier of the project.
+      - in: path
+        name: firehoseUrn
+        type: string
+        required: true
+        description: URN of the firehose.
+    get:
+      summary: Triggered alerts for a Firehose.
+      description: Triggered alerts for a Firehose.
+      operationId: getFirehoseAlerts
+      responses:
+        "200":
+          description: alerts for given firehose URN.
+          schema:
+            $ref: "#/definitions/AlertArray"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /alertTemplates:
+    get:
+      summary: Get list of alert templates for firehose.
+      description: Get list of alert templates for firehose.
+      operationId: listAlertTemplates
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/AlertTemplatesArray"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
 definitions:
   ErrorResponse:
@@ -655,3 +749,105 @@ definitions:
           type: string
         filter:
           type: object
+
+  Rule:
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+      template:
+        type: string
+      enabled:
+        type: boolean
+      created_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      updated_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      variables:
+        type: object
+  AlertPolicy:
+    type: object
+    properties:
+      resource:   # siren calls it namespace, since on platform side we will use it for resources
+        type: string
+        readOnly: true
+      rules:
+        type: array
+        items:
+          $ref: "#/definitions/Rule"
+  Alert:
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+      resource:
+        type: string
+      metric:
+        type: string
+      value:
+        type: string
+      severity:
+        type: string
+      rule:
+        type: string
+      triggered_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+  AlertArray:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/Alert"
+  AlertTemplate:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      body:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+      created_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      updated_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      variables:
+        type: object
+        properties:
+          name:
+            type: string
+          type:
+            type: string
+          default:
+            type: string
+          description:
+            type: string
+  AlertTemplatesArray:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/AlertTemplate"

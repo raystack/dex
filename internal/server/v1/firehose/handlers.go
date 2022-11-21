@@ -3,14 +3,15 @@ package firehose
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
+	"golang.org/x/exp/maps"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -20,9 +21,15 @@ import (
 	"github.com/odpf/dex/pkg/errors"
 )
 
-const firehoseNotFound = "no firehose with given URN"
+const (
+	firehoseNotFound             = "no firehose with given URN"
+	firehoseOutputReleaseNameKey = "release_name"
+)
 
-var firehoseLogFilterKeys = []string{"pod", "container", "sinceSeconds", "tailLines", "follow", "previous", "timestamps"}
+var (
+	firehoseLogFilterKeys      = []string{"pod", "container", "sinceSeconds", "tailLines", "follow", "previous", "timestamps"}
+	suppliedAlertVariableNames = []string{"name", "team", "entity"}
+)
 
 type listResponse[T any] struct {
 	Items []T `json:"items"`
@@ -464,7 +471,6 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 			chunk := getLogRes.GetChunk()
 			logChunk, err := protojson.Marshal(chunk)
 			if err != nil {
-				fmt.Println("err ", err)
 				utils.WriteErr(w, err)
 				return
 			}
@@ -542,4 +548,197 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 
 		utils.WriteJSON(w, http.StatusOK, firehoseDef)
 	}
+}
+
+func handleGetFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient, svc *alertsv1.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		pathVars := mux.Vars(r)
+		projectID := r.Header.Get(headerProjectID)
+		urn := pathVars[pathParamURN]
+
+		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		name, err := getFirehoseReleaseName(firehoseDef)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		policyDef, err := svc.GetAlertPolicy(ctx, getProjectResponse.GetProject().GetSlug(), name)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		policyDef.Rules = removeSuppliedVariablesFromRules(policyDef.Rules, suppliedAlertVariableNames)
+		utils.WriteJSON(w, http.StatusOK, policyDef)
+	}
+}
+
+func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient, svc *alertsv1.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		pathVars := mux.Vars(r)
+		projectID := r.Header.Get(headerProjectID)
+		urn := pathVars[pathParamURN]
+
+		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		name, err := getFirehoseReleaseName(firehoseDef)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+		team := firehoseDef.Team
+		projectSlug := getProjectResponse.GetProject().GetSlug()
+		entity, err := svc.GetProjectDataSource(ctx, projectSlug)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		var policyDef alertsv1.Policy
+		if err := json.NewDecoder(r.Body).Decode(&policyDef); err != nil {
+			utils.WriteErr(w, errors.ErrInvalid.
+				WithMsgf("request json body is not valid").
+				WithCausef(err.Error()))
+			return
+		}
+
+		policyDef.Rules = addSuppliedVariablesFromRules(policyDef.Rules, map[string]string{
+			"team":   team,
+			"name":   name,
+			"entity": entity,
+		})
+		policyDef.Resource = name
+
+		alertPolicy, err := svc.UpsertAlertPolicy(ctx, projectSlug, policyDef)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, alertPolicy)
+	}
+}
+
+func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient, svc *alertsv1.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		pathVars := mux.Vars(r)
+		projectID := r.Header.Get(headerProjectID)
+		urn := pathVars[pathParamURN]
+
+		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
+
+		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		name, err := getFirehoseReleaseName(firehoseDef)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		alerts, err := svc.ListAlerts(ctx, getProjectResponse.GetProject().GetSlug(), name)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		resp := listResponse[alertsv1.Alert]{Items: alerts}
+		utils.WriteJSON(w, http.StatusOK, resp)
+	}
+}
+
+func getFirehoseReleaseName(firehoseDef *firehoseDefinition) (string, error) {
+	s, ok := firehoseDef.State.Output[firehoseOutputReleaseNameKey].(string)
+	if !ok {
+		return "", errors.ErrInternal.WithMsgf("unable to parse firehose name")
+	}
+	return s, nil
+}
+
+func findInArray(a []string, f string) bool {
+	for _, s := range a {
+		if s == f {
+			return true
+		}
+	}
+	return false
+}
+
+func removeSuppliedVariablesFromRules(rules []alertsv1.Rule, varKeys []string) []alertsv1.Rule {
+	var result []alertsv1.Rule
+	for _, r := range rules {
+		var finalVars []alertsv1.Variable
+		for _, variable := range r.Variables {
+			if !findInArray(varKeys, variable.Name) {
+				finalVars = append(finalVars, variable)
+			}
+		}
+		r.Variables = finalVars
+		result = append(result, r)
+	}
+	return result
+}
+
+func addSuppliedVariablesFromRules(rules []alertsv1.Rule, vars map[string]string) []alertsv1.Rule {
+	rules = removeSuppliedVariablesFromRules(rules, maps.Keys(vars))
+	var suppliedVars []alertsv1.Variable
+	for k, v := range vars {
+		suppliedVars = append(suppliedVars, alertsv1.Variable{
+			Name:  k,
+			Value: v,
+		})
+	}
+	var result []alertsv1.Rule
+	for _, rule := range rules {
+		rule.Variables = append(rule.Variables, suppliedVars...)
+		result = append(result, rule)
+	}
+	return result
 }
