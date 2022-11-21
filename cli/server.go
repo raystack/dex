@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
+	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -86,9 +87,15 @@ func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap
 		return err
 	}
 
+	sirenConn, err := grpc.Dial(cfg.Siren.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+
 	return server.Serve(ctx, cfg.Service.Addr(), nrApp, zapLog,
 		cfg.Entropy.FirehoseVersion,
 		shieldv1beta1.NewShieldServiceClient(shieldConn),
 		entropyv1beta1.NewResourceServiceClient(entropyConn),
+		sirenv1beta1.NewSirenServiceClient(sirenConn),
 	)
 }

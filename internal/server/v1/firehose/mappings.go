@@ -133,10 +133,9 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 			InputSchemaProtoClass: modConf.Firehose.EnvVariables["INPUT_SCHEMA_PROTO_CLASS"],
 		}
 		def.State = &firehoseState{
-			State:        modConf.State,
-			Status:       res.GetState().GetStatus().String(),
-			DeploymentID: res.GetName(), // TODO: extract from output of the resource.
-			Output:       res.GetState().Output.GetStructValue().AsMap(),
+			State:  modConf.State,
+			Status: res.GetState().GetStatus().String(),
+			Output: res.GetState().Output.GetStructValue().AsMap(),
 		}
 	}
 

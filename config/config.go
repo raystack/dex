@@ -16,12 +16,17 @@ type entropyConfig struct {
 	FirehoseVersion string `mapstructure:"firehose_version"`
 }
 
+type sirenConfig struct {
+	Addr string `mapstructure:"addr"`
+}
+
 // Config contains the application configuration.
 type Config struct {
 	Log       logger.LogConfig `mapstructure:"log"`
 	Service   serveConfig      `mapstructure:"service"`
 	Shield    shieldConfig     `mapstructure:"shield"`
 	Entropy   entropyConfig    `mapstructure:"entropy"`
+	Siren     sirenConfig      `mapstructure:"siren"`
 	Telemetry telemetry.Config `mapstructure:"telemetry"`
 }
 

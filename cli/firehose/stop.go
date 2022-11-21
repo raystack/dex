@@ -11,7 +11,7 @@ import (
 
 func stopCommand(cfgLoader ConfigLoader) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "Stop <project> <firehoseURN>",
+		Use:   "stop <project> <firehoseURN>",
 		Short: "Stop the firehose if it's currently running.",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
