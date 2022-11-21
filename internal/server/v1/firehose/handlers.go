@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"golang.org/x/exp/maps"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/odpf/dex/internal/server/reqctx"
 	"github.com/odpf/dex/internal/server/utils"
+	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
 	"github.com/odpf/dex/pkg/errors"
 )
 
