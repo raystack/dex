@@ -485,13 +485,13 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/alertPolicy:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy:
     parameters:
       - in: path
-        name: projectId
+        name: projectSlug
         type: string
         required: true
-        description: Unique identifier of the project.
+        description: Unique slug name of the project.
       - in: path
         name: firehoseUrn
         type: string
@@ -536,13 +536,13 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/alerts:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts:
     parameters:
       - in: path
-        name: projectId
+        name: projectSlug
         type: string
         required: true
-        description: Unique identifier of the project.
+        description: Unique slug name of the project.
       - in: path
         name: firehoseUrn
         type: string

@@ -67,11 +67,11 @@ type GetFirehoseAlertPolicyParams struct {
 	*/
 	FirehoseUrn string
 
-	/* ProjectID.
+	/* ProjectSlug.
 
-	   Unique identifier of the project.
+	   Unique slug name of the project.
 	*/
-	ProjectID string
+	ProjectSlug string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -137,15 +137,15 @@ func (o *GetFirehoseAlertPolicyParams) SetFirehoseUrn(firehoseUrn string) {
 	o.FirehoseUrn = firehoseUrn
 }
 
-// WithProjectID adds the projectID to the get firehose alert policy params
-func (o *GetFirehoseAlertPolicyParams) WithProjectID(projectID string) *GetFirehoseAlertPolicyParams {
-	o.SetProjectID(projectID)
+// WithProjectSlug adds the projectSlug to the get firehose alert policy params
+func (o *GetFirehoseAlertPolicyParams) WithProjectSlug(projectSlug string) *GetFirehoseAlertPolicyParams {
+	o.SetProjectSlug(projectSlug)
 	return o
 }
 
-// SetProjectID adds the projectId to the get firehose alert policy params
-func (o *GetFirehoseAlertPolicyParams) SetProjectID(projectID string) {
-	o.ProjectID = projectID
+// SetProjectSlug adds the projectSlug to the get firehose alert policy params
+func (o *GetFirehoseAlertPolicyParams) SetProjectSlug(projectSlug string) {
+	o.ProjectSlug = projectSlug
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -161,8 +161,8 @@ func (o *GetFirehoseAlertPolicyParams) WriteToRequest(r runtime.ClientRequest, r
 		return err
 	}
 
-	// path param projectId
-	if err := r.SetPathParam("projectId", o.ProjectID); err != nil {
+	// path param projectSlug
+	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 
