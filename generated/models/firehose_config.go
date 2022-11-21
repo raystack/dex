@@ -59,6 +59,11 @@ type FirehoseConfig struct {
 	// topic name
 	// Required: true
 	TopicName *string `json:"topic_name"`
+
+	// version
+	// Example: 1.0.0
+	// Read Only: true
+	Version string `json:"version,omitempty"`
 }
 
 // Validate validates this firehose config
@@ -198,6 +203,10 @@ func (m *FirehoseConfig) ContextValidate(ctx context.Context, formats strfmt.Reg
 		res = append(res, err)
 	}
 
+	if err := m.contextValidateVersion(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -215,6 +224,15 @@ func (m *FirehoseConfig) contextValidateSinkType(ctx context.Context, formats st
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *FirehoseConfig) contextValidateVersion(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "version", "body", string(m.Version)); err != nil {
+		return err
 	}
 
 	return nil

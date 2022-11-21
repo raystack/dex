@@ -94,11 +94,11 @@ type GetFirehoseLogsParams struct {
 	*/
 	Previous *bool
 
-	/* ProjectID.
+	/* ProjectSlug.
 
 	   Unique identifier of the project.
 	*/
-	ProjectID string
+	ProjectSlug string
 
 	/* SinceSeconds.
 
@@ -237,15 +237,15 @@ func (o *GetFirehoseLogsParams) SetPrevious(previous *bool) {
 	o.Previous = previous
 }
 
-// WithProjectID adds the projectID to the get firehose logs params
-func (o *GetFirehoseLogsParams) WithProjectID(projectID string) *GetFirehoseLogsParams {
-	o.SetProjectID(projectID)
+// WithProjectSlug adds the projectSlug to the get firehose logs params
+func (o *GetFirehoseLogsParams) WithProjectSlug(projectSlug string) *GetFirehoseLogsParams {
+	o.SetProjectSlug(projectSlug)
 	return o
 }
 
-// SetProjectID adds the projectId to the get firehose logs params
-func (o *GetFirehoseLogsParams) SetProjectID(projectID string) {
-	o.ProjectID = projectID
+// SetProjectSlug adds the projectSlug to the get firehose logs params
+func (o *GetFirehoseLogsParams) SetProjectSlug(projectSlug string) {
+	o.ProjectSlug = projectSlug
 }
 
 // WithSinceSeconds adds the sinceSeconds to the get firehose logs params
@@ -362,8 +362,8 @@ func (o *GetFirehoseLogsParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		}
 	}
 
-	// path param projectId
-	if err := r.SetPathParam("projectId", o.ProjectID); err != nil {
+	// path param projectSlug
+	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 

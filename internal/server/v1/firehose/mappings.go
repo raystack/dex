@@ -28,6 +28,7 @@ type firehoseDefinition struct {
 
 type firehoseConfigs struct {
 	Image                 string            `json:"image"`
+	Version               string            `json:"version"`
 	EnvVars               map[string]string `json:"env_vars"`
 	Replicas              int               `json:"replicas"`
 	SinkType              string            `json:"sink_type"`
@@ -119,6 +120,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 	if !onlyMeta {
 		def.Configs = &firehoseConfigs{
 			Image:                 firehoseChart,
+			Version:               modConf.ChartVersion,
 			EnvVars:               modConf.Firehose.EnvVariables,
 			Replicas:              modConf.Firehose.Replicas,
 			SinkType:              modConf.Firehose.EnvVariables["SINK_TYPE"],

@@ -12,7 +12,8 @@ type shieldConfig struct {
 }
 
 type entropyConfig struct {
-	Addr string `mapstructure:"addr"`
+	Addr            string `mapstructure:"addr"`
+	FirehoseVersion string `mapstructure:"firehose_version"`
 }
 
 // Config contains the application configuration.

@@ -4,6 +4,8 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/odpf/salt/cmdx"
 	"github.com/spf13/cobra"
+
+	"github.com/odpf/dex/cli/firehose"
 )
 
 type CDK struct {
@@ -41,6 +43,7 @@ func New() *cobra.Command {
 		versionCmd(),
 		configCmd(cdk),
 		loginCmd(cdk),
+		firehose.Command(cdk.Config),
 	)
 
 	// Help topics.
