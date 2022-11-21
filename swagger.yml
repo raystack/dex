@@ -440,13 +440,13 @@ paths:
           required: false
           description: Return logs for selected container.
         - in: query
-          name: sinceSeconds
+          name: since_seconds
           type: integer
           minimum: 1
           required: false
           description: Return logs since given seconds ago
         - in: query
-          name: tailLines
+          name: tail_lines
           type: integer
           minimum: 1
           required: false

@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	firehoseLogFilterKeys      = []string{"pod", "container", "sinceSeconds", "tailLines", "follow", "previous", "timestamps"}
+	firehoseLogFilterKeys      = []string{"pod", "container", "since_seconds", "tail_lines", "follow", "previous", "timestamps"}
 	suppliedAlertVariableNames = []string{"name", "team", "entity"}
 )
 
