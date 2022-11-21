@@ -1,4 +1,4 @@
-package firehose
+package alert
 
 import (
 	"net/http"
