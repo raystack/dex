@@ -9,7 +9,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func viewCommand() *cobra.Command {
+func viewCommand(cfgLoader ConfigLoader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "view <project> <name>",
 		Short: "View a firehose",
@@ -19,7 +19,7 @@ func viewCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient()
+			client := initClient(cfgLoader)
 
 			params := operations.GetFirehoseParams{
 				ProjectID:   args[0],

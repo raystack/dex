@@ -11,7 +11,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func listCommand() *cobra.Command {
+func listCommand(cfgLoader ConfigLoader) *cobra.Command {
 	var limit int
 
 	cmd := &cobra.Command{
@@ -22,7 +22,7 @@ func listCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient()
+			client := initClient(cfgLoader)
 
 			params := operations.ListFirehosesParams{
 				ProjectID: args[0],

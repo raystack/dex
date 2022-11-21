@@ -20,7 +20,7 @@ type logChunk struct {
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
-func logsCommand() *cobra.Command {
+func logsCommand(cfgLoader ConfigLoader) *cobra.Command {
 	var container, pod string
 	var follow, previous, timestamps bool
 	var tailCount, since int64
@@ -33,7 +33,7 @@ func logsCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient()
+			client := initClient(cfgLoader)
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],

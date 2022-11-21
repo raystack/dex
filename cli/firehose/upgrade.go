@@ -1,3 +1,4 @@
+//nolint:dupl
 package firehose
 
 import (
@@ -9,7 +10,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func upgradeCommand() *cobra.Command {
+func upgradeCommand(cfgLoader ConfigLoader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upgrade <project> <firehoseURN>",
 		Short: "Upgrade the firehose to the latest version supported",
@@ -24,7 +25,7 @@ func upgradeCommand() *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient()
+			client := initClient(cfgLoader)
 			_, err := client.Operations.UpgradeFirehose(params)
 			if err != nil {
 				return err

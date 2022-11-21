@@ -1,3 +1,4 @@
+//nolint:dupl
 package firehose
 
 import (
@@ -9,12 +10,12 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func startCommand() *cobra.Command {
+func startCommand(cfgLoader ConfigLoader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start <project> <firehoseURN>",
 		Short: "Start the firehose if it's currently stopped.",
 		Args:  cobra.ExactArgs(2),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error { //nolint:dupl
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
@@ -24,7 +25,7 @@ func startCommand() *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient()
+			client := initClient(cfgLoader)
 			_, err := client.Operations.StartFirehose(params)
 			if err != nil {
 				return err

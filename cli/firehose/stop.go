@@ -9,7 +9,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func stopCommand() *cobra.Command {
+func stopCommand(cfgLoader ConfigLoader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "Stop <project> <firehoseURN>",
 		Short: "Stop the firehose if it's currently running.",
@@ -18,7 +18,7 @@ func stopCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient()
+			client := initClient(cfgLoader)
 			params := &operations.StopFirehoseParams{
 				FirehoseUrn: args[1],
 				ProjectID:   args[0],

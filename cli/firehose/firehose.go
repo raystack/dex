@@ -1,17 +1,27 @@
 package firehose
 
 import (
-	"os"
+	"log"
 
 	"github.com/MakeNowJust/heredoc"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/odpf/salt/cmdx"
 	"github.com/spf13/cobra"
 
 	"github.com/odpf/dex/generated/client"
 )
 
-func Command() *cobra.Command {
+type Config struct {
+	Host        string `json:"host"`
+	AccessToken string `json:"access_token"`
+}
+
+type ConfigLoader interface {
+	Load(into interface{}, opts ...cmdx.ConfigLoaderOpts) error
+}
+
+func Command(cfgLoader ConfigLoader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "firehose <command>",
 		Aliases: []string{"s"},
@@ -27,22 +37,26 @@ func Command() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		viewCommand(),
-		listCommand(),
-		applyCommand(),
-		scaleCommand(),
-		startCommand(),
-		stopCommand(),
-		logsCommand(),
-		upgradeCommand(),
-		resetOffsetCommand(),
+		viewCommand(cfgLoader),
+		listCommand(cfgLoader),
+		applyCommand(cfgLoader),
+		scaleCommand(cfgLoader),
+		startCommand(cfgLoader),
+		stopCommand(cfgLoader),
+		logsCommand(cfgLoader),
+		upgradeCommand(cfgLoader),
+		resetOffsetCommand(cfgLoader),
 	)
 	return cmd
 }
 
-func initClient() *client.DexAPI {
-	// TODO: should be read from configurations.
-	r := httptransport.New(client.DefaultHost, client.DefaultBasePath, client.DefaultSchemes)
-	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("API_ACCESS_TOKEN"))
+func initClient(cfgLoader ConfigLoader) *client.DexAPI {
+	var cfg Config
+	if err := cfgLoader.Load(&cfg); err != nil {
+		log.Fatalf("failed to load firehose configs: %s", err)
+	}
+
+	r := httptransport.New(cfg.Host, client.DefaultBasePath, client.DefaultSchemes)
+	r.DefaultAuthentication = httptransport.BearerToken(cfg.AccessToken)
 	return client.New(r, strfmt.Default)
 }

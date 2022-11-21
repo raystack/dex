@@ -43,7 +43,7 @@ func New() *cobra.Command {
 		versionCmd(),
 		configCmd(cdk),
 		loginCmd(cdk),
-		firehose.Command(),
+		firehose.Command(cdk.Config),
 	)
 
 	// Help topics.
