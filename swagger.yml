@@ -27,17 +27,17 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{id}:
+  /projects/{slug}:
     get:
-      summary: Get project by id.
-      description: Get project by its unique identifier.
-      operationId: getProjectById
+      summary: Get project by slug.
+      description: Get project by its unique slug name.
+      operationId: getProjectBySlug
       parameters:
         - in: path
-          name: id
+          name: slug
           type: string
           required: true
-          description: Unique identifier of the project.
+          description: Unique slug of the project.
       responses:
         "200":
           description: successful operation
@@ -51,10 +51,10 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses:
+  /projects/{projectSlug}/firehoses:
     parameters:
       - in: path
-        name: projectId
+        name: projectSlug
         type: string
         required: true
         description: Unique identifier of the project.
@@ -140,10 +140,10 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}:
     parameters:
       - in: path
-        name: projectId
+        name: projectSlug
         type: string
         required: true
         description: Unique identifier of the project.
@@ -199,11 +199,11 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/reset:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/reset:
     parameters:
       - in: path
         type: string
-        name: projectId
+        name: projectSlug
         description: Identifier for the project.
         required: true
       - in: path
@@ -216,16 +216,6 @@ paths:
       description: Reset firehose consumption offset.
       operationId: resetOffset
       parameters:
-        - in: path
-          name: projectId
-          type: string
-          required: true
-          description: Unique identifier of the project.
-        - in: path
-          name: firehoseUrn
-          type: string
-          required: true
-          description: URN of the firehose.
         - in: body
           name: body
           schema:
@@ -260,11 +250,11 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/scale:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/scale:
     parameters:
       - in: path
         type: string
-        name: projectId
+        name: projectSlug
         description: Identifier for the project.
         required: true
       - in: path
@@ -277,16 +267,6 @@ paths:
       description: Scale the number of instances of firehose.
       operationId: scaleFirehose
       parameters:
-        - in: path
-          name: projectId
-          type: string
-          required: true
-          description: Unique identifier of the project.
-        - in: path
-          name: firehoseUrn
-          type: string
-          required: true
-          description: URN of the firehose.
         - in: body
           name: body
           schema:
@@ -315,11 +295,11 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/start:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/start:
     parameters:
       - in: path
         type: string
-        name: projectId
+        name: projectSlug
         description: Identifier for the project.
         required: true
       - in: path
@@ -332,16 +312,6 @@ paths:
       description: Start the Firehose if it is currently stopped.
       operationId: startFirehose
       parameters:
-        - in: path
-          name: projectId
-          type: string
-          required: true
-          description: Unique identifier of the project.
-        - in: path
-          name: firehoseUrn
-          type: string
-          required: true
-          description: URN of the firehose.
         - in: body
           name: body
           schema:
@@ -364,11 +334,11 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/upgrade:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade:
     parameters:
       - in: path
         type: string
-        name: projectId
+        name: projectSlug
         description: Identifier for the project.
         required: true
       - in: path
@@ -381,16 +351,6 @@ paths:
       description: Upgrade the firehose to the latest version supported.
       operationId: upgradeFirehose
       parameters:
-        - in: path
-          name: projectId
-          type: string
-          required: true
-          description: Unique identifier of the project.
-        - in: path
-          name: firehoseUrn
-          type: string
-          required: true
-          description: URN of the firehose.
         - in: body
           name: body
           schema:
@@ -409,11 +369,11 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/stop:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/stop:
     parameters:
       - in: path
         type: string
-        name: projectId
+        name: projectSlug
         description: Identifier for the project.
         required: true
       - in: path
@@ -426,16 +386,6 @@ paths:
       description: Stop the Firehose if it is currently running.
       operationId: stopFirehose
       parameters:
-        - in: path
-          name: projectId
-          type: string
-          required: true
-          description: Unique identifier of the project.
-        - in: path
-          name: firehoseUrn
-          type: string
-          required: true
-          description: URN of the firehose.
         - in: body
           name: body
           schema:
@@ -460,7 +410,18 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectId}/firehoses/{firehoseUrn}/logs:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/logs:
+    parameters:
+      - in: path
+        name: projectSlug
+        type: string
+        required: true
+        description: Unique identifier of the project.
+      - in: path
+        name: firehoseUrn
+        type: string
+        required: true
+        description: URN of the firehose.
     get:
       summary: Stream logs for a Firehose.
       description: Stream logs for a Firehose.
@@ -468,16 +429,6 @@ paths:
       produces:
         - "application/x-ndjson"
       parameters:
-        - in: path
-          name: projectId
-          type: string
-          required: true
-          description: Unique identifier of the project.
-        - in: path
-          name: firehoseUrn
-          type: string
-          required: true
-          description: URN of the firehose.
         - in: query
           name: pod
           type: string
@@ -536,171 +487,171 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 
 definitions:
-    ErrorResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Something went wrong"
-        code:
-          type: string
-          example: "internal_error"
-          enum:
-            - conflict
-            - not_found
-            - bad_request
-            - internal_error
-    ProjectArray:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: "#/definitions/Project"
-    Project:
-      type: object
-      properties:
-        id:
-          type: string
-          example: "foo"
-          readOnly: true
-        name:
-          type: string
-          example: "Project Foo"
-        slug:
-          type: string
-          example: "project-foo"
-        created_at:
-          type: string
-          format: date-time
-          example: "2022-06-23T16:49:15.885541Z"
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          example: "2022-06-23T16:49:15.885541Z"
-          readOnly: true
-        metadata:
-          type: object
-          example:
-            environment: "production"
-            landscape: "systems"
-            organization: "foo"
-    FirehoseArray:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: "#/definitions/Firehose"
-    Firehose:
-      type: object
-      properties:
-        urn:
-          type: string
-          example: "orn:foo:firehose:fh1"
-          readOnly: true
-        title:
-          type: string
-          example: "Booking Events Ingester"
-        name:
-          type: string
-          example: "booking-events-ingester"
-        created_at:
-          type: string
-          format: date-time
-          example: "2022-06-23T16:49:15.885541Z"
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          example: "2022-06-23T16:49:15.885541Z"
-          readOnly: true
-        description:
-          type: string
-          example: "This firehose consumes from booking events and ingests to redis"
-        team:
-          type: string
-          example: "pricing"
-          readOnly: true
-        cluster:
-          type: string
-          example: "data_engineering"
-        configs:
-          $ref: "#/definitions/FirehoseConfig"
-        state:
-          $ref: "#/definitions/FirehoseState"
-
-    FirehoseConfig:
-      type: object
-      required:
-        - image
-        - stream_name
-        - bootstrap_servers
-        - consumer_group_id
-        - sink_type
-        - namespace
-        - topic_name
-        - input_schema_proto_class
-      properties:
-        image:
-          type: string
-        version:
-          type: string
-          readOnly: true
-          example: "1.0.0"
-        stream_name:
-          type: string
-        bootstrap_servers:
-          type: string
-        replicas:
-          type: number
-          default: 1
-        consumer_group_id:
-          type: string
-        sink_type:
-          $ref: "#/definitions/FirehoseSinkType"
-        stop_date:
-          type: string
-        namespace:
-          type: string
-        topic_name:
-          type: string
-        input_schema_proto_class:
-          type: string
-        env_vars:
-          type: object
-          additionalProperties: true
-    FirehoseState:
-      type: object
-      properties:
-        state:
-          type: string
-          example: "STATUS_COMPLETED"
-        status:
-          type: string
-          example: ""
-        deployment_id:
-          type: string
-    FirehoseSinkType:
-      type: string
-      enum:
-        - "LOG"
-        - "HTTP"
-        - "POSTGRES"
-        - "INFLUXDB"
-        - "ELASTIC"
-        - "REDIS"
-        - "GRPC"
-        - "PROMETHEUS"
-        - "BIGQUERY"
-        - "BLOB"
-    Logs:
-      type: array
+  ErrorResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Something went wrong"
+      code:
+        type: string
+        example: "internal_error"
+        enum:
+          - conflict
+          - not_found
+          - bad_request
+          - internal_error
+  ProjectArray:
+    type: object
+    properties:
       items:
+        type: array
+        items:
+          $ref: "#/definitions/Project"
+  Project:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "foo"
+        readOnly: true
+      name:
+        type: string
+        example: "Project Foo"
+      slug:
+        type: string
+        example: "project-foo"
+      created_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      updated_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      metadata:
         type: object
-        properties:
-          data:
-            type: string
-          filter:
-            type: object
+        example:
+          environment: "production"
+          landscape: "systems"
+          organization: "foo"
+  FirehoseArray:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/Firehose"
+  Firehose:
+    type: object
+    properties:
+      urn:
+        type: string
+        example: "orn:foo:firehose:fh1"
+        readOnly: true
+      title:
+        type: string
+        example: "Booking Events Ingester"
+      name:
+        type: string
+        example: "booking-events-ingester"
+      created_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      updated_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+      description:
+        type: string
+        example: "This firehose consumes from booking events and ingests to redis"
+      team:
+        type: string
+        example: "pricing"
+        readOnly: true
+      cluster:
+        type: string
+        example: "data_engineering"
+      configs:
+        $ref: "#/definitions/FirehoseConfig"
+      state:
+        $ref: "#/definitions/FirehoseState"
+
+  FirehoseConfig:
+    type: object
+    required:
+      - image
+      - stream_name
+      - bootstrap_servers
+      - consumer_group_id
+      - sink_type
+      - namespace
+      - topic_name
+      - input_schema_proto_class
+    properties:
+      image:
+        type: string
+      version:
+        type: string
+        readOnly: true
+        example: "1.0.0"
+      stream_name:
+        type: string
+      bootstrap_servers:
+        type: string
+      replicas:
+        type: number
+        default: 1
+      consumer_group_id:
+        type: string
+      sink_type:
+        $ref: "#/definitions/FirehoseSinkType"
+      stop_date:
+        type: string
+      namespace:
+        type: string
+      topic_name:
+        type: string
+      input_schema_proto_class:
+        type: string
+      env_vars:
+        type: object
+        additionalProperties: true
+  FirehoseState:
+    type: object
+    properties:
+      state:
+        type: string
+        example: "STATUS_COMPLETED"
+      status:
+        type: string
+        example: ""
+      deployment_id:
+        type: string
+  FirehoseSinkType:
+    type: string
+    enum:
+      - "LOG"
+      - "HTTP"
+      - "POSTGRES"
+      - "INFLUXDB"
+      - "ELASTIC"
+      - "REDIS"
+      - "GRPC"
+      - "PROMETHEUS"
+      - "BIGQUERY"
+      - "BLOB"
+  Logs:
+    type: array
+    items:
+      type: object
+      properties:
+        data:
+          type: string
+        filter:
+          type: object

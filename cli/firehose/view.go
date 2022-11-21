@@ -22,7 +22,7 @@ func viewCommand(cfgLoader ConfigLoader) *cobra.Command {
 			client := initClient(cfgLoader)
 
 			params := operations.GetFirehoseParams{
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 				FirehoseUrn: args[1],
 			}
 			res, err := client.Operations.GetFirehose(&params)

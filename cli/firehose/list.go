@@ -25,7 +25,7 @@ func listCommand(cfgLoader ConfigLoader) *cobra.Command {
 			client := initClient(cfgLoader)
 
 			params := operations.ListFirehosesParams{
-				ProjectID: args[0],
+				ProjectSlug: args[0],
 			}
 			res, err := client.Operations.ListFirehoses(&params)
 			if err != nil {

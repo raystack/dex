@@ -21,7 +21,7 @@ func startCommand(cfgLoader ConfigLoader) *cobra.Command {
 
 			params := &operations.StartFirehoseParams{
 				FirehoseUrn: args[1],
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 				Body:        struct{}{},
 			}
 

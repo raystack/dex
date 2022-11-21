@@ -34,7 +34,7 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 			}
 
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
-			resp, err := client.Operations.GetFirehose(&operations.GetFirehoseParams{ProjectID: args[0], FirehoseUrn: urn})
+			resp, err := client.Operations.GetFirehose(&operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn})
 			var notFoundErr *operations.GetFirehoseNotFound
 			if err != nil && !errors.As(err, notFoundErr) {
 				return err
@@ -45,7 +45,7 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 				// Firehose already exists. Treat this as an update.
 				existing := resp.GetPayload()
 				params := &operations.UpdateFirehoseParams{
-					ProjectID:   args[0],
+					ProjectSlug: args[0],
 					FirehoseUrn: existing.Urn,
 					Body: operations.UpdateFirehoseBody{
 						Config: firehoseDef.Configs,
@@ -59,8 +59,8 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 			} else {
 				// Firehose does not already exist. Treat this as create.
 				params := &operations.CreateFirehoseParams{
-					Body:      &firehoseDef,
-					ProjectID: args[0],
+					Body:        &firehoseDef,
+					ProjectSlug: args[0],
 				}
 
 				created, createErr := client.Operations.CreateFirehose(params)

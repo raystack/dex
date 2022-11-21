@@ -67,11 +67,11 @@ type GetFirehoseParams struct {
 	*/
 	FirehoseUrn string
 
-	/* ProjectID.
+	/* ProjectSlug.
 
 	   Unique identifier of the project.
 	*/
-	ProjectID string
+	ProjectSlug string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -137,15 +137,15 @@ func (o *GetFirehoseParams) SetFirehoseUrn(firehoseUrn string) {
 	o.FirehoseUrn = firehoseUrn
 }
 
-// WithProjectID adds the projectID to the get firehose params
-func (o *GetFirehoseParams) WithProjectID(projectID string) *GetFirehoseParams {
-	o.SetProjectID(projectID)
+// WithProjectSlug adds the projectSlug to the get firehose params
+func (o *GetFirehoseParams) WithProjectSlug(projectSlug string) *GetFirehoseParams {
+	o.SetProjectSlug(projectSlug)
 	return o
 }
 
-// SetProjectID adds the projectId to the get firehose params
-func (o *GetFirehoseParams) SetProjectID(projectID string) {
-	o.ProjectID = projectID
+// SetProjectSlug adds the projectSlug to the get firehose params
+func (o *GetFirehoseParams) SetProjectSlug(projectSlug string) {
+	o.ProjectSlug = projectSlug
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -161,8 +161,8 @@ func (o *GetFirehoseParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 
-	// path param projectId
-	if err := r.SetPathParam("projectId", o.ProjectID); err != nil {
+	// path param projectSlug
+	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 

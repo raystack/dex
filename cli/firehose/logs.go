@@ -37,7 +37,7 @@ func logsCommand(cfgLoader ConfigLoader) *cobra.Command {
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 				Follow:      &follow,
 				Previous:    &previous,
 				Timestamps:  &timestamps,

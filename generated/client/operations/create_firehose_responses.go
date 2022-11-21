@@ -86,11 +86,11 @@ func (o *CreateFirehoseCreated) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseCreated) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectId}/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
 }
 
 func (o *CreateFirehoseCreated) String() string {
-	return fmt.Sprintf("[POST /projects/{projectId}/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
 }
 
 func (o *CreateFirehoseCreated) GetPayload() *models.Firehose {
@@ -149,11 +149,11 @@ func (o *CreateFirehoseConflict) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseConflict) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectId}/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
+	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
 }
 
 func (o *CreateFirehoseConflict) String() string {
-	return fmt.Sprintf("[POST /projects/{projectId}/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
+	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
 }
 
 func (o *CreateFirehoseConflict) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *CreateFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectId}/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *CreateFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /projects/{projectId}/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *CreateFirehoseInternalServerError) GetPayload() *models.ErrorResponse {

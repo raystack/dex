@@ -21,7 +21,7 @@ func stopCommand(cfgLoader ConfigLoader) *cobra.Command {
 			client := initClient(cfgLoader)
 			params := &operations.StopFirehoseParams{
 				FirehoseUrn: args[1],
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 				Body:        struct{}{},
 			}
 

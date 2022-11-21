@@ -27,7 +27,7 @@ func resetOffsetCommand(cfgLoader ConfigLoader) *cobra.Command {
 
 			params := &operations.ResetOffsetParams{
 				FirehoseUrn: args[1],
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 			}
 
 			resetTo = strings.TrimSpace(strings.ToUpper(resetTo))

@@ -37,7 +37,7 @@ type ClientService interface {
 
 	GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer, opts ...ClientOption) (*GetFirehoseLogsOK, error)
 
-	GetProjectByID(params *GetProjectByIDParams, opts ...ClientOption) (*GetProjectByIDOK, error)
+	GetProjectBySlug(params *GetProjectBySlugParams, opts ...ClientOption) (*GetProjectBySlugOK, error)
 
 	ListFirehoses(params *ListFirehosesParams, opts ...ClientOption) (*ListFirehosesOK, error)
 
@@ -71,7 +71,7 @@ func (a *Client) CreateFirehose(params *CreateFirehoseParams, opts ...ClientOpti
 	op := &runtime.ClientOperation{
 		ID:                 "createFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses",
+		PathPattern:        "/projects/{projectSlug}/firehoses",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -111,7 +111,7 @@ func (a *Client) GetFirehose(params *GetFirehoseParams, opts ...ClientOption) (*
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehose",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -151,7 +151,7 @@ func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehoseLogs",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/logs",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/logs",
 		ProducesMediaTypes: []string{"application/x-ndjson"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -179,24 +179,24 @@ func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer
 }
 
 /*
-GetProjectByID gets project by id
+GetProjectBySlug gets project by slug
 
-Get project by its unique identifier.
+Get project by its unique slug name.
 */
-func (a *Client) GetProjectByID(params *GetProjectByIDParams, opts ...ClientOption) (*GetProjectByIDOK, error) {
+func (a *Client) GetProjectBySlug(params *GetProjectBySlugParams, opts ...ClientOption) (*GetProjectBySlugOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetProjectByIDParams()
+		params = NewGetProjectBySlugParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "getProjectById",
+		ID:                 "getProjectBySlug",
 		Method:             "GET",
-		PathPattern:        "/projects/{id}",
+		PathPattern:        "/projects/{slug}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetProjectByIDReader{formats: a.formats},
+		Reader:             &GetProjectBySlugReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -208,13 +208,13 @@ func (a *Client) GetProjectByID(params *GetProjectByIDParams, opts ...ClientOpti
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetProjectByIDOK)
+	success, ok := result.(*GetProjectBySlugOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for getProjectById: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for getProjectBySlug: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
@@ -231,7 +231,7 @@ func (a *Client) ListFirehoses(params *ListFirehosesParams, opts ...ClientOption
 	op := &runtime.ClientOperation{
 		ID:                 "listFirehoses",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectId}/firehoses",
+		PathPattern:        "/projects/{projectSlug}/firehoses",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -311,7 +311,7 @@ func (a *Client) ResetOffset(params *ResetOffsetParams, opts ...ClientOption) (*
 	op := &runtime.ClientOperation{
 		ID:                 "resetOffset",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/reset",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/reset",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -351,7 +351,7 @@ func (a *Client) ScaleFirehose(params *ScaleFirehoseParams, opts ...ClientOption
 	op := &runtime.ClientOperation{
 		ID:                 "scaleFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/scale",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/scale",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -391,7 +391,7 @@ func (a *Client) StartFirehose(params *StartFirehoseParams, opts ...ClientOption
 	op := &runtime.ClientOperation{
 		ID:                 "startFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/start",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/start",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -431,7 +431,7 @@ func (a *Client) StopFirehose(params *StopFirehoseParams, opts ...ClientOption) 
 	op := &runtime.ClientOperation{
 		ID:                 "stopFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/stop",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/stop",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -471,7 +471,7 @@ func (a *Client) UpdateFirehose(params *UpdateFirehoseParams, opts ...ClientOpti
 	op := &runtime.ClientOperation{
 		ID:                 "updateFirehose",
 		Method:             "PUT",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -511,7 +511,7 @@ func (a *Client) UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOp
 	op := &runtime.ClientOperation{
 		ID:                 "upgradeFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectId}/firehoses/{firehoseUrn}/upgrade",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

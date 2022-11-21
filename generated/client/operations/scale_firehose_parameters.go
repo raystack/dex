@@ -70,11 +70,11 @@ type ScaleFirehoseParams struct {
 	*/
 	FirehoseUrn string
 
-	/* ProjectID.
+	/* ProjectSlug.
 
-	   Unique identifier of the project.
+	   Identifier for the project.
 	*/
-	ProjectID string
+	ProjectSlug string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -151,15 +151,15 @@ func (o *ScaleFirehoseParams) SetFirehoseUrn(firehoseUrn string) {
 	o.FirehoseUrn = firehoseUrn
 }
 
-// WithProjectID adds the projectID to the scale firehose params
-func (o *ScaleFirehoseParams) WithProjectID(projectID string) *ScaleFirehoseParams {
-	o.SetProjectID(projectID)
+// WithProjectSlug adds the projectSlug to the scale firehose params
+func (o *ScaleFirehoseParams) WithProjectSlug(projectSlug string) *ScaleFirehoseParams {
+	o.SetProjectSlug(projectSlug)
 	return o
 }
 
-// SetProjectID adds the projectId to the scale firehose params
-func (o *ScaleFirehoseParams) SetProjectID(projectID string) {
-	o.ProjectID = projectID
+// SetProjectSlug adds the projectSlug to the scale firehose params
+func (o *ScaleFirehoseParams) SetProjectSlug(projectSlug string) {
+	o.ProjectSlug = projectSlug
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -178,8 +178,8 @@ func (o *ScaleFirehoseParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return err
 	}
 
-	// path param projectId
-	if err := r.SetPathParam("projectId", o.ProjectID); err != nil {
+	// path param projectSlug
+	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 

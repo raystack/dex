@@ -21,7 +21,7 @@ func upgradeCommand(cfgLoader ConfigLoader) *cobra.Command {
 
 			params := &operations.UpgradeFirehoseParams{
 				FirehoseUrn: args[1],
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 				Body:        struct{}{},
 			}
 

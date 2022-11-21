@@ -67,11 +67,11 @@ type ListFirehosesParams struct {
 	*/
 	Cluster *string
 
-	/* ProjectID.
+	/* ProjectSlug.
 
 	   Unique identifier of the project.
 	*/
-	ProjectID string
+	ProjectSlug string
 
 	/* SinkType.
 
@@ -169,15 +169,15 @@ func (o *ListFirehosesParams) SetCluster(cluster *string) {
 	o.Cluster = cluster
 }
 
-// WithProjectID adds the projectID to the list firehoses params
-func (o *ListFirehosesParams) WithProjectID(projectID string) *ListFirehosesParams {
-	o.SetProjectID(projectID)
+// WithProjectSlug adds the projectSlug to the list firehoses params
+func (o *ListFirehosesParams) WithProjectSlug(projectSlug string) *ListFirehosesParams {
+	o.SetProjectSlug(projectSlug)
 	return o
 }
 
-// SetProjectID adds the projectId to the list firehoses params
-func (o *ListFirehosesParams) SetProjectID(projectID string) {
-	o.ProjectID = projectID
+// SetProjectSlug adds the projectSlug to the list firehoses params
+func (o *ListFirehosesParams) SetProjectSlug(projectSlug string) {
+	o.ProjectSlug = projectSlug
 }
 
 // WithSinkType adds the sinkType to the list firehoses params
@@ -260,8 +260,8 @@ func (o *ListFirehosesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		}
 	}
 
-	// path param projectId
-	if err := r.SetPathParam("projectId", o.ProjectID); err != nil {
+	// path param projectSlug
+	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 

@@ -25,7 +25,7 @@ func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
 			replicasNum := float64(replicas)
 			params := &operations.ScaleFirehoseParams{
 				FirehoseUrn: args[1],
-				ProjectID:   args[0],
+				ProjectSlug: args[0],
 				Body: operations.ScaleFirehoseBody{
 					Replicas: &replicasNum,
 				},
