@@ -56,7 +56,7 @@ func initClient(cfgLoader ConfigLoader) *client.DexAPI {
 		log.Fatalf("failed to load firehose configs: %s", err)
 	}
 
-	r := httptransport.New(cfg.Host, client.DefaultBasePath, client.DefaultSchemes)
+	r := httptransport.New(cfg.Host, "/api", client.DefaultSchemes)
 	r.DefaultAuthentication = httptransport.BearerToken(cfg.AccessToken)
 	return client.New(r, strfmt.Default)
 }

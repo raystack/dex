@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os/signal"
 	"syscall"
 
@@ -33,8 +34,12 @@ func loginCmd(cdk *CDK) *cobra.Command {
 				ClientID:     ac.OAuth.ClientID,
 				ClientSecret: ac.OAuth.ClientSecret,
 				Scopes:       []string{scopeEmail},
-				Endpoint:     ac.OAuth.Endpoint,
-				RedirectURL:  redirectTo,
+				Endpoint: oauth2.Endpoint{
+					AuthURL:   ac.OAuth.Endpoint.AuthURL,
+					TokenURL:  ac.OAuth.Endpoint.TokenURL,
+					AuthStyle: oauth2.AuthStyleInParams,
+				},
+				RedirectURL: redirectTo,
 			}
 
 			var ts oauth2.TokenSource
@@ -57,7 +62,12 @@ func loginCmd(cdk *CDK) *cobra.Command {
 			ac.RefreshToken = token.RefreshToken
 			ac.Expiry = token.Expiry.Unix()
 
-			return cdk.Auth.Write(ac)
+			if err := cdk.Auth.Write(ac); err != nil {
+				return err
+			}
+
+			fmt.Println("✅ You are successfully logged in.")
+			return nil
 		},
 	}
 
