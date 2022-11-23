@@ -71,17 +71,9 @@ func handleListFirehoses(client entropyv1beta1.ResourceServiceClient) http.Handl
 
 func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		projectID := r.Header.Get(headerProjectID)
-
-		prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		var def firehoseDefinition
@@ -92,7 +84,7 @@ func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
-		res, err := mapFirehoseToResource(reqctx.From(r.Context()), def, prj.GetProject())
+		res, err := mapFirehoseToResource(reqctx.From(r.Context()), def, prj)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -140,18 +132,11 @@ func handleGetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handler
 func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pathVars := mux.Vars(r)
-		projectID := r.Header.Get(headerProjectID)
 		urn := pathVars[pathParamURN]
 
-		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
@@ -168,7 +153,7 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
-		cfgStruct, err := updReq.Configs.toConfigStruct(getProjectResponse.GetProject())
+		cfgStruct, err := updReq.Configs.toConfigStruct(prj)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -346,17 +331,10 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		urn := mux.Vars(r)[pathParamURN]
-		projectID := r.Header.Get(headerProjectID)
 
-		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
@@ -410,7 +388,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 		}
 
 		if isStop {
-			if err := stopAlertsForResource(ctx, firehoseDef, svc, getProjectResponse); err != nil {
+			if err := stopAlertsForResource(ctx, firehoseDef, svc, prj); err != nil {
 				utils.WriteErr(w, err)
 				return
 			}
@@ -420,7 +398,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 	}
 }
 
-func stopAlertsForResource(ctx context.Context, firehoseDef *firehoseDefinition, svc *alertsv1.Service, getProjectResponse *shieldv1beta1.GetProjectResponse) error {
+func stopAlertsForResource(ctx context.Context, firehoseDef *firehoseDefinition, svc *alertsv1.Service, prj *shieldv1beta1.Project) error {
 	name, err := getFirehoseReleaseName(firehoseDef)
 	if err != nil {
 		return err
@@ -429,7 +407,7 @@ func stopAlertsForResource(ctx context.Context, firehoseDef *firehoseDefinition,
 		Resource: name,
 		Rules:    nil,
 	}
-	_, err = svc.UpsertAlertPolicy(ctx, getProjectResponse.GetProject().GetSlug(), policy)
+	_, err = svc.UpsertAlertPolicy(ctx, prj.GetSlug(), policy)
 	if err != nil {
 		return err
 	}
@@ -522,18 +500,11 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pathVars := mux.Vars(r)
-		projectID := r.Header.Get(headerProjectID)
 		urn := pathVars[pathParamURN]
 
-		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
@@ -547,7 +518,7 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 		}
 
 		cur.Configs.Version = latestFirehoseVersion
-		cfgStruct, err := cur.Configs.toConfigStruct(getProjectResponse.GetProject())
+		cfgStruct, err := cur.Configs.toConfigStruct(prj)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -590,18 +561,11 @@ func handleGetFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClient,
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		pathVars := mux.Vars(r)
-		projectID := r.Header.Get(headerProjectID)
 		urn := pathVars[pathParamURN]
 
-		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
@@ -616,7 +580,7 @@ func handleGetFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClient,
 			return
 		}
 
-		policyDef, err := svc.GetAlertPolicy(ctx, getProjectResponse.GetProject().GetSlug(), name)
+		policyDef, err := svc.GetAlertPolicy(ctx, prj.GetSlug(), name)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -631,18 +595,11 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		pathVars := mux.Vars(r)
-		projectID := r.Header.Get(headerProjectID)
 		urn := pathVars[pathParamURN]
 
-		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
@@ -657,8 +614,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 			return
 		}
 		team := firehoseDef.Team
-		projectSlug := getProjectResponse.GetProject().GetSlug()
-		entity, err := svc.GetProjectDataSource(ctx, projectSlug)
+		entity, err := svc.GetProjectDataSource(ctx, prj.GetSlug())
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -679,7 +635,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 		})
 		policyDef.Resource = name
 
-		alertPolicy, err := svc.UpsertAlertPolicy(ctx, projectSlug, policyDef)
+		alertPolicy, err := svc.UpsertAlertPolicy(ctx, prj.GetSlug(), policyDef)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -693,18 +649,11 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		pathVars := mux.Vars(r)
-		projectID := r.Header.Get(headerProjectID)
 		urn := pathVars[pathParamURN]
 
-		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		prj, err := getProject(r, shieldClient)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound)
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
+			utils.WriteErr(w, err)
 		}
 
 		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
@@ -719,7 +668,7 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 			return
 		}
 
-		alerts, err := svc.ListAlerts(ctx, getProjectResponse.GetProject().GetSlug(), name)
+		alerts, err := svc.ListAlerts(ctx, prj.GetSlug(), name)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -728,6 +677,20 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 		resp := listResponse[alertsv1.Alert]{Items: alerts}
 		utils.WriteJSON(w, http.StatusOK, resp)
 	}
+}
+
+func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient) (*shieldv1beta1.Project, error) {
+	projectID := r.Header.Get(headerProjectID)
+
+	prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+	if err != nil {
+		st := status.Convert(err)
+		if st.Code() == codes.NotFound {
+			return nil, errors.ErrNotFound
+		}
+		return nil, err
+	}
+	return prj.GetProject(), nil
 }
 
 func getFirehoseReleaseName(firehoseDef *firehoseDefinition) (string, error) {
