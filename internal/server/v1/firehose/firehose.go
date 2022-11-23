@@ -41,8 +41,8 @@ func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldCl
 
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/reset", handleResetFirehose(client)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/scale", handleScaleFirehose(client)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/start", handleStartOrStop(client, false)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/stop", handleStartOrStop(client, true)).Methods(http.MethodPost)
+	r.Handle("/projects/{projectSlug}/firehoses/{urn}/start", handleStartOrStop(client, shieldClient, alertSvc, false)).Methods(http.MethodPost)
+	r.Handle("/projects/{projectSlug}/firehoses/{urn}/stop", handleStartOrStop(client, shieldClient, alertSvc, true)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/upgrade", handleUpgradeFirehose(client, shieldClient, latestFirehoseVersion)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/logs", handleGetFirehoseLogs(client)).Methods(http.MethodGet)
 
