@@ -5,7 +5,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
-	"golang.org/x/oauth2"
 )
 
 type ClientConfig struct {
@@ -13,17 +12,22 @@ type ClientConfig struct {
 }
 
 type OAuthConfig struct {
-	ClientID     string
-	ClientSecret string
-	Endpoint     oauth2.Endpoint
-	Audience     string
+	Audience     string        `mapstructure:"audience" yaml:"audience"`
+	Endpoint     OAuthEndpoint `mapstructure:"endpoint" yaml:"endpoint"`
+	ClientID     string        `mapstructure:"client_id" yaml:"client_id"`
+	ClientSecret string        `mapstructure:"client_secret" yaml:"client_secret"`
+}
+
+type OAuthEndpoint struct {
+	AuthURL  string `mapstructure:"auth_url" yaml:"auth_url"`
+	TokenURL string `mapstructure:"token_url" yaml:"token_url"`
 }
 
 type AuthConfig struct {
-	OAuth        OAuthConfig
-	AccessToken  string
-	RefreshToken string
-	Expiry       int64
+	OAuth        OAuthConfig `mapstructure:"oauth" yaml:"oauth"`
+	Expiry       int64       `mapstructure:"expiry" yaml:"expiry"`
+	AccessToken  string      `mapstructure:"access_token" yaml:"access_token"`
+	RefreshToken string      `mapstructure:"refresh_token" yaml:"refresh_token"`
 }
 
 func configCmd(cdk *CDK) *cobra.Command {
