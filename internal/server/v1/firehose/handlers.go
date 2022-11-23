@@ -342,12 +342,25 @@ func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 	}
 }
 
-func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, isStop bool) http.HandlerFunc {
+func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient, svc *alertsv1.Service, isStop bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		urn := mux.Vars(r)[pathParamURN]
+		projectID := r.Header.Get(headerProjectID)
+
+		getProjectResponse, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+		if err != nil {
+			st := status.Convert(err)
+			if st.Code() == codes.NotFound {
+				utils.WriteErr(w, errors.ErrNotFound)
+			} else {
+				utils.WriteErr(w, err)
+			}
+			return
+		}
 
 		// Ensure that the URN refers to a valid firehose resource.
-		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+		if _, err := getFirehoseResource(ctx, client, urn); err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
@@ -375,7 +388,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, isStop bool)
 			Labels: map[string]string{}, // TODO: shield labels.
 		}
 
-		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
+		rpcResp, err := client.ApplyAction(ctx, rpcReq)
 		if err != nil {
 			st := status.Convert(err)
 			if st.Code() == codes.InvalidArgument {
@@ -396,8 +409,31 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, isStop bool)
 			return
 		}
 
+		if isStop {
+			if err := stopAlertsForResource(ctx, firehoseDef, svc, getProjectResponse); err != nil {
+				utils.WriteErr(w, err)
+				return
+			}
+		}
+
 		utils.WriteJSON(w, http.StatusOK, firehoseDef)
 	}
+}
+
+func stopAlertsForResource(ctx context.Context, firehoseDef *firehoseDefinition, svc *alertsv1.Service, getProjectResponse *shieldv1beta1.GetProjectResponse) error {
+	name, err := getFirehoseReleaseName(firehoseDef)
+	if err != nil {
+		return err
+	}
+	policy := alertsv1.Policy{
+		Resource: name,
+		Rules:    nil,
+	}
+	_, err = svc.UpsertAlertPolicy(ctx, getProjectResponse.GetProject().GetSlug(), policy)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServiceClient, firehoseURN string) (*firehoseDefinition, error) {
