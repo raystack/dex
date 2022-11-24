@@ -44,9 +44,18 @@ type resetRequestBody struct {
 	DateTime *time.Time `json:"date_time"`
 }
 
-func handleListFirehoses(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleListFirehoses(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rpcReq := &entropyv1beta1.ListResourcesRequest{Kind: kindFirehose}
+		prj, err := getProject(r, shieldClient)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		rpcReq := &entropyv1beta1.ListResourcesRequest{
+			Kind:    kindFirehose,
+			Project: prj.GetSlug(),
+		}
 
 		rpcResp, err := client.ListResources(r.Context(), rpcReq)
 		if err != nil {
@@ -74,6 +83,7 @@ func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		var def firehoseDefinition
@@ -137,6 +147,7 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
@@ -335,6 +346,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
@@ -505,6 +517,7 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
@@ -566,6 +579,7 @@ func handleGetFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClient,
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
@@ -600,6 +614,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
@@ -654,6 +669,7 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 		prj, err := getProject(r, shieldClient)
 		if err != nil {
 			utils.WriteErr(w, err)
+			return
 		}
 
 		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)

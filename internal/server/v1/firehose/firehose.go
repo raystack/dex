@@ -31,7 +31,7 @@ func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldCl
 	alertSvc := &alertsv1.Service{Siren: sirenClient}
 
 	// read APIs
-	r.Handle("/projects/{projectSlug}/firehoses", handleListFirehoses(client)).Methods(http.MethodGet)
+	r.Handle("/projects/{projectSlug}/firehoses", handleListFirehoses(client, shieldClient)).Methods(http.MethodGet)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleGetFirehose(client)).Methods(http.MethodGet)
 
 	// write APIs
