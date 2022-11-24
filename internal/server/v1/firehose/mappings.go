@@ -64,6 +64,12 @@ type moduleConfigFirehoseDef struct {
 	EnvVariables       map[string]string `json:"env_variables"`
 }
 
+type revisionDiff struct {
+	Diff      json.RawMessage   `json:"diff"`
+	Labels    map[string]string `json:"labels"`
+	UpdatedAt time.Time         `json:"updated_at"`
+}
+
 func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
 	cfg, err := def.Configs.toConfigStruct(prj)
 	if err != nil {

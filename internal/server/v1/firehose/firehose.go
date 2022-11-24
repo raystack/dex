@@ -33,6 +33,7 @@ func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldCl
 	// read APIs
 	r.Handle("/projects/{projectSlug}/firehoses", handleListFirehoses(client, shieldClient)).Methods(http.MethodGet)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleGetFirehose(client)).Methods(http.MethodGet)
+	r.Handle("/projects/{projectSlug}/firehoses/{urn}/history", handleGetFirehoseHistory(client)).Methods(http.MethodGet)
 
 	// write APIs
 	r.Handle("/projects/{projectSlug}/firehoses", handleCreateFirehose(client, shieldClient)).Methods(http.MethodPost)
