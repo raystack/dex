@@ -145,7 +145,6 @@ func handleGetFirehoseHistory(entropyClient entropyv1beta1.ResourceServiceClient
 	return func(w http.ResponseWriter, r *http.Request) {
 		urn := mux.Vars(r)[pathParamURN]
 
-		// Ensure that the URN refers to a valid firehose resource.
 		def, err := getFirehoseHistory(r.Context(), entropyClient, urn)
 		if err != nil {
 			utils.WriteErr(w, err)
