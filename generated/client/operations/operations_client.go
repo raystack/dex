@@ -39,6 +39,8 @@ type ClientService interface {
 
 	GetFirehoseAlerts(params *GetFirehoseAlertsParams, opts ...ClientOption) (*GetFirehoseAlertsOK, error)
 
+	GetFirehoseHistory(params *GetFirehoseHistoryParams, opts ...ClientOption) (*GetFirehoseHistoryOK, error)
+
 	GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer, opts ...ClientOption) (*GetFirehoseLogsOK, error)
 
 	GetProjectBySlug(params *GetProjectBySlugParams, opts ...ClientOption) (*GetProjectBySlugOK, error)
@@ -223,6 +225,46 @@ func (a *Client) GetFirehoseAlerts(params *GetFirehoseAlertsParams, opts ...Clie
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for getFirehoseAlerts: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+GetFirehoseHistory histories for a firehose
+
+History for a Firehose.
+*/
+func (a *Client) GetFirehoseHistory(params *GetFirehoseHistoryParams, opts ...ClientOption) (*GetFirehoseHistoryOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetFirehoseHistoryParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getFirehoseHistory",
+		Method:             "GET",
+		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/history",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetFirehoseHistoryReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetFirehoseHistoryOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getFirehoseHistory: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
