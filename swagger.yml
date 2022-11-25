@@ -565,7 +565,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy:
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/history:
     parameters:
       - in: path
         name: projectSlug
