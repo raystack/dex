@@ -472,7 +472,7 @@ func getFirehoseHistory(ctx context.Context, client entropyv1beta1.ResourceServi
 		return nil, err
 	}
 
-	prevSpec := []byte{'{', '}'}
+	prevSpec := []byte("{}")
 	var rh []revisionDiff
 
 	for _, revision := range resp.GetRevisions() {
