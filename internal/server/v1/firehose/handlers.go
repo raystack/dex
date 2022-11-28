@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"golang.org/x/exp/maps"
@@ -130,6 +132,20 @@ func handleGetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handler
 
 		// Ensure that the URN refers to a valid firehose resource.
 		def, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, def)
+	}
+}
+
+func handleGetFirehoseHistory(entropyClient entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		urn := mux.Vars(r)[pathParamURN]
+
+		def, err := getFirehoseHistory(r.Context(), entropyClient, urn)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -441,6 +457,45 @@ func getFirehoseResource(ctx context.Context, client entropyv1beta1.ResourceServ
 	}
 
 	return mapResourceToFirehose(resp.GetResource(), false)
+}
+
+func getFirehoseHistory(ctx context.Context, client entropyv1beta1.ResourceServiceClient, firehoseURN string) ([]revisionDiff, error) {
+	resp, err := client.GetResourceRevisions(ctx, &entropyv1beta1.GetResourceRevisionsRequest{Urn: firehoseURN})
+	if err != nil {
+		st := status.Convert(err)
+		if st.Code() == codes.NotFound {
+			return nil, errors.ErrNotFound.
+				WithMsgf(firehoseNotFound).
+				WithCausef(st.Message())
+		}
+		return nil, err
+	}
+
+	prevSpec := []byte("{}")
+	var rh []revisionDiff
+
+	for _, revision := range resp.GetRevisions() {
+		var rd revisionDiff
+		currentSpec, err := protojson.MarshalOptions{
+			UseProtoNames: true,
+		}.Marshal(revision.GetSpec())
+		if err != nil {
+			return nil, err
+		}
+
+		specDiff, err := jsonDiff(prevSpec, currentSpec)
+		if err != nil {
+			return nil, err
+		}
+
+		rd.Labels = revision.GetLabels()
+		rd.Diff = json.RawMessage(specDiff)
+		rd.UpdatedAt = revision.GetCreatedAt().AsTime()
+		rh = append(rh, rd)
+		prevSpec = currentSpec
+	}
+
+	return rh, nil
 }
 
 func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
@@ -756,4 +811,19 @@ func addSuppliedVariablesFromRules(rules []alertsv1.Rule, vars map[string]string
 		result = append(result, rule)
 	}
 	return result
+}
+
+func jsonDiff(left, right []byte) (string, error) {
+	differ := gojsondiff.New()
+	compare, err := differ.Compare(left, right)
+	if err != nil {
+		return "", err
+	}
+
+	diffString, err := formatter.NewDeltaFormatter().Format(compare)
+	if err != nil {
+		return "", err
+	}
+
+	return diffString, nil
 }
