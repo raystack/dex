@@ -50,13 +50,14 @@ func Command(cfgLoader ConfigLoader) *cobra.Command {
 	return cmd
 }
 
-func initClient(cfgLoader ConfigLoader) *client.DexAPI {
+func initClient(cmd *cobra.Command, cfgLoader ConfigLoader) *client.DexAPI {
 	var cfg Config
 	if err := cfgLoader.Load(&cfg); err != nil {
 		log.Fatalf("failed to load firehose configs: %s", err)
 	}
 
 	r := httptransport.New(cfg.Host, "/api", client.DefaultSchemes)
+	r.Context = cmd.Context()
 	r.DefaultAuthentication = httptransport.BearerToken(cfg.AccessToken)
 	return client.New(r, strfmt.Default)
 }

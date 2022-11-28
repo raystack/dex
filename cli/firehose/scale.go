@@ -20,7 +20,7 @@ func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 
 			replicasNum := float64(replicas)
 			params := &operations.ScaleFirehoseParams{

@@ -19,12 +19,13 @@ func viewCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 
 			params := operations.GetFirehoseParams{
 				ProjectSlug: args[0],
 				FirehoseUrn: args[1],
 			}
+
 			res, err := client.Operations.GetFirehose(&params)
 			if err != nil {
 				return err

@@ -22,7 +22,7 @@ func listCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 
 			params := operations.ListFirehosesParams{
 				ProjectSlug: args[0],

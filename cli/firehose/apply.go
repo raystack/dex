@@ -24,7 +24,7 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 
 			var firehoseDef models.Firehose
 			if err := readYAMLFile(args[1], &firehoseDef); err != nil {

@@ -18,7 +18,7 @@ func stopCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 			params := &operations.StopFirehoseParams{
 				FirehoseUrn: args[1],
 				ProjectSlug: args[0],

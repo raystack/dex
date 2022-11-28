@@ -33,7 +33,7 @@ func logsCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],

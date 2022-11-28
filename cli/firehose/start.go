@@ -25,7 +25,7 @@ func startCommand(cfgLoader ConfigLoader) *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 			_, err := client.Operations.StartFirehose(params)
 			if err != nil {
 				return err

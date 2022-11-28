@@ -25,7 +25,7 @@ func upgradeCommand(cfgLoader ConfigLoader) *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd, cfgLoader)
 			_, err := client.Operations.UpgradeFirehose(params)
 			if err != nil {
 				return err
