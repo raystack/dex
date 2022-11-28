@@ -166,8 +166,8 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
-		// Ensure that the URN refers to a valid firehose resource.
-		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
@@ -186,9 +186,13 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
+		rCtx := reqctx.From(r.Context())
+		labels := firehoseDef.getLabels()
+		labels["updated_by"] = rCtx.UserID
+
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
-			Labels: map[string]string{}, // TODO: merge shield labels with current value.
+			Labels: labels,
 			NewSpec: &entropyv1beta1.ResourceSpec{
 				Configs: cfgStruct,
 			},
@@ -209,7 +213,7 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		firehoseDef, err = mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -249,7 +253,8 @@ func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 		urn := mux.Vars(r)[pathParamURN]
 
 		// Ensure that the URN refers to a valid firehose resource.
-		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
@@ -266,11 +271,15 @@ func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 			return
 		}
 
+		rCtx := reqctx.From(r.Context())
+		labels := firehoseDef.getLabels()
+		labels["updated_by"] = rCtx.UserID
+
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
 			Action: actionResetOffset,
 			Params: paramsStruct,
-			Labels: map[string]string{}, // TODO: shield labels.
+			Labels: labels,
 		}
 
 		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
@@ -288,7 +297,7 @@ func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		firehoseDef, err = mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -302,8 +311,8 @@ func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 	return func(w http.ResponseWriter, r *http.Request) {
 		urn := mux.Vars(r)[pathParamURN]
 
-		// Ensure that the URN refers to a valid firehose resource.
-		if _, err := getFirehoseResource(r.Context(), client, urn); err != nil {
+		firehoseDef, err := getFirehoseResource(r.Context(), client, urn)
+		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
@@ -322,11 +331,15 @@ func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 			return
 		}
 
+		rCtx := reqctx.From(r.Context())
+		labels := firehoseDef.getLabels()
+		labels["updated_by"] = rCtx.UserID
+
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
 			Action: actionScale,
 			Params: paramsStruct,
-			Labels: map[string]string{}, // TODO: shield labels.
+			Labels: labels,
 		}
 
 		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
@@ -344,7 +357,7 @@ func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		firehoseDef, err = mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -366,7 +379,8 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 		}
 
 		// Ensure that the URN refers to a valid firehose resource.
-		if _, err := getFirehoseResource(ctx, client, urn); err != nil {
+		firehoseDef, err := getFirehoseResource(ctx, client, urn)
+		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
@@ -383,6 +397,10 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 			return
 		}
 
+		rCtx := reqctx.From(r.Context())
+		labels := firehoseDef.getLabels()
+		labels["updated_by"] = rCtx.UserID
+
 		action := actionStart
 		if isStop {
 			action = actionStop
@@ -391,7 +409,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 			Urn:    urn,
 			Action: action,
 			Params: paramsStruct,
-			Labels: map[string]string{}, // TODO: shield labels.
+			Labels: labels,
 		}
 
 		rpcResp, err := client.ApplyAction(ctx, rpcReq)
@@ -409,7 +427,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		firehoseDef, err = mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -592,9 +610,13 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 			return
 		}
 
+		rCtx := reqctx.From(r.Context())
+		labels := cur.getLabels()
+		labels["updated_by"] = rCtx.UserID
+
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
-			Labels: map[string]string{}, // TODO: merge shield labels with current value.
+			Labels: labels,
 			NewSpec: &entropyv1beta1.ResourceSpec{
 				Configs: cfgStruct,
 			},
