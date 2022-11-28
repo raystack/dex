@@ -24,6 +24,12 @@ type firehoseDefinition struct {
 	Cluster     string           `json:"cluster"`
 	Configs     *firehoseConfigs `json:"configs,omitempty"`
 	State       *firehoseState   `json:"state,omitempty"`
+	metadata    *firehoseMetadata
+}
+
+type firehoseMetadata struct {
+	CreatedBy string
+	UpdatedBy string
 }
 
 type firehoseConfigs struct {
@@ -89,8 +95,11 @@ func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shie
 		Name:    def.Name,
 		Project: prj.GetSlug(),
 		Labels: map[string]string{
-			"team":       def.Team,
-			"created_by": rCtx.UserID,
+			"title":       def.Title,
+			"team":        def.Team,
+			"description": def.Description,
+			"created_by":  rCtx.UserID,
+			"updated_by":  rCtx.UserID,
 		},
 		Spec: spec,
 	}, nil
@@ -121,6 +130,10 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 		UpdatedAt:   res.GetUpdatedAt().AsTime(),
 		Description: labels["description"],
 		Cluster:     labels["kube_cluster"],
+		metadata: &firehoseMetadata{
+			CreatedBy: labels["created_by"],
+			UpdatedBy: labels["updated_by"],
+		},
 	}
 
 	if !onlyMeta {
@@ -146,6 +159,16 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 	}
 
 	return &def, nil
+}
+
+func (fd firehoseDefinition) getLabels() map[string]string {
+	return map[string]string{
+		"title":       fd.Title,
+		"team":        fd.Team,
+		"description": fd.Description,
+		"created_by":  fd.metadata.CreatedBy,
+		"updated_by":  fd.metadata.UpdatedBy,
+	}
 }
 
 func (fc firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
