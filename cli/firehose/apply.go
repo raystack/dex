@@ -14,7 +14,7 @@ import (
 	"github.com/odpf/dex/pkg/errors"
 )
 
-func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
+func applyCommand() *cobra.Command {
 	var configFile string
 
 	cmd := &cobra.Command{
@@ -24,7 +24,7 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
-			client := initClient(cmd, cfgLoader)
+			client := initClient(cmd)
 
 			var firehoseDef models.Firehose
 			if err := readYAMLFile(args[1], &firehoseDef); err != nil {

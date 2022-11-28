@@ -5,12 +5,23 @@ import (
 	"github.com/odpf/salt/cmdx"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/auth"
+	"github.com/odpf/dex/cli/config"
 	"github.com/odpf/dex/cli/firehose"
+	"github.com/odpf/dex/cli/server"
+	"github.com/odpf/dex/pkg/version"
 )
 
-type CDK struct {
-	Config *cmdx.Config
-	Auth   *cmdx.Config
+var envHelp = map[string]string{
+	"short": "List of supported environment variables",
+	"long": heredoc.Doc(`
+			ODPF_CONFIG_DIR: the directory where dex will store configuration files. Default:
+			"$XDG_CONFIG_HOME/odpf" or "$HOME/.config/odpf".
+
+			NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
+
+			CLICOLOR: set to "0" to disable printing ANSI colors in output.
+		`),
 }
 
 // New root command.
@@ -33,17 +44,12 @@ func New() *cobra.Command {
 		},
 	}
 
-	cdk := &CDK{
-		Config: cmdx.SetConfig("dex"),
-		Auth:   cmdx.SetConfig("auth"),
-	}
-
 	cmd.AddCommand(
-		serverCommand(),
 		versionCmd(),
-		configCmd(cdk),
-		loginCmd(cdk),
-		firehose.Command(cdk.Config),
+		auth.LoginCommand(),
+		config.Commands(),
+		server.Commands(),
+		firehose.Commands(),
 	)
 
 	// Help topics.
@@ -60,4 +66,14 @@ func New() *cobra.Command {
 	})
 
 	return cmd
+}
+
+func versionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Show version information",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return version.Print()
+		},
+	}
 }

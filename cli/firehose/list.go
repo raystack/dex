@@ -3,6 +3,7 @@ package firehose
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/odpf/salt/printer"
 	"github.com/odpf/salt/term"
@@ -11,7 +12,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func listCommand(cfgLoader ConfigLoader) *cobra.Command {
+func listCommand() *cobra.Command {
 	var limit int
 
 	cmd := &cobra.Command{
@@ -22,11 +23,12 @@ func listCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd, cfgLoader)
+			client := initClient(cmd)
 
 			params := operations.ListFirehosesParams{
 				ProjectSlug: args[0],
 			}
+			params.SetTimeout(10 * time.Second)
 			res, err := client.Operations.ListFirehoses(&params)
 			if err != nil {
 				return err
@@ -41,7 +43,7 @@ func listCommand(cfgLoader ConfigLoader) *cobra.Command {
 			}
 			spinner.Stop()
 
-			fmt.Printf("\nShowing %d firehoses", len(firehoses))
+			fmt.Printf("\nShowing %d firehoses\n", len(firehoses))
 			printer.Table(os.Stdout, report)
 			return nil
 		},

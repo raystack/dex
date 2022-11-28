@@ -12,7 +12,7 @@ import (
 	"github.com/odpf/dex/pkg/errors"
 )
 
-func resetOffsetCommand(cfgLoader ConfigLoader) *cobra.Command {
+func resetOffsetCommand() *cobra.Command {
 	var resetTo, datetime string
 
 	cmd := &cobra.Command{
@@ -23,7 +23,7 @@ func resetOffsetCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd, cfgLoader)
+			client := initClient(cmd)
 
 			params := &operations.ResetOffsetParams{
 				FirehoseUrn: args[1],

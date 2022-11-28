@@ -6,22 +6,14 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	"github.com/odpf/salt/cmdx"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/auth"
+	"github.com/odpf/dex/cli/config"
 	"github.com/odpf/dex/generated/client"
 )
 
-type Config struct {
-	Host        string `json:"host"`
-	AccessToken string `json:"access_token"`
-}
-
-type ConfigLoader interface {
-	Load(into interface{}, opts ...cmdx.ConfigLoaderOpts) error
-}
-
-func Command(cfgLoader ConfigLoader) *cobra.Command {
+func Commands() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "firehose <command>",
 		Aliases: []string{"s"},
@@ -37,27 +29,32 @@ func Command(cfgLoader ConfigLoader) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		viewCommand(cfgLoader),
-		listCommand(cfgLoader),
-		applyCommand(cfgLoader),
-		scaleCommand(cfgLoader),
-		startCommand(cfgLoader),
-		stopCommand(cfgLoader),
-		logsCommand(cfgLoader),
-		upgradeCommand(cfgLoader),
-		resetOffsetCommand(cfgLoader),
+		viewCommand(),
+		listCommand(),
+		applyCommand(),
+		scaleCommand(),
+		startCommand(),
+		stopCommand(),
+		logsCommand(),
+		upgradeCommand(),
+		resetOffsetCommand(),
 	)
 	return cmd
 }
 
-func initClient(cmd *cobra.Command, cfgLoader ConfigLoader) *client.DexAPI {
-	var cfg Config
-	if err := cfgLoader.Load(&cfg); err != nil {
-		log.Fatalf("failed to load firehose configs: %s", err)
+func initClient(cmd *cobra.Command) *client.DexAPI {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load configs: %s", err)
+	}
+
+	accessToken, err := auth.Token(cmd.Context())
+	if err != nil {
+		log.Fatalf("failed to load configs: %s", err)
 	}
 
 	r := httptransport.New(cfg.Host, "/api", client.DefaultSchemes)
 	r.Context = cmd.Context()
-	r.DefaultAuthentication = httptransport.BearerToken(cfg.AccessToken)
+	r.DefaultAuthentication = httptransport.BearerToken(accessToken)
 	return client.New(r, strfmt.Default)
 }

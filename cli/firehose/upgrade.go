@@ -10,7 +10,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func upgradeCommand(cfgLoader ConfigLoader) *cobra.Command {
+func upgradeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upgrade <project> <firehoseURN>",
 		Short: "Upgrade the firehose to the latest version supported",
@@ -25,7 +25,7 @@ func upgradeCommand(cfgLoader ConfigLoader) *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cmd, cfgLoader)
+			client := initClient(cmd)
 			_, err := client.Operations.UpgradeFirehose(params)
 			if err != nil {
 				return err

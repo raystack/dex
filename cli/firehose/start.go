@@ -10,7 +10,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func startCommand(cfgLoader ConfigLoader) *cobra.Command {
+func startCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start <project> <firehoseURN>",
 		Short: "Start the firehose if it's currently stopped.",
@@ -25,7 +25,7 @@ func startCommand(cfgLoader ConfigLoader) *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cmd, cfgLoader)
+			client := initClient(cmd)
 			_, err := client.Operations.StartFirehose(params)
 			if err != nil {
 				return err

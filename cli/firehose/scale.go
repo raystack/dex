@@ -9,7 +9,7 @@ import (
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
+func scaleCommand() *cobra.Command {
 	var replicas int
 
 	cmd := &cobra.Command{
@@ -20,7 +20,7 @@ func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd, cfgLoader)
+			client := initClient(cmd)
 
 			replicasNum := float64(replicas)
 			params := &operations.ScaleFirehoseParams{

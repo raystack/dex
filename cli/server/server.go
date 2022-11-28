@@ -1,4 +1,4 @@
-package cli
+package server
 
 import (
 	"context"
@@ -13,13 +13,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/odpf/dex/config"
 	"github.com/odpf/dex/internal/server"
 	"github.com/odpf/dex/pkg/logger"
 	"github.com/odpf/dex/pkg/telemetry"
 )
 
-func serverCommand() *cobra.Command {
+func Commands() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "server <command>",
 		Aliases: []string{"s"},
@@ -34,20 +33,19 @@ func serverCommand() *cobra.Command {
 		},
 	}
 
+	cmd.PersistentFlags().StringP("config", "c", "dex_server.yml", "Path to configuration file")
 	cmd.AddCommand(startCommand())
 	return cmd
 }
 
 func startCommand() *cobra.Command {
-	var configFile string
-
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start the server",
 	}
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		cfg, err := config.Load(configFile)
+		cfg, err := loadConfig(cmd)
 		if err != nil {
 			return err
 		}
@@ -68,12 +66,10 @@ func startCommand() *cobra.Command {
 		return runServer(cmd.Context(), nrApp, zapLog, cfg)
 	}
 
-	cmd.Flags().StringVarP(&configFile, "config", "c", "./config/config.yaml", "Config file path")
-
 	return cmd
 }
 
-func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap.Logger, cfg config.Config) error {
+func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap.Logger, cfg serverConfig) error {
 	ctx, cancel := context.WithCancel(baseCtx)
 	defer cancel()
 
