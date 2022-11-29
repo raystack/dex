@@ -38,7 +38,8 @@ type listResponse[T any] struct {
 }
 
 type updateRequestBody struct {
-	Configs firehoseConfigs `json:"configs"`
+	Description string          `json:"description"`
+	Configs     firehoseConfigs `json:"configs"`
 }
 
 type resetRequestBody struct {
@@ -189,6 +190,7 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
 		labels["updated_by"] = rCtx.UserID
+		labels["description"] = updReq.Description
 
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
