@@ -831,12 +831,6 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
 
-	if projectSlug != prj.GetProject().GetSlug() {
-		return nil, errors.
-			ErrInvalid.
-			WithMsgf("project slug in path and project id from header do not point to same project")
-	}
-
 	return prj.GetProject(), nil
 }
 
