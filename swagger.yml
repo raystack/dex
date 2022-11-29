@@ -705,7 +705,6 @@ definitions:
         type: string
         format: uuid
         example: "e144ea5e-c7d6-48c4-a580-db31cb3389aa"
-        readOnly: true
       cluster:
         type: string
         example: "data_engineering"
