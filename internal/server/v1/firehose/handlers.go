@@ -187,14 +187,20 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
+		firehoseDef.Description = updReq.Description
+
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
-		labels["description"] = updReq.Description
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
-			Labels: labels,
+			Labels: labelMap,
 			NewSpec: &entropyv1beta1.ResourceSpec{
 				Configs: cfgStruct,
 			},
@@ -275,13 +281,18 @@ func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
 			Action: actionResetOffset,
 			Params: paramsStruct,
-			Labels: labels,
+			Labels: labelMap,
 		}
 
 		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
@@ -335,13 +346,18 @@ func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
 			Action: actionScale,
 			Params: paramsStruct,
-			Labels: labels,
+			Labels: labelMap,
 		}
 
 		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
@@ -401,7 +417,12 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		action := actionStart
 		if isStop {
@@ -411,7 +432,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 			Urn:    urn,
 			Action: action,
 			Params: paramsStruct,
-			Labels: labels,
+			Labels: labelMap,
 		}
 
 		rpcResp, err := client.ApplyAction(ctx, rpcReq)
@@ -614,11 +635,16 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 
 		rCtx := reqctx.From(r.Context())
 		labels := cur.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
-			Labels: labels,
+			Labels: labelMap,
 			NewSpec: &entropyv1beta1.ResourceSpec{
 				Configs: cfgStruct,
 			},

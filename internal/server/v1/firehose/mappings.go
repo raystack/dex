@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -12,6 +13,8 @@ import (
 	"github.com/odpf/dex/internal/server/reqctx"
 	"github.com/odpf/dex/pkg/errors"
 )
+
+const resourceDepKey = "kube_cluster"
 
 type firehoseDefinition struct {
 	URN         string           `json:"urn"`
@@ -28,8 +31,10 @@ type firehoseDefinition struct {
 }
 
 type firehoseMetadata struct {
-	CreatedBy string
-	UpdatedBy string
+	CreatedBy      string
+	CreatedByEmail string
+	UpdatedBy      string
+	UpdatedByEmail string
 }
 
 type firehoseConfigs struct {
@@ -52,6 +57,16 @@ type firehoseState struct {
 	Status       string                 `json:"status"`
 	Output       map[string]interface{} `json:"output,omitempty"`
 	DeploymentID string                 `json:"deployment_id"`
+}
+
+type firehoseLabels struct {
+	Title          string `mapstructure:"title"`
+	Team           string `mapstructure:"team"`
+	Description    string `mapstructure:"description"`
+	CreatedBy      string `mapstructure:"created_by"`
+	CreatedByEmail string `mapstructure:"created_by_email"`
+	UpdatedBy      string `mapstructure:"updated_by"`
+	UpdatedByEmail string `mapstructure:"updated_by_email"`
 }
 
 type moduleConfig struct {
@@ -85,8 +100,16 @@ func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shie
 	spec := &entropyv1beta1.ResourceSpec{
 		Configs: cfg,
 		Dependencies: []*entropyv1beta1.ResourceDependency{
-			{Key: "kube_cluster", Value: def.Cluster},
+			{Key: resourceDepKey, Value: def.Cluster},
 		},
+	}
+
+	labels := def.getLabels()
+	labels.setUpdatedBy(rCtx)
+	labels.setCreatedBy(rCtx)
+	labelsMap, err := labels.toMap()
+	if err != nil {
+		return nil, err
 	}
 
 	return &entropyv1beta1.Resource{
@@ -94,14 +117,8 @@ func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shie
 		Kind:    kindFirehose,
 		Name:    def.Name,
 		Project: prj.GetSlug(),
-		Labels: map[string]string{
-			"title":       def.Title,
-			"team":        def.Team,
-			"description": def.Description,
-			"created_by":  rCtx.UserID,
-			"updated_by":  rCtx.UserID,
-		},
-		Spec: spec,
+		Labels:  labelsMap,
+		Spec:    spec,
 	}, nil
 }
 
@@ -120,19 +137,33 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 		return nil, err
 	}
 
-	labels := res.GetLabels()
+	labelsMap := res.GetLabels()
+	labels, err := toFirehoseLabels(labelsMap)
+	if err != nil {
+		return nil, err
+	}
+
+	var kubeCluster string
+	for _, dep := range res.GetSpec().GetDependencies() {
+		if dep.GetKey() == resourceDepKey {
+			kubeCluster = dep.GetValue()
+		}
+	}
+
 	def := firehoseDefinition{
 		URN:         res.GetUrn(),
 		Name:        res.GetName(),
-		Title:       labels["title"],
-		Team:        labels["team"],
+		Title:       labels.Title,
+		Team:        labels.Team,
 		CreatedAt:   res.GetCreatedAt().AsTime(),
 		UpdatedAt:   res.GetUpdatedAt().AsTime(),
-		Description: labels["description"],
-		Cluster:     labels["kube_cluster"],
+		Description: labels.Description,
+		Cluster:     kubeCluster,
 		metadata: &firehoseMetadata{
-			CreatedBy: labels["created_by"],
-			UpdatedBy: labels["updated_by"],
+			CreatedBy:      labels.CreatedBy,
+			CreatedByEmail: labels.CreatedByEmail,
+			UpdatedBy:      labels.UpdatedBy,
+			UpdatedByEmail: labels.UpdatedByEmail,
 		},
 	}
 
@@ -161,14 +192,44 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 	return &def, nil
 }
 
-func (fd firehoseDefinition) getLabels() map[string]string {
-	return map[string]string{
-		"title":       fd.Title,
-		"team":        fd.Team,
-		"description": fd.Description,
-		"created_by":  fd.metadata.CreatedBy,
-		"updated_by":  fd.metadata.UpdatedBy,
+func (fd firehoseDefinition) getLabels() firehoseLabels {
+	return firehoseLabels{
+		Title:          fd.Title,
+		Team:           fd.Team,
+		Description:    fd.Description,
+		CreatedBy:      fd.metadata.CreatedBy,
+		CreatedByEmail: fd.metadata.CreatedByEmail,
+		UpdatedBy:      fd.metadata.UpdatedBy,
+		UpdatedByEmail: fd.metadata.UpdatedByEmail,
 	}
+}
+
+func (fl firehoseLabels) toMap() (map[string]string, error) {
+	result := map[string]string{}
+	err := mapstructure.Decode(fl, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
+}
+
+func toFirehoseLabels(labels map[string]string) (*firehoseLabels, error) {
+	result := firehoseLabels{}
+	err := mapstructure.Decode(labels, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, err
+}
+
+func (fl *firehoseLabels) setUpdatedBy(ctx reqctx.ReqCtx) {
+	fl.UpdatedBy = ctx.UserID
+	fl.UpdatedByEmail = ctx.UserEmail
+}
+
+func (fl *firehoseLabels) setCreatedBy(ctx reqctx.ReqCtx) {
+	fl.CreatedBy = ctx.UserID
+	fl.CreatedByEmail = ctx.UserEmail
 }
 
 func (fc firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
