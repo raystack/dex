@@ -1,4 +1,4 @@
-package firehose
+package firehoses
 
 import (
 	"bufio"

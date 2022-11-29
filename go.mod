@@ -20,6 +20,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.8.0
 	github.com/yudai/gojsondiff v1.0.0
+	github.com/yudai/pp v2.0.1+incompatible
 	go.buf.build/odpf/gwv/odpf/proton v1.1.135
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
@@ -100,7 +101,6 @@ require (
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	github.com/yudai/pp v2.0.1+incompatible // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	go.buf.build/odpf/gwv/envoyproxy/protoc-gen-validate v1.1.7 // indirect

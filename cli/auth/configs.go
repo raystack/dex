@@ -6,6 +6,8 @@ import (
 
 	"github.com/odpf/salt/cmdx"
 	"golang.org/x/oauth2"
+
+	"github.com/odpf/dex/pkg/errors"
 )
 
 type OAuthProviderConfig struct {
@@ -81,7 +83,13 @@ func Token(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	if newToken.AccessToken != ac.AccessToken {
+	if newToken.RefreshToken != ac.RefreshToken {
+		idToken, ok := newToken.Extra("id_token").(string)
+		if !ok {
+			return "", errors.New("id_token not found in token response")
+		}
+		newToken.AccessToken = idToken
+
 		ac.setToken(newToken)
 		if err := saveConfig(*ac); err != nil {
 			return "", err

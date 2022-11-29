@@ -1,4 +1,4 @@
-package firehose
+package projects
 
 import (
 	"log"
@@ -15,13 +15,13 @@ import (
 
 func Commands() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "firehose <command>",
-		Aliases: []string{"s"},
-		Short:   "Firehose management commands.",
-		Long:    "You can create/manage/view firehoses using this command.",
+		Use:     "project <command>",
+		Aliases: []string{"p"},
+		Short:   "Project management commands.",
+		Long:    "You can view projects using this command.",
 		Example: heredoc.Doc(`
-			$ dex firehose list project-x
-			$ dex firehose create -c ./config.yaml
+			$ dex project list
+			$ dex project show project-x
 		`),
 		Annotations: map[string]string{
 			"group": "core",
@@ -29,16 +29,10 @@ func Commands() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		viewCommand(),
 		listCommand(),
-		applyCommand(),
-		scaleCommand(),
-		startCommand(),
-		stopCommand(),
-		logsCommand(),
-		upgradeCommand(),
-		resetOffsetCommand(),
+		viewCommand(),
 	)
+
 	return cmd
 }
 

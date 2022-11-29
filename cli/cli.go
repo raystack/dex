@@ -7,7 +7,8 @@ import (
 
 	"github.com/odpf/dex/cli/auth"
 	"github.com/odpf/dex/cli/config"
-	"github.com/odpf/dex/cli/firehose"
+	"github.com/odpf/dex/cli/firehoses"
+	"github.com/odpf/dex/cli/projects"
 	"github.com/odpf/dex/cli/server"
 	"github.com/odpf/dex/pkg/version"
 )
@@ -43,13 +44,15 @@ func New() *cobra.Command {
 			`),
 		},
 	}
+	cmd.PersistentFlags().StringP("format", "F", "pretty", "Output format (json, yaml, pretty)")
 
 	cmd.AddCommand(
 		versionCmd(),
 		auth.LoginCommand(),
 		config.Commands(),
 		server.Commands(),
-		firehose.Commands(),
+		projects.Commands(),
+		firehoses.Commands(),
 	)
 
 	// Help topics.

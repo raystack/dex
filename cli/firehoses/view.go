@@ -1,11 +1,10 @@
-package firehose
+package firehoses
 
 import (
-	"fmt"
-
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
@@ -30,10 +29,9 @@ func viewCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			firehose := res.Payload
+			firehose := res.GetPayload()
 
-			fmt.Println(firehose)
-			return nil
+			return cdk.Display(cmd, firehose, cdk.YAMLFormat)
 		},
 	}
 

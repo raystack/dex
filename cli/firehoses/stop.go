@@ -1,11 +1,13 @@
-package firehose
+package firehoses
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
@@ -25,13 +27,15 @@ func stopCommand() *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			_, err := client.Operations.StopFirehose(params)
+			modifiedFirehose, err := client.Operations.StopFirehose(params)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("Stop request accepted. Use view command to check status.")
-			return nil
+			return cdk.Display(cmd, modifiedFirehose, func(w io.Writer, v interface{}) error {
+				_, err := fmt.Fprintln(w, "Stop request accepted. Use view command to check status.")
+				return err
+			})
 		},
 	}
 	return cmd

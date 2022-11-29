@@ -1,13 +1,15 @@
-package firehose
+package firehoses
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/go-openapi/strfmt"
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 	"github.com/odpf/dex/pkg/errors"
 )
@@ -51,13 +53,15 @@ func resetOffsetCommand() *cobra.Command {
 				return errors.Errorf("unknown reset target: %s", resetTo)
 			}
 
-			_, err := client.Operations.ResetOffset(params)
+			modifiedFirehose, err := client.Operations.ResetOffset(params)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("Reset offset request accepted. Use view command to check status.")
-			return nil
+			return cdk.Display(cmd, modifiedFirehose, func(w io.Writer, v interface{}) error {
+				_, err := fmt.Fprintln(w, "Reset offset request accepted. Use view command to check status.")
+				return err
+			})
 		},
 	}
 

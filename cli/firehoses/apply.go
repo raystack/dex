@@ -1,7 +1,6 @@
-package firehose
+package firehoses
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 	"github.com/odpf/dex/generated/models"
 	"github.com/odpf/dex/pkg/errors"
@@ -70,8 +70,7 @@ func applyCommand() *cobra.Command {
 				finalVersion = created.GetPayload()
 			}
 
-			fmt.Println(finalVersion)
-			return nil
+			return cdk.Display(cmd, finalVersion, cdk.YAMLFormat)
 		},
 	}
 

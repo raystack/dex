@@ -1,12 +1,14 @@
 //nolint:dupl
-package firehose
+package firehoses
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
@@ -26,13 +28,15 @@ func upgradeCommand() *cobra.Command {
 			}
 
 			client := initClient(cmd)
-			_, err := client.Operations.UpgradeFirehose(params)
+			modifiedFirehose, err := client.Operations.UpgradeFirehose(params)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("Upgrade request accepted. Use view command to check status.")
-			return nil
+			return cdk.Display(cmd, modifiedFirehose, func(w io.Writer, v interface{}) error {
+				_, err := fmt.Fprintln(w, "Upgrade request accepted. Use view command to check status.")
+				return err
+			})
 		},
 	}
 	return cmd
