@@ -38,11 +38,6 @@ paths:
           type: string
           required: true
           description: Unique slug of the project.
-        - in: header
-          name: X-Shield-Project
-          type: string
-          required: true
-          description: Unique ID of the project.
       responses:
         "200":
           description: successful operation

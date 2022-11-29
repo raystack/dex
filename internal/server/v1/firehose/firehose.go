@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	pathParamURN = "urn"
+	pathParamURN         = "urn"
+	pathParamProjectSlug = "projectSlug"
+
 	kindFirehose = "firehose"
 
 	actionStop        = "stop"

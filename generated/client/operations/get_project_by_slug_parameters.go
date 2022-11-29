@@ -61,12 +61,6 @@ GetProjectBySlugParams contains all the parameters to send to the API endpoint
 */
 type GetProjectBySlugParams struct {
 
-	/* XShieldProject.
-
-	   Unique ID of the project.
-	*/
-	XShieldProject string
-
 	/* Slug.
 
 	   Unique slug of the project.
@@ -126,17 +120,6 @@ func (o *GetProjectBySlugParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXShieldProject adds the xShieldProject to the get project by slug params
-func (o *GetProjectBySlugParams) WithXShieldProject(xShieldProject string) *GetProjectBySlugParams {
-	o.SetXShieldProject(xShieldProject)
-	return o
-}
-
-// SetXShieldProject adds the xShieldProject to the get project by slug params
-func (o *GetProjectBySlugParams) SetXShieldProject(xShieldProject string) {
-	o.XShieldProject = xShieldProject
-}
-
 // WithSlug adds the slug to the get project by slug params
 func (o *GetProjectBySlugParams) WithSlug(slug string) *GetProjectBySlugParams {
 	o.SetSlug(slug)
@@ -155,11 +138,6 @@ func (o *GetProjectBySlugParams) WriteToRequest(r runtime.ClientRequest, reg str
 		return err
 	}
 	var res []error
-
-	// header param X-Shield-Project
-	if err := r.SetHeaderParam("X-Shield-Project", o.XShieldProject); err != nil {
-		return err
-	}
 
 	// path param slug
 	if err := r.SetPathParam("slug", o.Slug); err != nil {

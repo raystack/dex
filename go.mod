@@ -5,6 +5,7 @@ go 1.18
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.0
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
+	github.com/BurntSushi/toml v0.3.1
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/runtime v0.24.1
