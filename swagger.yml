@@ -74,10 +74,10 @@ paths:
           required: false
           description: Return firehoses belonging to only this group.
         - in: query
-          name: cluster
+          name: kube_cluster
           type: string
           required: false
-          description: Return firehoses belonging to only this cluster.
+          description: Return firehoses belonging to only this kubernetes cluster.
         - in: query
           name: status
           type: string
@@ -705,9 +705,9 @@ definitions:
         type: string
         format: uuid
         example: "e144ea5e-c7d6-48c4-a580-db31cb3389aa"
-      cluster:
+      kube_cluster:
         type: string
-        example: "data_engineering"
+        example: "orn:entropy:kubernetes:sample_project:sample_name"
       configs:
         $ref: "#/definitions/FirehoseConfig"
       state:

@@ -24,7 +24,7 @@ type firehoseDefinition struct {
 	CreatedAt   time.Time        `json:"created_at"`
 	UpdatedAt   time.Time        `json:"updated_at"`
 	Description string           `json:"description"`
-	Cluster     string           `json:"cluster"`
+	KubeCluster string           `json:"kube_cluster"`
 	Configs     *firehoseConfigs `json:"configs,omitempty"`
 	State       *firehoseState   `json:"state,omitempty"`
 	metadata    *firehoseMetadata
@@ -100,7 +100,7 @@ func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shie
 	spec := &entropyv1beta1.ResourceSpec{
 		Configs: cfg,
 		Dependencies: []*entropyv1beta1.ResourceDependency{
-			{Key: resourceDepKey, Value: def.Cluster},
+			{Key: resourceDepKey, Value: def.KubeCluster},
 		},
 	}
 
@@ -158,7 +158,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 		CreatedAt:   res.GetCreatedAt().AsTime(),
 		UpdatedAt:   res.GetUpdatedAt().AsTime(),
 		Description: labels.Description,
-		Cluster:     kubeCluster,
+		KubeCluster: kubeCluster,
 		metadata: &firehoseMetadata{
 			CreatedBy:      labels.CreatedBy,
 			CreatedByEmail: labels.CreatedByEmail,
