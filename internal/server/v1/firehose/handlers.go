@@ -733,7 +733,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 			utils.WriteErr(w, err)
 			return
 		}
-		team := firehoseDef.Team
+		group := firehoseDef.Group
 		entity, err := svc.GetProjectDataSource(ctx, prj.GetSlug())
 		if err != nil {
 			utils.WriteErr(w, err)
@@ -749,7 +749,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 		}
 
 		policyDef.Rules = addSuppliedVariablesFromRules(policyDef.Rules, map[string]string{
-			"team":   team,
+			"team":   group,
 			"name":   name,
 			"entity": entity,
 		})

@@ -69,10 +69,10 @@ paths:
       operationId: listFirehoses
       parameters:
         - in: query
-          name: team
+          name: group
           type: string
           required: false
-          description: Return firehoses belonging to only this team.
+          description: Return firehoses belonging to only this group.
         - in: query
           name: cluster
           type: string
@@ -701,9 +701,10 @@ definitions:
       description:
         type: string
         example: "This firehose consumes from booking events and ingests to redis"
-      team:
+      group:
         type: string
-        example: "pricing"
+        format: uuid
+        example: "e144ea5e-c7d6-48c4-a580-db31cb3389aa"
         readOnly: true
       cluster:
         type: string

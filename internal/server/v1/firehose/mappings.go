@@ -19,7 +19,7 @@ const resourceDepKey = "kube_cluster"
 type firehoseDefinition struct {
 	URN         string           `json:"urn"`
 	Name        string           `json:"name"`
-	Team        string           `json:"team"`
+	Group       string           `json:"group"`
 	Title       string           `json:"title"`
 	CreatedAt   time.Time        `json:"created_at"`
 	UpdatedAt   time.Time        `json:"updated_at"`
@@ -61,7 +61,7 @@ type firehoseState struct {
 
 type firehoseLabels struct {
 	Title          string `mapstructure:"title"`
-	Team           string `mapstructure:"team"`
+	Group          string `mapstructure:"group"`
 	Description    string `mapstructure:"description"`
 	CreatedBy      string `mapstructure:"created_by"`
 	CreatedByEmail string `mapstructure:"created_by_email"`
@@ -154,7 +154,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 		URN:         res.GetUrn(),
 		Name:        res.GetName(),
 		Title:       labels.Title,
-		Team:        labels.Team,
+		Group:       labels.Group,
 		CreatedAt:   res.GetCreatedAt().AsTime(),
 		UpdatedAt:   res.GetUpdatedAt().AsTime(),
 		Description: labels.Description,
@@ -195,7 +195,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 func (fd firehoseDefinition) getLabels() firehoseLabels {
 	return firehoseLabels{
 		Title:          fd.Title,
-		Team:           fd.Team,
+		Group:          fd.Group,
 		Description:    fd.Description,
 		CreatedBy:      fd.metadata.CreatedBy,
 		CreatedByEmail: fd.metadata.CreatedByEmail,
