@@ -774,6 +774,7 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 
 func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient) (*shieldv1beta1.Project, error) {
 	projectID := r.Header.Get(headerProjectID)
+	projectSlug := mux.Vars(r)[pathParamProjectSlug]
 
 	prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
 	if err != nil {
@@ -783,6 +784,13 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 		}
 		return nil, err
 	}
+
+	if projectSlug != prj.GetProject().GetSlug() {
+		return nil, errors.
+			ErrInvalid.
+			WithMsgf("project slug in path and project id from header do not point to same project")
+	}
+
 	return prj.GetProject(), nil
 }
 
