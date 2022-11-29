@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/spf13/cobra"
 	"github.com/yudai/pp"
 	"gopkg.in/yaml.v2"
@@ -13,9 +14,12 @@ import (
 	"github.com/odpf/dex/pkg/errors"
 )
 
-type FormatFn func(w io.Writer, v interface{}) error
+type FormatFn func(w io.Writer, v any) error
 
-func Display(cmd *cobra.Command, v interface{}, prettyFormatter FormatFn) error {
+// Display formats the given value 'v' using format specified as value for --format
+// flag and writes to STDOUT. If --format=pretty/human, custom-formatter passed will
+// be used.
+func Display(cmd *cobra.Command, v any, prettyFormatter FormatFn) error {
 	format, _ := cmd.Flags().GetString("format")
 	format = strings.ToLower(strings.TrimSpace(format))
 
@@ -27,15 +31,15 @@ func Display(cmd *cobra.Command, v interface{}, prettyFormatter FormatFn) error 
 	case "yaml", "yml":
 		formatter = YAMLFormat
 
+	case "toml":
+		formatter = TOMLFormat
+
 	case "pretty", "human":
 		if prettyFormatter != nil {
 			formatter = prettyFormatter
 		} else {
-			formatter = PPFormatter
+			formatter = GoFormat
 		}
-
-	case "pp":
-		formatter = PPFormatter
 	}
 
 	if formatter == nil {
@@ -45,18 +49,45 @@ func Display(cmd *cobra.Command, v interface{}, prettyFormatter FormatFn) error 
 	return formatter(os.Stdout, v)
 }
 
-func JSONFormat(w io.Writer, v interface{}) error {
+// JSONFormat outputs 'v' formatted as indented JSON.
+func JSONFormat(w io.Writer, v any) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(v)
 }
 
-func YAMLFormat(w io.Writer, v interface{}) error {
-	enc := yaml.NewEncoder(w)
+// TOMLFormat outputs 'v' formatted as per TOML spec.
+func TOMLFormat(w io.Writer, v any) error {
+	enc := toml.NewEncoder(w)
 	return enc.Encode(v)
 }
 
-func PPFormatter(w io.Writer, v interface{}) error {
+// YAMLFormat outputs 'v' formatted as per YAML spec.
+func YAMLFormat(w io.Writer, v any) error {
+	// note: since most values are json tagged but may not be
+	// yaml tagged, we do this to ensure keys are snake-cased.
+	val, err := jsonConvert(v)
+	if err != nil {
+		return err
+	}
+	return yaml.NewEncoder(w).Encode(val)
+}
+
+// GoFormat outputs 'v' formatted using pp package.
+func GoFormat(w io.Writer, v any) error {
 	_, err := pp.Fprintln(w, v)
 	return err
+}
+
+func jsonConvert(v any) (any, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	var val any
+	if err := json.Unmarshal(b, &val); err != nil {
+		return nil, err
+	}
+	return val, nil
 }

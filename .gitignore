@@ -24,3 +24,5 @@ tmp/
 
 expt/
 requests.http
+
+test_*.yml

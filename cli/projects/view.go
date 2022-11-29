@@ -12,24 +12,22 @@ import (
 
 func viewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "view <id> <project-slug>",
+		Use:     "view <project-slug>",
 		Short:   "View a project",
 		Long:    "Display information about a project",
-		Args:    cobra.ExactArgs(2),
+		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"show"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd)
-
+			cl := initClient(cmd)
 			params := operations.GetProjectBySlugParams{
-				Slug:           args[1],
-				XShieldProject: args[0],
+				Slug: args[0],
 			}
 			params.SetTimeout(10 * time.Second)
 
-			res, err := client.Operations.GetProjectBySlug(&params)
+			res, err := cl.Operations.GetProjectBySlug(&params)
 			if err != nil {
 				return err
 			}

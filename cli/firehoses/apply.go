@@ -3,6 +3,7 @@ package firehoses
 import (
 	"os"
 	"strings"
+	"time"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
@@ -29,14 +30,15 @@ func applyCommand() *cobra.Command {
 			var firehoseDef models.Firehose
 			if err := readYAMLFile(args[1], &firehoseDef); err != nil {
 				return err
-			} else if err := validateFirehoseDef(firehoseDef); err != nil {
-				return err
 			}
 
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
-			resp, err := client.Operations.GetFirehose(&operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn})
-			var notFoundErr *operations.GetFirehoseNotFound
-			if err != nil && !errors.As(err, notFoundErr) {
+			getParams := &operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn}
+			getParams.WithTimeout(10 * time.Second)
+
+			resp, err := client.Operations.GetFirehose(getParams)
+			notFoundErr := &operations.GetFirehoseNotFound{}
+			if err != nil && !errors.As(err, &notFoundErr) {
 				return err
 			}
 
@@ -51,6 +53,8 @@ func applyCommand() *cobra.Command {
 						Config: firehoseDef.Configs,
 					},
 				}
+				params.WithTimeout(10 * time.Second)
+
 				updated, updateErr := client.Operations.UpdateFirehose(params)
 				if updateErr != nil {
 					return updateErr
@@ -62,6 +66,7 @@ func applyCommand() *cobra.Command {
 					Body:        &firehoseDef,
 					ProjectSlug: args[0],
 				}
+				params.WithTimeout(10 * time.Second)
 
 				created, createErr := client.Operations.CreateFirehose(params)
 				if createErr != nil {
@@ -76,16 +81,6 @@ func applyCommand() *cobra.Command {
 
 	cmd.Flags().StringVarP(&configFile, "config", "c", "./config.yaml", "Config file path")
 	return cmd
-}
-
-func validateFirehoseDef(fd models.Firehose) error {
-	if strings.TrimSpace(fd.Name) == "" {
-		return errors.New("firehose name must be a non-empty string")
-	}
-	if strings.TrimSpace(fd.Cluster) == "" {
-		return errors.New("")
-	}
-	return nil
 }
 
 func readYAMLFile(filePath string, into interface{}) error {

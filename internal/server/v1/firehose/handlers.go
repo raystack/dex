@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -801,9 +802,24 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 }
 
 func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient) (*shieldv1beta1.Project, error) {
-	projectID := r.Header.Get(headerProjectID)
+	projectID := strings.TrimSpace(r.Header.Get(headerProjectID))
 	projectSlug := mux.Vars(r)[pathParamProjectSlug]
 
+	if projectID == "" {
+		// List everything and search by slug.
+		projects, err := shieldClient.ListProjects(r.Context(), &shieldv1beta1.ListProjectsRequest{})
+		if err != nil {
+			return nil, err
+		}
+		for _, prj := range projects.GetProjects() {
+			if prj.GetSlug() == projectSlug {
+				return prj, nil
+			}
+		}
+		return nil, errors.ErrNotFound
+	}
+
+	// Project ID is available. Use it to fetch the project directly.
 	prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
 	if err != nil {
 		st := status.Convert(err)
@@ -811,6 +827,8 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 			return nil, errors.ErrNotFound
 		}
 		return nil, err
+	} else if prj.GetProject().Slug != projectSlug {
+		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
 
 	if projectSlug != prj.GetProject().GetSlug() {
