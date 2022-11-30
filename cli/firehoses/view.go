@@ -1,15 +1,14 @@
-package firehose
+package firehoses
 
 import (
-	"fmt"
-
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func viewCommand(cfgLoader ConfigLoader) *cobra.Command {
+func viewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "view <project> <name>",
 		Short: "View a firehose",
@@ -19,20 +18,20 @@ func viewCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd)
 
 			params := operations.GetFirehoseParams{
 				ProjectSlug: args[0],
 				FirehoseUrn: args[1],
 			}
+
 			res, err := client.Operations.GetFirehose(&params)
 			if err != nil {
 				return err
 			}
-			firehose := res.Payload
+			firehose := res.GetPayload()
 
-			fmt.Println(firehose)
-			return nil
+			return cdk.Display(cmd, firehose, cdk.YAMLFormat)
 		},
 	}
 

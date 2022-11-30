@@ -5,6 +5,7 @@ go 1.18
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.0
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
+	github.com/BurntSushi/toml v0.3.1
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/runtime v0.24.1
@@ -12,6 +13,7 @@ require (
 	github.com/go-openapi/swag v0.21.1
 	github.com/go-openapi/validate v0.22.0
 	github.com/gorilla/mux v1.8.0
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/newrelic/go-agent/v3 v3.18.2
 	github.com/newrelic/go-agent/v3/integrations/nrgorilla v1.1.1
 	github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0
@@ -20,6 +22,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.8.0
 	github.com/yudai/gojsondiff v1.0.0
+	github.com/yudai/pp v2.0.1+incompatible
 	go.buf.build/odpf/gwv/odpf/proton v1.1.135
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
@@ -76,7 +79,6 @@ require (
 	github.com/mcuadros/go-defaults v1.2.0 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.6 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
-	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/muesli/reflow v0.2.0 // indirect
 	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/newrelic/newrelic-telemetry-sdk-go v0.2.0 // indirect
@@ -100,7 +102,6 @@ require (
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	github.com/yudai/pp v2.0.1+incompatible // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	go.buf.build/odpf/gwv/envoyproxy/protoc-gen-validate v1.1.7 // indirect

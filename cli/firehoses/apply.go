@@ -1,20 +1,21 @@
-package firehose
+package firehoses
 
 import (
-	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 	"github.com/odpf/dex/generated/models"
 	"github.com/odpf/dex/pkg/errors"
 )
 
-func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
+func applyCommand() *cobra.Command {
 	var configFile string
 
 	cmd := &cobra.Command{
@@ -24,19 +25,20 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
-			client := initClient(cfgLoader)
+			client := initClient(cmd)
 
 			var firehoseDef models.Firehose
 			if err := readYAMLFile(args[1], &firehoseDef); err != nil {
 				return err
-			} else if err := validateFirehoseDef(firehoseDef); err != nil {
-				return err
 			}
 
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
-			resp, err := client.Operations.GetFirehose(&operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn})
-			var notFoundErr *operations.GetFirehoseNotFound
-			if err != nil && !errors.As(err, notFoundErr) {
+			getParams := &operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn}
+			getParams.WithTimeout(10 * time.Second)
+
+			resp, err := client.Operations.GetFirehose(getParams)
+			notFoundErr := &operations.GetFirehoseNotFound{}
+			if err != nil && !errors.As(err, &notFoundErr) {
 				return err
 			}
 
@@ -51,6 +53,8 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 						Config: firehoseDef.Configs,
 					},
 				}
+				params.WithTimeout(10 * time.Second)
+
 				updated, updateErr := client.Operations.UpdateFirehose(params)
 				if updateErr != nil {
 					return updateErr
@@ -62,6 +66,7 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 					Body:        &firehoseDef,
 					ProjectSlug: args[0],
 				}
+				params.WithTimeout(10 * time.Second)
 
 				created, createErr := client.Operations.CreateFirehose(params)
 				if createErr != nil {
@@ -70,23 +75,12 @@ func applyCommand(cfgLoader ConfigLoader) *cobra.Command {
 				finalVersion = created.GetPayload()
 			}
 
-			fmt.Println(finalVersion)
-			return nil
+			return cdk.Display(cmd, finalVersion, cdk.YAMLFormat)
 		},
 	}
 
 	cmd.Flags().StringVarP(&configFile, "config", "c", "./config.yaml", "Config file path")
 	return cmd
-}
-
-func validateFirehoseDef(fd models.Firehose) error {
-	if strings.TrimSpace(fd.Name) == "" {
-		return errors.New("firehose name must be a non-empty string")
-	}
-	if strings.TrimSpace(fd.Cluster) == "" {
-		return errors.New("")
-	}
-	return nil
 }
 
 func readYAMLFile(filePath string, into interface{}) error {

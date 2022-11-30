@@ -1,15 +1,17 @@
-package firehose
+package firehoses
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
+func scaleCommand() *cobra.Command {
 	var replicas int
 
 	cmd := &cobra.Command{
@@ -20,7 +22,7 @@ func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd)
 
 			replicasNum := float64(replicas)
 			params := &operations.ScaleFirehoseParams{
@@ -31,13 +33,16 @@ func scaleCommand(cfgLoader ConfigLoader) *cobra.Command {
 				},
 			}
 
-			_, err := client.Operations.ScaleFirehose(params)
+			modifiedFirehose, err := client.Operations.ScaleFirehose(params)
 			if err != nil {
 				return err
 			}
+			spinner.Stop()
 
-			fmt.Println("Scale request accepted. Use view command to check status.")
-			return nil
+			return cdk.Display(cmd, modifiedFirehose, func(w io.Writer, v interface{}) error {
+				_, err := fmt.Fprintln(w, "Scale request accepted. Use view command to check status.")
+				return err
+			})
 		},
 	}
 

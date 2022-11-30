@@ -4,11 +4,8 @@ import (
 	"net/http"
 
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/odpf/dex/internal/server/utils"
-	"github.com/odpf/dex/pkg/errors"
 )
 
 type listResponse[T any] struct {
@@ -17,26 +14,13 @@ type listResponse[T any] struct {
 
 func handleGetProject(client shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rpcReq := &shieldv1beta1.GetProjectRequest{
-			Id: r.Header.Get(headerProjectID),
-		}
-
-		rpcResp, err := client.GetProject(r.Context(), rpcReq)
+		prj, err := getProject(r, client)
 		if err != nil {
-			st := status.Convert(err)
-			if st.Code() == codes.NotFound {
-				utils.WriteErr(w, errors.ErrNotFound.WithCausef(st.Message()))
-			} else {
-				utils.WriteErr(w, err)
-			}
-			return
-		} else if rpcResp.GetProject() == nil {
-			utils.WriteErr(w, errors.ErrNotFound)
+			utils.WriteErr(w, err)
 			return
 		}
 
-		shieldProj := rpcResp.GetProject()
-		utils.WriteJSON(w, http.StatusOK, mapShieldProjectToProject(shieldProj))
+		utils.WriteJSON(w, http.StatusOK, mapShieldProjectToProject(prj))
 	}
 }
 
@@ -50,15 +34,14 @@ func handleListProjects(client shieldv1beta1.ShieldServiceClient) http.HandlerFu
 			return
 		}
 
-		listResponse := listResponse[Project]{Items: []Project{}}
+		projects := listResponse[Project]{Items: []Project{}}
 		for _, p := range resp.Projects {
 			if p == nil {
 				continue
 			}
-
-			listResponse.Items = append(listResponse.Items, mapShieldProjectToProject(p))
+			projects.Items = append(projects.Items, mapShieldProjectToProject(p))
 		}
 
-		utils.WriteJSON(w, http.StatusOK, listResponse)
+		utils.WriteJSON(w, http.StatusOK, projects)
 	}
 }

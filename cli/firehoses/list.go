@@ -1,19 +1,20 @@
-package firehose
+package firehoses
 
 import (
 	"fmt"
+	"io"
 	"os"
+	"time"
 
 	"github.com/odpf/salt/printer"
 	"github.com/odpf/salt/term"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func listCommand(cfgLoader ConfigLoader) *cobra.Command {
-	var limit int
-
+func listCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list <project>",
 		Short: "List firehoses in the given project.",
@@ -22,31 +23,32 @@ func listCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd)
 
 			params := operations.ListFirehosesParams{
 				ProjectSlug: args[0],
 			}
+			params.SetTimeout(10 * time.Second)
 			res, err := client.Operations.ListFirehoses(&params)
 			if err != nil {
 				return err
 			}
-			firehoses := res.Payload.Items
-
-			report := [][]string{
-				{term.Bold("INDEX"), term.Bold("NAME")},
-			}
-			for idx, f := range firehoses {
-				report = append(report, []string{term.Greenf("#%d", idx+1), f.Name})
-			}
+			firehoses := res.GetPayload().Items
 			spinner.Stop()
 
-			fmt.Printf("\nShowing %d firehoses", len(firehoses))
-			printer.Table(os.Stdout, report)
-			return nil
+			return cdk.Display(cmd, firehoses, func(w io.Writer, v interface{}) error {
+				report := [][]string{
+					{term.Bold("URN"), term.Bold("NAME"), term.Bold("VERSION")},
+				}
+				for _, f := range firehoses {
+					report = append(report, []string{f.Urn, f.Name, f.Configs.Version})
+				}
+
+				fmt.Printf("Showing %d firehoses\n", len(firehoses))
+				printer.Table(os.Stdout, report)
+				return nil
+			})
 		},
 	}
-
-	cmd.Flags().IntVarP(&limit, "limit", "L", 30, "Maximum number of firehoses to fetch (default 30)")
 	return cmd
 }

@@ -1,4 +1,4 @@
-package cli
+package auth
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ const (
 	redirectTo = "http://localhost:5454"
 )
 
-func loginCmd(cdk *CDK) *cobra.Command {
+func LoginCommand() *cobra.Command {
 	var keyFile string
 
 	cmd := &cobra.Command{
@@ -25,26 +25,14 @@ func loginCmd(cdk *CDK) *cobra.Command {
 			ctx, cancel := signal.NotifyContext(cmd.Context(), syscall.SIGINT, syscall.SIGTERM)
 			defer cancel()
 
-			var ac AuthConfig
-			if err := cdk.Auth.Load(&ac); err != nil {
+			ac, err := LoadConfig()
+			if err != nil {
 				return err
-			}
-
-			oauth2Conf := &oauth2.Config{
-				ClientID:     ac.OAuth.ClientID,
-				ClientSecret: ac.OAuth.ClientSecret,
-				Scopes:       []string{scopeEmail},
-				Endpoint: oauth2.Endpoint{
-					AuthURL:   ac.OAuth.Endpoint.AuthURL,
-					TokenURL:  ac.OAuth.Endpoint.TokenURL,
-					AuthStyle: oauth2.AuthStyleInParams,
-				},
-				RedirectURL: redirectTo,
 			}
 
 			var ts oauth2.TokenSource
 			if keyFile == "" {
-				ts = oidc.NewTokenSource(ctx, oauth2Conf, ac.OAuth.Audience)
+				ts = oidc.NewTokenSource(ctx, ac.oauth2Config(), ac.OAuth.Audience)
 			} else {
 				var err error
 				ts, err = oidc.NewGoogleServiceAccountTokenSource(ctx, keyFile, ac.OAuth.Audience)
@@ -58,11 +46,8 @@ func loginCmd(cdk *CDK) *cobra.Command {
 				return err
 			}
 
-			ac.AccessToken = token.AccessToken
-			ac.RefreshToken = token.RefreshToken
-			ac.Expiry = token.Expiry.Unix()
-
-			if err := cdk.Auth.Write(ac); err != nil {
+			ac.setToken(token)
+			if err := saveConfig(*ac); err != nil {
 				return err
 			}
 

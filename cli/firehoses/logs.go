@@ -1,4 +1,4 @@
-package firehose
+package firehoses
 
 import (
 	"bufio"
@@ -20,7 +20,7 @@ type logChunk struct {
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
-func logsCommand(cfgLoader ConfigLoader) *cobra.Command {
+func logsCommand() *cobra.Command {
 	var container, pod string
 	var follow, previous, timestamps bool
 	var tailCount, since int64
@@ -33,7 +33,7 @@ func logsCommand(cfgLoader ConfigLoader) *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cfgLoader)
+			client := initClient(cmd)
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],

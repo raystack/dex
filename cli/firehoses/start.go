@@ -1,16 +1,18 @@
 //nolint:dupl
-package firehose
+package firehoses
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 )
 
-func startCommand(cfgLoader ConfigLoader) *cobra.Command {
+func startCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start <project> <firehoseURN>",
 		Short: "Start the firehose if it's currently stopped.",
@@ -25,14 +27,17 @@ func startCommand(cfgLoader ConfigLoader) *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cfgLoader)
-			_, err := client.Operations.StartFirehose(params)
+			client := initClient(cmd)
+			modifiedFirehose, err := client.Operations.StartFirehose(params)
 			if err != nil {
 				return err
 			}
+			spinner.Stop()
 
-			fmt.Println("Start request accepted. Use view command to check status.")
-			return nil
+			return cdk.Display(cmd, modifiedFirehose, func(w io.Writer, v interface{}) error {
+				_, err := fmt.Fprintln(w, "Start request accepted. Use view command to check status.")
+				return err
+			})
 		},
 	}
 	return cmd

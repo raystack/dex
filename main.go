@@ -9,13 +9,14 @@ import (
 	"syscall"
 
 	"github.com/odpf/salt/cmdx"
+	"github.com/odpf/salt/term"
 
 	"github.com/odpf/dex/cli"
 )
 
 const (
-	exitOK    = 0
-	exitError = 1
+	exitUsageErr   = 1
+	exitGeneralErr = 2
 )
 
 func main() {
@@ -27,20 +28,19 @@ func main() {
 
 func execute(ctx context.Context) {
 	root := cli.New()
-	cmd, err := root.ExecuteContextC(ctx)
 
-	if err == nil {
+	cmd, err := root.ExecuteContextC(ctx)
+	if err != nil {
+		if cmdx.IsCmdErr(err) {
+			if !strings.HasSuffix(err.Error(), "\n") {
+				fmt.Println()
+			}
+			fmt.Println(cmd.UsageString())
+			os.Exit(exitUsageErr)
+		}
+
+		fmt.Println(term.Redf("Error: %v", err))
+		os.Exit(exitGeneralErr)
 		return
 	}
-
-	if cmdx.IsCmdErr(err) {
-		if !strings.HasSuffix(err.Error(), "\n") {
-			fmt.Println()
-		}
-		fmt.Println(cmd.UsageString())
-		os.Exit(exitOK)
-	}
-
-	fmt.Println(err)
-	os.Exit(exitError)
 }

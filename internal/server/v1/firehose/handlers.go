@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -38,7 +39,8 @@ type listResponse[T any] struct {
 }
 
 type updateRequestBody struct {
-	Configs firehoseConfigs `json:"configs"`
+	Description string          `json:"description"`
+	Configs     firehoseConfigs `json:"configs"`
 }
 
 type resetRequestBody struct {
@@ -186,13 +188,20 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			return
 		}
 
+		firehoseDef.Description = updReq.Description
+
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
-			Labels: labels,
+			Labels: labelMap,
 			NewSpec: &entropyv1beta1.ResourceSpec{
 				Configs: cfgStruct,
 			},
@@ -273,13 +282,18 @@ func handleResetFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
 			Action: actionResetOffset,
 			Params: paramsStruct,
-			Labels: labels,
+			Labels: labelMap,
 		}
 
 		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
@@ -333,13 +347,18 @@ func handleScaleFirehose(client entropyv1beta1.ResourceServiceClient) http.Handl
 
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
 			Action: actionScale,
 			Params: paramsStruct,
-			Labels: labels,
+			Labels: labelMap,
 		}
 
 		rpcResp, err := client.ApplyAction(r.Context(), rpcReq)
@@ -399,7 +418,12 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 
 		rCtx := reqctx.From(r.Context())
 		labels := firehoseDef.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		action := actionStart
 		if isStop {
@@ -409,7 +433,7 @@ func handleStartOrStop(client entropyv1beta1.ResourceServiceClient, shieldClient
 			Urn:    urn,
 			Action: action,
 			Params: paramsStruct,
-			Labels: labels,
+			Labels: labelMap,
 		}
 
 		rpcResp, err := client.ApplyAction(ctx, rpcReq)
@@ -612,11 +636,16 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 
 		rCtx := reqctx.From(r.Context())
 		labels := cur.getLabels()
-		labels["updated_by"] = rCtx.UserID
+		labels.setUpdatedBy(rCtx)
+		labelMap, err := labels.toMap()
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
 
 		rpcReq := &entropyv1beta1.UpdateResourceRequest{
 			Urn:    urn,
-			Labels: labels,
+			Labels: labelMap,
 			NewSpec: &entropyv1beta1.ResourceSpec{
 				Configs: cfgStruct,
 			},
@@ -705,7 +734,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 			utils.WriteErr(w, err)
 			return
 		}
-		team := firehoseDef.Team
+		group := firehoseDef.Group
 		entity, err := svc.GetProjectDataSource(ctx, prj.GetSlug())
 		if err != nil {
 			utils.WriteErr(w, err)
@@ -721,7 +750,7 @@ func handleUpsertFirehoseAlertPolicies(client entropyv1beta1.ResourceServiceClie
 		}
 
 		policyDef.Rules = addSuppliedVariablesFromRules(policyDef.Rules, map[string]string{
-			"team":   team,
+			"team":   group,
 			"name":   name,
 			"entity": entity,
 		})
@@ -773,8 +802,24 @@ func handleListFirehoseAlerts(client entropyv1beta1.ResourceServiceClient, shiel
 }
 
 func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient) (*shieldv1beta1.Project, error) {
-	projectID := r.Header.Get(headerProjectID)
+	projectID := strings.TrimSpace(r.Header.Get(headerProjectID))
+	projectSlug := mux.Vars(r)[pathParamProjectSlug]
 
+	if projectID == "" {
+		// List everything and search by slug.
+		projects, err := shieldClient.ListProjects(r.Context(), &shieldv1beta1.ListProjectsRequest{})
+		if err != nil {
+			return nil, err
+		}
+		for _, prj := range projects.GetProjects() {
+			if prj.GetSlug() == projectSlug {
+				return prj, nil
+			}
+		}
+		return nil, errors.ErrNotFound
+	}
+
+	// Project ID is available. Use it to fetch the project directly.
 	prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
 	if err != nil {
 		st := status.Convert(err)
@@ -782,7 +827,10 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 			return nil, errors.ErrNotFound
 		}
 		return nil, err
+	} else if prj.GetProject().Slug != projectSlug {
+		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
+
 	return prj.GetProject(), nil
 }
 
