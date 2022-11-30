@@ -13,6 +13,7 @@ require (
 	github.com/go-openapi/swag v0.21.1
 	github.com/go-openapi/validate v0.22.0
 	github.com/gorilla/mux v1.8.0
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/newrelic/go-agent/v3 v3.18.2
 	github.com/newrelic/go-agent/v3/integrations/nrgorilla v1.1.1
 	github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0
@@ -78,7 +79,6 @@ require (
 	github.com/mcuadros/go-defaults v1.2.0 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.6 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
-	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/muesli/reflow v0.2.0 // indirect
 	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/newrelic/newrelic-telemetry-sdk-go v0.2.0 // indirect

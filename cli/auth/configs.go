@@ -83,7 +83,10 @@ func Token(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	if newToken.RefreshToken != ac.RefreshToken {
+	// Token may or may not have been refreshed now. We use old & new token
+	// expiry value to detect if a refresh occurred or not and flush to the
+	// auth file if it did.
+	if !newToken.Expiry.Equal(curToken.Expiry) {
 		idToken, ok := newToken.Extra("id_token").(string)
 		if !ok {
 			return "", errors.New("id_token not found in token response")
