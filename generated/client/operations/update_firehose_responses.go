@@ -315,6 +315,10 @@ type UpdateFirehoseBody struct {
 
 	// config
 	Config *models.FirehoseConfig `json:"config,omitempty"`
+
+	// description
+	// Example: This firehose consumes from booking events and ingests to redis
+	Description string `json:"description,omitempty"`
 }
 
 // Validate validates this update firehose body

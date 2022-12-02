@@ -4,7 +4,6 @@ consumes:
   - application/json
 schemes:
   - http
-  - https
 swagger: "2.0"
 
 info:
@@ -132,6 +131,10 @@ paths:
           description: Successfully created
           schema:
             $ref: "#/definitions/Firehose"
+        "400":
+          description: Request was invalid.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "409":
           description: A firehose with same unique identifier already exists.
           schema:
@@ -618,7 +621,10 @@ definitions:
     properties:
       message:
         type: string
-        example: "Something went wrong"
+        example: "Request is invalid"
+      cause:
+        type: string
+        example: "name must not be empty"
       code:
         type: string
         example: "internal_error"
@@ -672,6 +678,8 @@ definitions:
           $ref: "#/definitions/Firehose"
   Firehose:
     type: object
+    required:
+      - configs
     properties:
       urn:
         type: string
@@ -707,6 +715,9 @@ definitions:
         $ref: "#/definitions/FirehoseConfig"
       state:
         $ref: "#/definitions/FirehoseState"
+      metadata:
+        $ref: "#/definitions/FirehoseMetadata"
+        readOnly: true
 
   FirehoseConfig:
     type: object
@@ -747,7 +758,6 @@ definitions:
         type: string
       env_vars:
         type: object
-        additionalProperties: true
   FirehoseState:
     type: object
     properties:
@@ -759,6 +769,21 @@ definitions:
         example: ""
       deployment_id:
         type: string
+  FirehoseMetadata:
+    type: object
+    properties:
+      created_by:
+        type: string
+        format: uuid
+      created_by_email:
+        type: string
+        format: email
+      updated_by:
+        type: string
+        format: uuid
+      updated_by_email:
+        type: string
+        format: email
   FirehoseSinkType:
     type: string
     enum:

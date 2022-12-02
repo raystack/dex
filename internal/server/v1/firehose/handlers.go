@@ -112,6 +112,8 @@ func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			st := status.Convert(err)
 			if st.Code() == codes.AlreadyExists {
 				outErr = errors.ErrConflict.WithCausef(st.Message())
+			} else if st.Code() == codes.InvalidArgument {
+				outErr = errors.ErrInvalid.WithCausef(st.Message())
 			}
 
 			utils.WriteErr(w, outErr)
@@ -830,7 +832,6 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 	} else if prj.GetProject().Slug != projectSlug {
 		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
-
 	return prj.GetProject(), nil
 }
 

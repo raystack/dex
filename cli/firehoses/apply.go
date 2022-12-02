@@ -1,13 +1,14 @@
 package firehoses
 
 import (
-	"os"
+	"encoding/json"
+	"io/ioutil"
 	"strings"
 	"time"
 
+	"github.com/ghodss/yaml"
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 
 	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
@@ -74,6 +75,7 @@ func applyCommand() *cobra.Command {
 				}
 				finalVersion = created.GetPayload()
 			}
+			spinner.Stop()
 
 			return cdk.Display(cmd, finalVersion, cdk.YAMLFormat)
 		},
@@ -84,13 +86,17 @@ func applyCommand() *cobra.Command {
 }
 
 func readYAMLFile(filePath string, into interface{}) error {
-	f, err := os.Open(filePath)
+	b, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	return yaml.NewDecoder(f).Decode(into)
+	jsonB, err := yaml.YAMLToJSON(b)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(jsonB, into)
 }
 
 func generateFirehoseURN(project, name string) string {
