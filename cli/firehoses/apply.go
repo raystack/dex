@@ -35,7 +35,6 @@ func applyCommand() *cobra.Command {
 
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
 			getParams := &operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn}
-			getParams.WithTimeout(10 * time.Second)
 
 			resp, err := client.Operations.GetFirehose(getParams)
 			notFoundErr := &operations.GetFirehoseNotFound{}
