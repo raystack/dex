@@ -37,11 +37,9 @@ func listCommand() *cobra.Command {
 			spinner.Stop()
 
 			return cdk.Display(cmd, firehoses, func(w io.Writer, v interface{}) error {
-				report := [][]string{
-					{term.Bold("URN"), term.Bold("NAME"), term.Bold("VERSION")},
-				}
+				report := [][]string{{term.Bold("URN"), term.Bold("NAME")}}
 				for _, f := range firehoses {
-					report = append(report, []string{f.Urn, f.Name, f.Configs.Version})
+					report = append(report, []string{f.Urn, f.Name})
 				}
 
 				fmt.Printf("Showing %d firehoses\n", len(firehoses))
