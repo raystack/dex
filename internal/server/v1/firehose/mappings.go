@@ -251,10 +251,10 @@ func (fc *firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb
 		Telegraf: telegrafConf,
 		Firehose: moduleConfigFirehoseDef{
 			Replicas:           fc.Replicas,
-			KafkaBrokerAddress: fc.BootstrapServers,
 			KafkaTopic:         fc.TopicName,
-			KafkaConsumerID:    fc.ConsumerGroupID,
 			EnvVariables:       fc.EnvVars,
+			KafkaConsumerID:    fc.ConsumerGroupID,
+			KafkaBrokerAddress: fc.BootstrapServers,
 		},
 	})
 }

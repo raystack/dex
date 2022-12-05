@@ -189,7 +189,6 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			utils.WriteErr(w, err)
 			return
 		}
-
 		firehoseDef.Description = updReq.Description
 
 		rCtx := reqctx.From(r.Context())

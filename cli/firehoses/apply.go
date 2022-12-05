@@ -51,7 +51,7 @@ func applyCommand() *cobra.Command {
 					ProjectSlug: args[0],
 					FirehoseUrn: existing.Urn,
 					Body: operations.UpdateFirehoseBody{
-						Config: firehoseDef.Configs,
+						Configs: firehoseDef.Configs,
 					},
 				}
 				params.WithTimeout(10 * time.Second)

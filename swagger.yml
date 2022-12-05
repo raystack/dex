@@ -185,7 +185,7 @@ paths:
               description:
                 type: string
                 example: "This firehose consumes from booking events and ingests to redis"
-              config:
+              configs:
                 type: object
                 $ref: "#/definitions/FirehoseConfig"
       responses:
