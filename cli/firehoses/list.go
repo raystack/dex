@@ -3,8 +3,6 @@ package firehoses
 import (
 	"fmt"
 	"io"
-	"os"
-	"time"
 
 	"github.com/odpf/salt/printer"
 	"github.com/odpf/salt/term"
@@ -12,6 +10,8 @@ import (
 
 	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
+	"github.com/odpf/dex/generated/models"
+	"github.com/odpf/dex/pkg/errors"
 )
 
 func listCommand() *cobra.Command {
@@ -20,33 +20,37 @@ func listCommand() *cobra.Command {
 		Short: "List firehoses in the given project.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			spinner := printer.Spin("")
-			defer spinner.Stop()
-
-			client := initClient(cmd)
-
-			params := operations.ListFirehosesParams{
-				ProjectSlug: args[0],
-			}
-			params.SetTimeout(10 * time.Second)
-			res, err := client.Operations.ListFirehoses(&params)
+			firehoses, err := listFirehoses(cmd, args[0])
 			if err != nil {
-				return err
+				return errors.Errorf("failed to list: %s", err)
 			}
-			firehoses := res.GetPayload().Items
-			spinner.Stop()
 
 			return cdk.Display(cmd, firehoses, func(w io.Writer, v interface{}) error {
 				report := [][]string{{term.Bold("URN"), term.Bold("NAME")}}
 				for _, f := range firehoses {
 					report = append(report, []string{f.Urn, f.Name})
 				}
-
-				fmt.Printf("Showing %d firehoses\n", len(firehoses))
-				printer.Table(os.Stdout, report)
+				_, _ = fmt.Fprintf(w, "Showing %d firehoses\n", len(firehoses))
+				printer.Table(w, report)
 				return nil
 			})
 		},
 	}
 	return cmd
+}
+
+func listFirehoses(cmd *cobra.Command, prjSlug string) ([]*models.Firehose, error) {
+	spinner := printer.Spin(fmt.Sprintf("Fetching firehoses in project '%s'", prjSlug))
+	defer spinner.Stop()
+
+	params := operations.ListFirehosesParams{
+		ProjectSlug: prjSlug,
+	}
+
+	dexAPI := initClient(cmd)
+	res, err := dexAPI.Operations.ListFirehoses(&params)
+	if err != nil {
+		return nil, err
+	}
+	return res.GetPayload().Items, nil
 }

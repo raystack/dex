@@ -1,9 +1,13 @@
 package firehoses
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 )
 
@@ -36,4 +40,23 @@ func Commands() *cobra.Command {
 
 	cmd.PersistentFlags().DurationP("timeout", "T", 10*time.Second, "Timeout for the operation")
 	return cmd
+}
+
+func readYAMLFile(filePath string, into interface{}) error {
+	b, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	jsonB, err := yaml.YAMLToJSON(b)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(jsonB, into)
+}
+
+func generateFirehoseURN(project, name string) string {
+	parts := []string{"orn", "entropy", "firehose", project, name}
+	return strings.Join(parts, ":")
 }
