@@ -26,7 +26,7 @@ func applyCommand() *cobra.Command {
 				return err
 			}
 
-			var notFoundErr operations.GetFirehoseNotFound
+			notFoundErr := &operations.GetFirehoseNotFound{}
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
 			existing, err := getFirehose(cmd, args[0], urn)
 			if err != nil && !errors.As(err, &notFoundErr) {

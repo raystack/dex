@@ -27,8 +27,8 @@ func upgradeCommand() *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cmd)
-			modifiedFirehose, err := client.Operations.UpgradeFirehose(params)
+			dexAPI := initClient(cmd)
+			modifiedFirehose, err := dexAPI.Operations.UpgradeFirehose(params)
 			if err != nil {
 				return err
 			}

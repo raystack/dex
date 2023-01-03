@@ -33,7 +33,7 @@ func logsCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd)
+			dexAPI := initClient(cmd)
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],
@@ -60,7 +60,7 @@ func logsCommand() *cobra.Command {
 			}
 
 			reader, writer := io.Pipe()
-			_, err := client.Operations.GetFirehoseLogs(params, writer)
+			_, err := dexAPI.Operations.GetFirehoseLogs(params, writer)
 			if err != nil {
 				return err
 			}
