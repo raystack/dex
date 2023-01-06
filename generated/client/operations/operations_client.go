@@ -282,7 +282,7 @@ func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer
 		ID:                 "getFirehoseLogs",
 		Method:             "GET",
 		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/logs",
-		ProducesMediaTypes: []string{"application/x-ndjson"},
+		ProducesMediaTypes: []string{"application/x-ndjson", "text/plain"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,

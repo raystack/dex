@@ -24,14 +24,16 @@ type swaggerParams interface {
 type swaggerTransport struct {
 	runtime.ClientTransport
 
-	Context context.Context
-	Timeout time.Duration
+	Context    context.Context
+	Timeout    time.Duration
+	noDeadline bool
 }
 
 func (tr *swaggerTransport) Submit(operation *runtime.ClientOperation) (interface{}, error) {
 	if params, ok := operation.Params.(swaggerParams); ok {
-		params.SetDefaults()
-		params.SetTimeout(tr.Timeout)
+		if !tr.noDeadline {
+			params.SetTimeout(tr.Timeout)
+		}
 		params.SetContext(tr.Context)
 	}
 	return tr.ClientTransport.Submit(operation)
@@ -50,9 +52,12 @@ func initClient(cmd *cobra.Command) *client.DexAPI {
 
 	r := httptransport.New(cfg.Host, "/api", client.DefaultSchemes)
 	r.Context = cmd.Context()
+	r.Consumers["application/x-ndjson"] = runtime.ByteStreamConsumer()
 	r.DefaultAuthentication = httptransport.BearerToken(accessToken)
 	r.EnableConnectionReuse()
-	return client.New(newSwaggerTransport(cmd, r), strfmt.Default)
+
+	customTr := newSwaggerTransport(cmd, r)
+	return client.New(customTr, strfmt.Default)
 }
 
 func newSwaggerTransport(cmd *cobra.Command, r runtime.ClientTransport) *swaggerTransport {

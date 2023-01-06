@@ -575,6 +575,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/x-ndjson")
 		w.Header().Set("Transfer-Encoding", "chunked")
 
 		for {
@@ -584,6 +585,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 					flusher.Flush()
 					return
 				}
+
 				st := status.Convert(err)
 				if st.Code() == codes.NotFound {
 					utils.WriteErr(w, errors.ErrNotFound)

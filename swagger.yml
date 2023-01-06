@@ -434,6 +434,7 @@ paths:
       operationId: getFirehoseLogs
       produces:
         - "application/x-ndjson"
+        - "text/plain"
       parameters:
         - in: query
           name: pod
