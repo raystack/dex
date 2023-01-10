@@ -2,7 +2,7 @@ package firehoses
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -43,7 +43,7 @@ func Commands() *cobra.Command {
 }
 
 func readYAMLFile(filePath string, into interface{}) error {
-	b, err := ioutil.ReadFile(filePath)
+	b, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}

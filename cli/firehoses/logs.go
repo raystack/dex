@@ -33,7 +33,7 @@ func logsCommand() *cobra.Command {
 			if follow {
 				_ = cmd.Flags().Set("timeout", "10m")
 			}
-			
+
 			dexAPI := initClient(cmd)
 
 			params := &operations.GetFirehoseLogsParams{
