@@ -532,6 +532,7 @@ func getFirehoseHistory(ctx context.Context, client entropyv1beta1.ResourceServi
 		}
 
 		rd.Labels = revision.GetLabels()
+		rd.Reason = revision.GetReason()
 		rd.Diff = json.RawMessage(specDiff)
 		rd.UpdatedAt = revision.GetCreatedAt().AsTime()
 		rh = append(rh, rd)

@@ -1316,8 +1316,8 @@ go.buf.build/odpf/gwv/envoyproxy/protoc-gen-validate v1.1.7 h1:wYwJQOy357I7Zw66i
 go.buf.build/odpf/gwv/envoyproxy/protoc-gen-validate v1.1.7/go.mod h1:2Tg6rYIoDhpl39Zd2+WBOF9uG4XxAOs0bK2Z2/bwTOc=
 go.buf.build/odpf/gwv/grpc-ecosystem/grpc-gateway v1.1.46 h1:ZQzdKpKbzL8o41XHSEFDJkoT5whqFTysbr34xwwVC90=
 go.buf.build/odpf/gwv/grpc-ecosystem/grpc-gateway v1.1.46/go.mod h1:UrBCdmHgaY/pLapYUMOq01c1yuzwT8AEBTsgpmzq2zo=
-go.buf.build/odpf/gwv/odpf/proton v1.1.135 h1:SgbOZTcOtw2SN99Wr+ezExk7MYgmQQ6O277GElvaHzI=
-go.buf.build/odpf/gwv/odpf/proton v1.1.135/go.mod h1:V6NNZKrRPHjMkIPiSXvwUHks0D8bUGPXAjXUaujG/90=
+go.buf.build/odpf/gwv/odpf/proton v1.1.172 h1:cGk4ctsVhBK4d6mV+QVrJD0rWkXtDO+ogCA8l3BCkhk=
+go.buf.build/odpf/gwv/odpf/proton v1.1.172/go.mod h1:V6NNZKrRPHjMkIPiSXvwUHks0D8bUGPXAjXUaujG/90=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=

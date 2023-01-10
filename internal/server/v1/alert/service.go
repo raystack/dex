@@ -74,7 +74,7 @@ func (s *Service) ListAlerts(ctx context.Context, projectSlug string, resource s
 	}
 
 	alertsResp, err := s.Siren.ListAlerts(ctx, &sirenv1beta1.ListAlertsRequest{
-		ProviderName: alertProviderName,
+		ProviderType: alertProviderName,
 		ProviderId:   ns.Provider,
 		ResourceName: resource,
 	})

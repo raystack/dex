@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/yudai/gojsondiff v1.0.0
 	github.com/yudai/pp v2.0.1+incompatible
-	go.buf.build/odpf/gwv/odpf/proton v1.1.135
+	go.buf.build/odpf/gwv/odpf/proton v1.1.172
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/exp v0.0.0-20221111204811-129d8d6c17ab

@@ -88,6 +88,7 @@ type moduleConfigFirehoseDef struct {
 type revisionDiff struct {
 	Diff      json.RawMessage   `json:"diff"`
 	Labels    map[string]string `json:"labels"`
+	Reason    string            `json:"reason"`
 	UpdatedAt time.Time         `json:"updated_at"`
 }
 
