@@ -65,7 +65,7 @@ func resetOffsetCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&resetTo, "to", "T", "datetime", "Reset target (earliest, latest, datetime).")
+	cmd.Flags().StringVar(&resetTo, "to", "datetime", "Reset target (earliest, latest, datetime).")
 	cmd.Flags().StringVarP(&datetime, "datetime", "D", "", "Target timestamp in ISO8601 or Unix Epoch format.")
 	return cmd
 }
