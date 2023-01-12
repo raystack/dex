@@ -15,12 +15,20 @@ import (
 )
 
 func listCommand() *cobra.Command {
+	var sinkType, group, status string
 	cmd := &cobra.Command{
 		Use:   "list <project>",
 		Short: "List firehoses in the given project.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			firehoses, err := listFirehoses(cmd, args[0])
+			params := operations.ListFirehosesParams{
+				Group:       strPtrIfNonEmpty(group),
+				Status:      strPtrIfNonEmpty(status),
+				SinkType:    strPtrIfNonEmpty(sinkType),
+				ProjectSlug: args[0],
+			}
+
+			firehoses, err := listFirehoses(cmd, params)
 			if err != nil {
 				return errors.Errorf("failed to list: %s", err)
 			}
@@ -36,16 +44,17 @@ func listCommand() *cobra.Command {
 			})
 		},
 	}
+
+	flags := cmd.Flags()
+	flags.StringVarP(&group, "group", "G", "", "Consumer group to filter by")
+	flags.StringVarP(&sinkType, "sink-type", "S", "", "Sink type to filter")
+	flags.StringVarP(&status, "status", "s", "", "Status of the firehose deployment")
 	return cmd
 }
 
-func listFirehoses(cmd *cobra.Command, prjSlug string) ([]*models.Firehose, error) {
-	spinner := printer.Spin(fmt.Sprintf("Fetching firehoses in project '%s'", prjSlug))
+func listFirehoses(cmd *cobra.Command, params operations.ListFirehosesParams) ([]*models.Firehose, error) {
+	spinner := printer.Spin(fmt.Sprintf("Fetching firehoses in project '%s'", params.ProjectSlug))
 	defer spinner.Stop()
-
-	params := operations.ListFirehosesParams{
-		ProjectSlug: prjSlug,
-	}
 
 	dexAPI := initClient(cmd)
 	res, err := dexAPI.Operations.ListFirehoses(&params)
@@ -53,4 +62,11 @@ func listFirehoses(cmd *cobra.Command, prjSlug string) ([]*models.Firehose, erro
 		return nil, err
 	}
 	return res.GetPayload().Items, nil
+}
+
+func strPtrIfNonEmpty(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
