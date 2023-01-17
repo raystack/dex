@@ -15,16 +15,12 @@ import (
 )
 
 func listCommand() *cobra.Command {
-	var sinkType, group, status string
 	cmd := &cobra.Command{
 		Use:   "list <project>",
 		Short: "List firehoses in the given project.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			params := operations.ListFirehosesParams{
-				Group:       strPtrIfNonEmpty(group),
-				Status:      strPtrIfNonEmpty(status),
-				SinkType:    strPtrIfNonEmpty(sinkType),
 				ProjectSlug: args[0],
 			}
 
@@ -45,10 +41,6 @@ func listCommand() *cobra.Command {
 		},
 	}
 
-	flags := cmd.Flags()
-	flags.StringVarP(&group, "group", "G", "", "Consumer group to filter by")
-	flags.StringVarP(&sinkType, "sink-type", "S", "", "Sink type to filter")
-	flags.StringVarP(&status, "status", "s", "", "Status of the firehose deployment")
 	return cmd
 }
 
@@ -62,11 +54,4 @@ func listFirehoses(cmd *cobra.Command, params operations.ListFirehosesParams) ([
 		return nil, err
 	}
 	return res.GetPayload().Items, nil
-}
-
-func strPtrIfNonEmpty(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
 }
