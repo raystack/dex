@@ -19,12 +19,9 @@ import (
 // swagger:model Firehose
 type Firehose struct {
 
-	// cluster
-	// Example: data_engineering
-	Cluster string `json:"cluster,omitempty"`
-
 	// configs
-	Configs *FirehoseConfig `json:"configs,omitempty"`
+	// Required: true
+	Configs *FirehoseConfig `json:"configs"`
 
 	// created at
 	// Example: 2022-06-23T16:49:15.885541Z
@@ -36,17 +33,25 @@ type Firehose struct {
 	// Example: This firehose consumes from booking events and ingests to redis
 	Description string `json:"description,omitempty"`
 
+	// group
+	// Example: e144ea5e-c7d6-48c4-a580-db31cb3389aa
+	// Format: uuid
+	Group strfmt.UUID `json:"group,omitempty"`
+
+	// kube cluster
+	// Example: orn:entropy:kubernetes:sample_project:sample_name
+	KubeCluster string `json:"kube_cluster,omitempty"`
+
+	// metadata
+	// Read Only: true
+	Metadata *FirehoseMetadata `json:"metadata,omitempty"`
+
 	// name
 	// Example: booking-events-ingester
 	Name string `json:"name,omitempty"`
 
 	// state
 	State *FirehoseState `json:"state,omitempty"`
-
-	// team
-	// Example: pricing
-	// Read Only: true
-	Team string `json:"team,omitempty"`
 
 	// title
 	// Example: Booking Events Ingester
@@ -76,6 +81,14 @@ func (m *Firehose) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateGroup(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMetadata(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateState(formats); err != nil {
 		res = append(res, err)
 	}
@@ -91,8 +104,9 @@ func (m *Firehose) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Firehose) validateConfigs(formats strfmt.Registry) error {
-	if swag.IsZero(m.Configs) { // not required
-		return nil
+
+	if err := validate.Required("configs", "body", m.Configs); err != nil {
+		return err
 	}
 
 	if m.Configs != nil {
@@ -116,6 +130,37 @@ func (m *Firehose) validateCreatedAt(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Firehose) validateGroup(formats strfmt.Registry) error {
+	if swag.IsZero(m.Group) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("group", "body", "uuid", m.Group.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Firehose) validateMetadata(formats strfmt.Registry) error {
+	if swag.IsZero(m.Metadata) { // not required
+		return nil
+	}
+
+	if m.Metadata != nil {
+		if err := m.Metadata.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("metadata")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("metadata")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -164,11 +209,11 @@ func (m *Firehose) ContextValidate(ctx context.Context, formats strfmt.Registry)
 		res = append(res, err)
 	}
 
-	if err := m.contextValidateState(ctx, formats); err != nil {
+	if err := m.contextValidateMetadata(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.contextValidateTeam(ctx, formats); err != nil {
+	if err := m.contextValidateState(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -211,6 +256,22 @@ func (m *Firehose) contextValidateCreatedAt(ctx context.Context, formats strfmt.
 	return nil
 }
 
+func (m *Firehose) contextValidateMetadata(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Metadata != nil {
+		if err := m.Metadata.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("metadata")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("metadata")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Firehose) contextValidateState(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.State != nil {
@@ -222,15 +283,6 @@ func (m *Firehose) contextValidateState(ctx context.Context, formats strfmt.Regi
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *Firehose) contextValidateTeam(ctx context.Context, formats strfmt.Registry) error {
-
-	if err := validate.ReadOnly(ctx, "team", "body", string(m.Team)); err != nil {
-		return err
 	}
 
 	return nil

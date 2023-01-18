@@ -112,6 +112,8 @@ func handleCreateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			st := status.Convert(err)
 			if st.Code() == codes.AlreadyExists {
 				outErr = errors.ErrConflict.WithCausef(st.Message())
+			} else if st.Code() == codes.InvalidArgument {
+				outErr = errors.ErrInvalid.WithCausef(st.Message())
 			}
 
 			utils.WriteErr(w, outErr)
@@ -187,7 +189,6 @@ func handleUpdateFirehose(client entropyv1beta1.ResourceServiceClient, shieldCli
 			utils.WriteErr(w, err)
 			return
 		}
-
 		firehoseDef.Description = updReq.Description
 
 		rCtx := reqctx.From(r.Context())
@@ -531,6 +532,7 @@ func getFirehoseHistory(ctx context.Context, client entropyv1beta1.ResourceServi
 		}
 
 		rd.Labels = revision.GetLabels()
+		rd.Reason = revision.GetReason()
 		rd.Diff = json.RawMessage(specDiff)
 		rd.UpdatedAt = revision.GetCreatedAt().AsTime()
 		rh = append(rh, rd)
@@ -574,6 +576,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/x-ndjson")
 		w.Header().Set("Transfer-Encoding", "chunked")
 
 		for {
@@ -583,6 +586,7 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 					flusher.Flush()
 					return
 				}
+
 				st := status.Convert(err)
 				if st.Code() == codes.NotFound {
 					utils.WriteErr(w, errors.ErrNotFound)
@@ -830,7 +834,6 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 	} else if prj.GetProject().Slug != projectSlug {
 		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
-
 	return prj.GetProject(), nil
 }
 

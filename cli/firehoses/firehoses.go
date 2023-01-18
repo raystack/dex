@@ -1,16 +1,14 @@
 package firehoses
 
 import (
-	"log"
+	"encoding/json"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/MakeNowJust/heredoc"
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-
-	"github.com/odpf/dex/cli/auth"
-	"github.com/odpf/dex/cli/config"
-	"github.com/odpf/dex/generated/client"
 )
 
 func Commands() *cobra.Command {
@@ -39,22 +37,26 @@ func Commands() *cobra.Command {
 		upgradeCommand(),
 		resetOffsetCommand(),
 	)
+
+	cmd.PersistentFlags().DurationP("timeout", "T", 10*time.Second, "Timeout for the operation")
 	return cmd
 }
 
-func initClient(cmd *cobra.Command) *client.DexAPI {
-	cfg, err := config.Load()
+func readYAMLFile(filePath string, into interface{}) error {
+	b, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Fatalf("failed to load configs: %s", err)
+		return err
 	}
 
-	accessToken, err := auth.Token(cmd.Context())
+	jsonB, err := yaml.YAMLToJSON(b)
 	if err != nil {
-		log.Fatalf("failed to load configs: %s", err)
+		return err
 	}
 
-	r := httptransport.New(cfg.Host, "/api", client.DefaultSchemes)
-	r.Context = cmd.Context()
-	r.DefaultAuthentication = httptransport.BearerToken(accessToken)
-	return client.New(r, strfmt.Default)
+	return json.Unmarshal(jsonB, into)
+}
+
+func generateFirehoseURN(project, name string) string {
+	parts := []string{"orn", "entropy", "firehose", project, name}
+	return strings.Join(parts, ":")
 }

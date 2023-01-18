@@ -27,14 +27,14 @@ type firehoseDefinition struct {
 	KubeCluster string           `json:"kube_cluster"`
 	Configs     *firehoseConfigs `json:"configs,omitempty"`
 	State       *firehoseState   `json:"state,omitempty"`
-	metadata    *firehoseMetadata
+	Metadata    firehoseMetadata `json:"metadata"`
 }
 
 type firehoseMetadata struct {
-	CreatedBy      string
-	CreatedByEmail string
-	UpdatedBy      string
-	UpdatedByEmail string
+	CreatedBy      string `json:"created_by"`
+	CreatedByEmail string `json:"created_by_email"`
+	UpdatedBy      string `json:"updated_by"`
+	UpdatedByEmail string `json:"updated_by_email"`
 }
 
 type firehoseConfigs struct {
@@ -72,26 +72,31 @@ type firehoseLabels struct {
 type moduleConfig struct {
 	State        string                  `json:"state"`
 	ChartVersion string                  `json:"chart_version"`
-	StopTime     *time.Time              `json:"stop_time"`
+	StopTime     time.Time               `json:"stop_time"`
 	Telegraf     map[string]interface{}  `json:"telegraf"`
 	Firehose     moduleConfigFirehoseDef `json:"firehose"`
 }
 
 type moduleConfigFirehoseDef struct {
-	Replicas           int               `json:"replicas"`
-	KafkaBrokerAddress string            `json:"kafka_broker_address"`
-	KafkaTopic         string            `json:"kafka_topic"`
-	KafkaConsumerID    string            `json:"kafka_consumer_id"`
-	EnvVariables       map[string]string `json:"env_variables"`
+	Replicas           int               `json:"replicas,omitempty"`
+	KafkaBrokerAddress string            `json:"kafka_broker_address,omitempty"`
+	KafkaTopic         string            `json:"kafka_topic,omitempty"`
+	KafkaConsumerID    string            `json:"kafka_consumer_id,omitempty"`
+	EnvVariables       map[string]string `json:"env_variables,omitempty"`
 }
 
 type revisionDiff struct {
 	Diff      json.RawMessage   `json:"diff"`
 	Labels    map[string]string `json:"labels"`
+	Reason    string            `json:"reason"`
 	UpdatedAt time.Time         `json:"updated_at"`
 }
 
 func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
+	if def.Configs == nil {
+		return nil, errors.ErrInvalid.WithMsgf("configs must be set")
+	}
+
 	cfg, err := def.Configs.toConfigStruct(prj)
 	if err != nil {
 		return nil, errors.ErrInternal.WithCausef(err.Error())
@@ -159,7 +164,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 		UpdatedAt:   res.GetUpdatedAt().AsTime(),
 		Description: labels.Description,
 		KubeCluster: kubeCluster,
-		metadata: &firehoseMetadata{
+		Metadata: firehoseMetadata{
 			CreatedBy:      labels.CreatedBy,
 			CreatedByEmail: labels.CreatedByEmail,
 			UpdatedBy:      labels.UpdatedBy,
@@ -174,7 +179,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 			EnvVars:               modConf.Firehose.EnvVariables,
 			Replicas:              modConf.Firehose.Replicas,
 			SinkType:              modConf.Firehose.EnvVariables["SINK_TYPE"],
-			StopDate:              modConf.StopTime,
+			StopDate:              &modConf.StopTime,
 			Namespace:             firehoseNamespace,
 			TopicName:             modConf.Firehose.KafkaTopic,
 			StreamName:            modConf.Firehose.EnvVariables["STREAM_NAME"],
@@ -197,14 +202,14 @@ func (fd firehoseDefinition) getLabels() firehoseLabels {
 		Title:          fd.Title,
 		Group:          fd.Group,
 		Description:    fd.Description,
-		CreatedBy:      fd.metadata.CreatedBy,
-		CreatedByEmail: fd.metadata.CreatedByEmail,
-		UpdatedBy:      fd.metadata.UpdatedBy,
-		UpdatedByEmail: fd.metadata.UpdatedByEmail,
+		CreatedBy:      fd.Metadata.CreatedBy,
+		CreatedByEmail: fd.Metadata.CreatedByEmail,
+		UpdatedBy:      fd.Metadata.UpdatedBy,
+		UpdatedByEmail: fd.Metadata.UpdatedByEmail,
 	}
 }
 
-func (fl firehoseLabels) toMap() (map[string]string, error) {
+func (fl *firehoseLabels) toMap() (map[string]string, error) {
 	result := map[string]string{}
 	err := mapstructure.Decode(fl, &result)
 	if err != nil {
@@ -232,22 +237,25 @@ func (fl *firehoseLabels) setCreatedBy(ctx reqctx.ReqCtx) {
 	fl.CreatedByEmail = ctx.UserEmail
 }
 
-func (fc firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
+func (fc *firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
 	const defaultState = "RUNNING"
 
 	metadata := prj.GetMetadata().AsMap()
-	telegrafConf, _ := metadata["telegraf"].(map[string]interface{})
+	telegrafConf, ok := metadata["telegraf"].(map[string]interface{})
+	if !ok || len(telegrafConf) == 0 {
+		telegrafConf = map[string]interface{}{"enabled": false}
+	}
 
 	return toProtobufStruct(moduleConfig{
 		State:    defaultState,
-		StopTime: fc.StopDate,
+		StopTime: time.Now().Add(10 * time.Hour),
 		Telegraf: telegrafConf,
 		Firehose: moduleConfigFirehoseDef{
 			Replicas:           fc.Replicas,
-			KafkaBrokerAddress: fc.BootstrapServers,
 			KafkaTopic:         fc.TopicName,
-			KafkaConsumerID:    fc.ConsumerGroupID,
 			EnvVariables:       fc.EnvVars,
+			KafkaConsumerID:    fc.ConsumerGroupID,
+			KafkaBrokerAddress: fc.BootstrapServers,
 		},
 	})
 }

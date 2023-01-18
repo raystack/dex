@@ -27,8 +27,8 @@ func startCommand() *cobra.Command {
 				Body:        struct{}{},
 			}
 
-			client := initClient(cmd)
-			modifiedFirehose, err := client.Operations.StartFirehose(params)
+			dexAPI := initClient(cmd)
+			modifiedFirehose, err := dexAPI.Operations.StartFirehose(params)
 			if err != nil {
 				return err
 			}

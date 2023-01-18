@@ -313,15 +313,19 @@ swagger:model UpdateFirehoseBody
 */
 type UpdateFirehoseBody struct {
 
-	// config
-	Config *models.FirehoseConfig `json:"config,omitempty"`
+	// configs
+	Configs *models.FirehoseConfig `json:"configs,omitempty"`
+
+	// description
+	// Example: This firehose consumes from booking events and ingests to redis
+	Description string `json:"description,omitempty"`
 }
 
 // Validate validates this update firehose body
 func (o *UpdateFirehoseBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateConfig(formats); err != nil {
+	if err := o.validateConfigs(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -331,17 +335,17 @@ func (o *UpdateFirehoseBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *UpdateFirehoseBody) validateConfig(formats strfmt.Registry) error {
-	if swag.IsZero(o.Config) { // not required
+func (o *UpdateFirehoseBody) validateConfigs(formats strfmt.Registry) error {
+	if swag.IsZero(o.Configs) { // not required
 		return nil
 	}
 
-	if o.Config != nil {
-		if err := o.Config.Validate(formats); err != nil {
+	if o.Configs != nil {
+		if err := o.Configs.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "config")
+				return ve.ValidateName("body" + "." + "configs")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("body" + "." + "config")
+				return ce.ValidateName("body" + "." + "configs")
 			}
 			return err
 		}
@@ -354,7 +358,7 @@ func (o *UpdateFirehoseBody) validateConfig(formats strfmt.Registry) error {
 func (o *UpdateFirehoseBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.contextValidateConfig(ctx, formats); err != nil {
+	if err := o.contextValidateConfigs(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -364,14 +368,14 @@ func (o *UpdateFirehoseBody) ContextValidate(ctx context.Context, formats strfmt
 	return nil
 }
 
-func (o *UpdateFirehoseBody) contextValidateConfig(ctx context.Context, formats strfmt.Registry) error {
+func (o *UpdateFirehoseBody) contextValidateConfigs(ctx context.Context, formats strfmt.Registry) error {
 
-	if o.Config != nil {
-		if err := o.Config.ContextValidate(ctx, formats); err != nil {
+	if o.Configs != nil {
+		if err := o.Configs.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("body" + "." + "config")
+				return ve.ValidateName("body" + "." + "configs")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("body" + "." + "config")
+				return ce.ValidateName("body" + "." + "configs")
 			}
 			return err
 		}

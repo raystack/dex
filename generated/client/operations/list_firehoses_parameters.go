@@ -61,11 +61,17 @@ ListFirehosesParams contains all the parameters to send to the API endpoint
 */
 type ListFirehosesParams struct {
 
-	/* Cluster.
+	/* Group.
 
-	   Return firehoses belonging to only this cluster.
+	   Return firehoses belonging to only this group.
 	*/
-	Cluster *string
+	Group *string
+
+	/* KubeCluster.
+
+	   Return firehoses belonging to only this kubernetes cluster.
+	*/
+	KubeCluster *string
 
 	/* ProjectSlug.
 
@@ -92,12 +98,6 @@ type ListFirehosesParams struct {
 
 	*/
 	StreamName *string
-
-	/* Team.
-
-	   Return firehoses belonging to only this team.
-	*/
-	Team *string
 
 	/* TopicName.
 
@@ -158,15 +158,26 @@ func (o *ListFirehosesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithCluster adds the cluster to the list firehoses params
-func (o *ListFirehosesParams) WithCluster(cluster *string) *ListFirehosesParams {
-	o.SetCluster(cluster)
+// WithGroup adds the group to the list firehoses params
+func (o *ListFirehosesParams) WithGroup(group *string) *ListFirehosesParams {
+	o.SetGroup(group)
 	return o
 }
 
-// SetCluster adds the cluster to the list firehoses params
-func (o *ListFirehosesParams) SetCluster(cluster *string) {
-	o.Cluster = cluster
+// SetGroup adds the group to the list firehoses params
+func (o *ListFirehosesParams) SetGroup(group *string) {
+	o.Group = group
+}
+
+// WithKubeCluster adds the kubeCluster to the list firehoses params
+func (o *ListFirehosesParams) WithKubeCluster(kubeCluster *string) *ListFirehosesParams {
+	o.SetKubeCluster(kubeCluster)
+	return o
+}
+
+// SetKubeCluster adds the kubeCluster to the list firehoses params
+func (o *ListFirehosesParams) SetKubeCluster(kubeCluster *string) {
+	o.KubeCluster = kubeCluster
 }
 
 // WithProjectSlug adds the projectSlug to the list firehoses params
@@ -213,17 +224,6 @@ func (o *ListFirehosesParams) SetStreamName(streamName *string) {
 	o.StreamName = streamName
 }
 
-// WithTeam adds the team to the list firehoses params
-func (o *ListFirehosesParams) WithTeam(team *string) *ListFirehosesParams {
-	o.SetTeam(team)
-	return o
-}
-
-// SetTeam adds the team to the list firehoses params
-func (o *ListFirehosesParams) SetTeam(team *string) {
-	o.Team = team
-}
-
 // WithTopicName adds the topicName to the list firehoses params
 func (o *ListFirehosesParams) WithTopicName(topicName *string) *ListFirehosesParams {
 	o.SetTopicName(topicName)
@@ -243,18 +243,35 @@ func (o *ListFirehosesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	}
 	var res []error
 
-	if o.Cluster != nil {
+	if o.Group != nil {
 
-		// query param cluster
-		var qrCluster string
+		// query param group
+		var qrGroup string
 
-		if o.Cluster != nil {
-			qrCluster = *o.Cluster
+		if o.Group != nil {
+			qrGroup = *o.Group
 		}
-		qCluster := qrCluster
-		if qCluster != "" {
+		qGroup := qrGroup
+		if qGroup != "" {
 
-			if err := r.SetQueryParam("cluster", qCluster); err != nil {
+			if err := r.SetQueryParam("group", qGroup); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.KubeCluster != nil {
+
+		// query param kube_cluster
+		var qrKubeCluster string
+
+		if o.KubeCluster != nil {
+			qrKubeCluster = *o.KubeCluster
+		}
+		qKubeCluster := qrKubeCluster
+		if qKubeCluster != "" {
+
+			if err := r.SetQueryParam("kube_cluster", qKubeCluster); err != nil {
 				return err
 			}
 		}
@@ -311,23 +328,6 @@ func (o *ListFirehosesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		if qStreamName != "" {
 
 			if err := r.SetQueryParam("stream_name", qStreamName); err != nil {
-				return err
-			}
-		}
-	}
-
-	if o.Team != nil {
-
-		// query param team
-		var qrTeam string
-
-		if o.Team != nil {
-			qrTeam = *o.Team
-		}
-		qTeam := qrTeam
-		if qTeam != "" {
-
-			if err := r.SetQueryParam("team", qTeam); err != nil {
 				return err
 			}
 		}

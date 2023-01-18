@@ -34,7 +34,7 @@ func viewCommand() *cobra.Command {
 			project := res.GetPayload()
 			spinner.Stop()
 
-			return cdk.Display(cmd, project, nil)
+			return cdk.Display(cmd, project, cdk.YAMLFormat)
 		},
 	}
 

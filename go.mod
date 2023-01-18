@@ -7,6 +7,7 @@ require (
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
 	github.com/BurntSushi/toml v0.3.1
 	github.com/MakeNowJust/heredoc v1.0.0
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/runtime v0.24.1
 	github.com/go-openapi/strfmt v0.21.3
@@ -23,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/yudai/gojsondiff v1.0.0
 	github.com/yudai/pp v2.0.1+incompatible
-	go.buf.build/odpf/gwv/odpf/proton v1.1.135
+	go.buf.build/odpf/gwv/odpf/proton v1.1.172
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/exp v0.0.0-20221111204811-129d8d6c17ab

@@ -20,13 +20,17 @@ import (
 // swagger:model ErrorResponse
 type ErrorResponse struct {
 
+	// cause
+	// Example: name must not be empty
+	Cause string `json:"cause,omitempty"`
+
 	// code
 	// Example: internal_error
 	// Enum: [conflict not_found bad_request internal_error]
 	Code string `json:"code,omitempty"`
 
 	// message
-	// Example: Something went wrong
+	// Example: Request is invalid
 	Message string `json:"message,omitempty"`
 }
 

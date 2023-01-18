@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 
-	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
 
 	"github.com/odpf/dex/generated/client/operations"
@@ -30,10 +30,11 @@ func logsCommand() *cobra.Command {
 		Short: "Stream logs from the given firehose processes",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			spinner := printer.Spin("")
-			defer spinner.Stop()
+			if follow {
+				_ = cmd.Flags().Set("timeout", "10m")
+			}
 
-			client := initClient(cmd)
+			dexAPI := initClient(cmd)
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],
@@ -60,18 +61,18 @@ func logsCommand() *cobra.Command {
 			}
 
 			reader, writer := io.Pipe()
-			_, err := client.Operations.GetFirehoseLogs(params, writer)
-			if err != nil {
-				return err
-			}
 
-			onLog := func(chunk logChunk) {
-				fmt.Println(chunk)
-			}
-			if err := streamLogs(cmd.Context(), reader, onLog); err != nil {
-				return err
-			}
-			return nil
+			go func() {
+				onLog := func(chunk logChunk) {
+					fmt.Print(string(chunk.Data))
+				}
+				if err := streamLogs(cmd.Context(), reader, onLog); err != nil {
+					log.Printf("failed: %v", err)
+				}
+			}()
+
+			_, err := dexAPI.Operations.GetFirehoseLogs(params, writer)
+			return err
 		},
 	}
 
@@ -81,7 +82,7 @@ func logsCommand() *cobra.Command {
 	flags.Int64Var(&since, "since", 0, "Fetch logs since (seconds since unix epoch)")
 	flags.Int64VarP(&tailCount, "lines", "n", 0, "Fetch last n lines")
 	flags.BoolVarP(&follow, "follow", "f", false, "Stream logs continuously until manual exit")
-	flags.BoolVarP(&timestamps, "timestamp", "T", false, "Show timestamps")
+	flags.BoolVarP(&timestamps, "timestamp", "t", false, "Show timestamps")
 	flags.BoolVarP(&previous, "previous", "P", false, "Fetch available logs for previous generation")
 
 	return cmd

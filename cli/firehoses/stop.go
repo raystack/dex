@@ -20,14 +20,14 @@ func stopCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd)
+			dexAPI := initClient(cmd)
 			params := &operations.StopFirehoseParams{
 				FirehoseUrn: args[1],
 				ProjectSlug: args[0],
 				Body:        struct{}{},
 			}
 
-			modifiedFirehose, err := client.Operations.StopFirehose(params)
+			modifiedFirehose, err := dexAPI.Operations.StopFirehose(params)
 			if err != nil {
 				return err
 			}

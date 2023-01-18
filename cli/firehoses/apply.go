@@ -1,13 +1,11 @@
 package firehoses
 
 import (
-	"os"
-	"strings"
-	"time"
+	"fmt"
+	"io"
 
 	"github.com/odpf/salt/printer"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 
 	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
@@ -23,59 +21,42 @@ func applyCommand() *cobra.Command {
 		Short: "Create/Update a firehose as described in a file",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			spinner := printer.Spin("")
-			defer spinner.Stop()
-			client := initClient(cmd)
-
 			var firehoseDef models.Firehose
 			if err := readYAMLFile(args[1], &firehoseDef); err != nil {
 				return err
 			}
 
-			urn := generateFirehoseURN(args[0], firehoseDef.Name)
-			getParams := &operations.GetFirehoseParams{ProjectSlug: args[0], FirehoseUrn: urn}
-			getParams.WithTimeout(10 * time.Second)
-
-			resp, err := client.Operations.GetFirehose(getParams)
 			notFoundErr := &operations.GetFirehoseNotFound{}
+			urn := generateFirehoseURN(args[0], firehoseDef.Name)
+			existing, err := getFirehose(cmd, args[0], urn)
 			if err != nil && !errors.As(err, &notFoundErr) {
 				return err
 			}
+			isUpdate := existing != nil
 
 			var finalVersion *models.Firehose
-			if resp != nil {
-				// Firehose already exists. Treat this as an update.
-				existing := resp.GetPayload()
-				params := &operations.UpdateFirehoseParams{
-					ProjectSlug: args[0],
-					FirehoseUrn: existing.Urn,
-					Body: operations.UpdateFirehoseBody{
-						Config: firehoseDef.Configs,
-					},
+			if isUpdate {
+				finalVersion, err = updateFirehose(cmd, args[0], *existing, firehoseDef)
+				if err != nil {
+					return errors.Errorf("update failed: %s", err)
 				}
-				params.WithTimeout(10 * time.Second)
-
-				updated, updateErr := client.Operations.UpdateFirehose(params)
-				if updateErr != nil {
-					return updateErr
-				}
-				finalVersion = updated.GetPayload()
 			} else {
 				// Firehose does not already exist. Treat this as create.
-				params := &operations.CreateFirehoseParams{
-					Body:        &firehoseDef,
-					ProjectSlug: args[0],
+				finalVersion, err = createFirehose(cmd, args[0], firehoseDef)
+				if err != nil {
+					return errors.Errorf("create failed: %s", err)
 				}
-				params.WithTimeout(10 * time.Second)
-
-				created, createErr := client.Operations.CreateFirehose(params)
-				if createErr != nil {
-					return createErr
-				}
-				finalVersion = created.GetPayload()
 			}
 
-			return cdk.Display(cmd, finalVersion, cdk.YAMLFormat)
+			return cdk.Display(cmd, finalVersion, func(w io.Writer, v any) error {
+				msg := "Create request placed"
+				if isUpdate {
+					msg = "Update request placed"
+				}
+				_, err := fmt.Fprintf(w, "%s.\nUse `dex firehose view %s %s` to check status.\n",
+					msg, args[0], finalVersion.Urn)
+				return err
+			})
 		},
 	}
 
@@ -83,17 +64,41 @@ func applyCommand() *cobra.Command {
 	return cmd
 }
 
-func readYAMLFile(filePath string, into interface{}) error {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func createFirehose(cmd *cobra.Command, prjSlug string, def models.Firehose) (*models.Firehose, error) {
+	spinner := printer.Spin("Creating new firehose")
+	defer spinner.Stop()
 
-	return yaml.NewDecoder(f).Decode(into)
+	// Firehose does not already exist. Treat this as create.
+	params := &operations.CreateFirehoseParams{
+		Body:        &def,
+		ProjectSlug: prjSlug,
+	}
+
+	dexAPI := initClient(cmd)
+	created, createErr := dexAPI.Operations.CreateFirehose(params)
+	if createErr != nil {
+		return nil, createErr
+	}
+	return created.GetPayload(), nil
 }
 
-func generateFirehoseURN(project, name string) string {
-	parts := []string{"orn", "entropy", "firehose", project, name}
-	return strings.Join(parts, ":")
+func updateFirehose(cmd *cobra.Command, prjSlug string, existing, updated models.Firehose) (*models.Firehose, error) {
+	spinner := printer.Spin(fmt.Sprintf("Updating %s", existing.Urn))
+	defer spinner.Stop()
+
+	params := &operations.UpdateFirehoseParams{
+		ProjectSlug: prjSlug,
+		FirehoseUrn: existing.Urn,
+		Body: operations.UpdateFirehoseBody{
+			Configs:     updated.Configs,
+			Description: updated.Description,
+		},
+	}
+
+	dexAPI := initClient(cmd)
+	updateResp, updateErr := dexAPI.Operations.UpdateFirehose(params)
+	if updateErr != nil {
+		return nil, updateErr
+	}
+	return updateResp.GetPayload(), nil
 }
