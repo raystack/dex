@@ -243,8 +243,11 @@ func (fc *firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb
 	metadata := prj.GetMetadata().AsMap()
 	var telegrafConf map[string]interface{}
 	telegrafConfString, ok := metadata["telegraf"].(string)
-	err := json.Unmarshal([]byte(telegrafConfString), &telegrafConf)
-	if !ok || len(telegrafConf) == 0 || err != nil {
+	if ok {
+		_ = json.Unmarshal([]byte(telegrafConfString), &telegrafConf)
+	}
+
+	if len(telegrafConf) == 0 {
 		telegrafConf = map[string]interface{}{"enabled": false}
 	}
 

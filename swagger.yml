@@ -106,6 +106,7 @@ paths:
             - "PROMETHEUS"
             - "BIGQUERY"
             - "BLOB"
+            - "BIGTABLE"
           required: false
           description: Return firehoses with this sink type.
       responses:
