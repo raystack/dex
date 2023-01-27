@@ -89,7 +89,6 @@ func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap
 	}
 
 	return server.Serve(ctx, cfg.Service.Addr(), nrApp, zapLog,
-		cfg.Entropy.FirehoseVersion,
 		shieldv1beta1.NewShieldServiceClient(shieldConn),
 		entropyv1beta1.NewResourceServiceClient(entropyConn),
 		sirenv1beta1.NewSirenServiceClient(sirenConn),

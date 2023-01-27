@@ -26,8 +26,7 @@ type shieldConfig struct {
 }
 
 type entropyConfig struct {
-	Addr            string `mapstructure:"addr"`
-	FirehoseVersion string `mapstructure:"firehose_version"`
+	Addr string `mapstructure:"addr"`
 }
 
 type sirenConfig struct {

@@ -608,38 +608,32 @@ func handleGetFirehoseLogs(client entropyv1beta1.ResourceServiceClient) http.Han
 	}
 }
 
-func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient,
-	latestFirehoseVersion string,
-) http.HandlerFunc {
+func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pathVars := mux.Vars(r)
-		urn := pathVars[pathParamURN]
-
-		prj, err := getProject(r, shieldClient)
-		if err != nil {
-			utils.WriteErr(w, err)
-			return
-		}
+		ctx := r.Context()
+		urn := mux.Vars(r)[pathParamURN]
 
 		// Ensure that the URN refers to a valid firehose resource.
-		cur, err := getFirehoseResource(r.Context(), client, urn)
+		firehoseDef, err := getFirehoseResource(ctx, client, urn)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
-		} else if cur.Configs.Version == latestFirehoseVersion {
-			utils.WriteJSON(w, http.StatusNoContent, nil)
+		}
+
+		var reqBody struct{}
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			utils.WriteErr(w, errors.ErrInvalid.WithMsgf("invalid json body").WithCausef(err.Error()))
 			return
 		}
 
-		cur.Configs.Version = latestFirehoseVersion
-		cfgStruct, err := cur.Configs.toConfigStruct(prj)
+		paramsStruct, err := toProtobufStruct(reqBody)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
 
 		rCtx := reqctx.From(r.Context())
-		labels := cur.getLabels()
+		labels := firehoseDef.getLabels()
 		labels.setUpdatedBy(rCtx)
 		labelMap, err := labels.toMap()
 		if err != nil {
@@ -647,15 +641,14 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 			return
 		}
 
-		rpcReq := &entropyv1beta1.UpdateResourceRequest{
+		rpcReq := &entropyv1beta1.ApplyActionRequest{
 			Urn:    urn,
+			Action: actionUpgrade,
+			Params: paramsStruct,
 			Labels: labelMap,
-			NewSpec: &entropyv1beta1.ResourceSpec{
-				Configs: cfgStruct,
-			},
 		}
 
-		rpcResp, err := client.UpdateResource(r.Context(), rpcReq)
+		rpcResp, err := client.ApplyAction(ctx, rpcReq)
 		if err != nil {
 			st := status.Convert(err)
 			if st.Code() == codes.InvalidArgument {
@@ -670,7 +663,7 @@ func handleUpgradeFirehose(client entropyv1beta1.ResourceServiceClient, shieldCl
 			return
 		}
 
-		firehoseDef, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+		firehoseDef, err = mapResourceToFirehose(rpcResp.GetResource(), false)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return

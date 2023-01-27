@@ -21,6 +21,7 @@ const (
 	actionScale       = "scale"
 	actionStart       = "start"
 	actionResetOffset = "reset"
+	actionUpgrade     = "upgrade"
 
 	// shield header names.
 	// Refer https://github.com/odpf/shield
@@ -28,7 +29,7 @@ const (
 )
 
 func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient,
-	sirenClient sirenv1beta1.SirenServiceClient, latestFirehoseVersion string,
+	sirenClient sirenv1beta1.SirenServiceClient,
 ) {
 	alertSvc := &alertsv1.Service{Siren: sirenClient}
 
@@ -46,7 +47,7 @@ func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldCl
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/scale", handleScaleFirehose(client)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/start", handleStartOrStop(client, shieldClient, alertSvc, false)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/stop", handleStartOrStop(client, shieldClient, alertSvc, true)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/upgrade", handleUpgradeFirehose(client, shieldClient, latestFirehoseVersion)).Methods(http.MethodPost)
+	r.Handle("/projects/{projectSlug}/firehoses/{urn}/upgrade", handleUpgradeFirehose(client)).Methods(http.MethodPost)
 	r.Handle("/projects/{projectSlug}/firehoses/{urn}/logs", handleGetFirehoseLogs(client)).Methods(http.MethodGet)
 
 	// alert APIs

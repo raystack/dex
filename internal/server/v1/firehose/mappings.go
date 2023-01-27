@@ -39,7 +39,6 @@ type firehoseMetadata struct {
 
 type firehoseConfigs struct {
 	Image                 string            `json:"image"`
-	Version               string            `json:"version"`
 	EnvVars               map[string]string `json:"env_vars"`
 	Replicas              int               `json:"replicas"`
 	SinkType              string            `json:"sink_type"`
@@ -70,11 +69,10 @@ type firehoseLabels struct {
 }
 
 type moduleConfig struct {
-	State        string                  `json:"state"`
-	ChartVersion string                  `json:"chart_version"`
-	StopTime     time.Time               `json:"stop_time"`
-	Telegraf     map[string]interface{}  `json:"telegraf"`
-	Firehose     moduleConfigFirehoseDef `json:"firehose"`
+	State    string                  `json:"state"`
+	StopTime time.Time               `json:"stop_time"`
+	Telegraf map[string]interface{}  `json:"telegraf"`
+	Firehose moduleConfigFirehoseDef `json:"firehose"`
 }
 
 type moduleConfigFirehoseDef struct {
@@ -175,7 +173,6 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 	if !onlyMeta {
 		def.Configs = &firehoseConfigs{
 			Image:                 firehoseChart,
-			Version:               modConf.ChartVersion,
 			EnvVars:               modConf.Firehose.EnvVariables,
 			Replicas:              modConf.Firehose.Replicas,
 			SinkType:              modConf.Firehose.EnvVariables["SINK_TYPE"],

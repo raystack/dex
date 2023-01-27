@@ -724,7 +724,6 @@ definitions:
   FirehoseConfig:
     type: object
     required:
-      - image
       - stream_name
       - bootstrap_servers
       - consumer_group_id
@@ -733,8 +732,6 @@ definitions:
       - topic_name
       - input_schema_proto_class
     properties:
-      image:
-        type: string
       version:
         type: string
         readOnly: true
