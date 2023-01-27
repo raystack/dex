@@ -754,7 +754,6 @@ definitions:
       - bootstrap_servers
       - consumer_group_id
       - sink_type
-      - namespace
       - topic_name
       - input_schema_proto_class
     properties:
@@ -774,8 +773,6 @@ definitions:
       sink_type:
         $ref: "#/definitions/FirehoseSinkType"
       stop_date:
-        type: string
-      namespace:
         type: string
       topic_name:
         type: string

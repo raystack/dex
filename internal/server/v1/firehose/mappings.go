@@ -38,12 +38,10 @@ type firehoseMetadata struct {
 }
 
 type firehoseConfigs struct {
-	Image                 string            `json:"image"`
 	EnvVars               map[string]string `json:"env_vars"`
 	Replicas              int               `json:"replicas"`
 	SinkType              string            `json:"sink_type"`
 	StopDate              *time.Time        `json:"stop_date"`
-	Namespace             string            `json:"namespace"`
 	TopicName             string            `json:"topic_name"`
 	StreamName            string            `json:"stream_name"`
 	ConsumerGroupID       string            `json:"consumer_group_id"`
@@ -126,11 +124,6 @@ func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shie
 }
 
 func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*firehoseDefinition, error) {
-	const (
-		firehoseChart     = "odpf/firehose"
-		firehoseNamespace = "firehose"
-	)
-
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
@@ -172,12 +165,10 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*fireho
 
 	if !onlyMeta {
 		def.Configs = &firehoseConfigs{
-			Image:                 firehoseChart,
 			EnvVars:               modConf.Firehose.EnvVariables,
 			Replicas:              modConf.Firehose.Replicas,
 			SinkType:              modConf.Firehose.EnvVariables["SINK_TYPE"],
 			StopDate:              &modConf.StopTime,
-			Namespace:             firehoseNamespace,
 			TopicName:             modConf.Firehose.KafkaTopic,
 			StreamName:            modConf.Firehose.EnvVariables["STREAM_NAME"],
 			ConsumerGroupID:       modConf.Firehose.KafkaConsumerID,
