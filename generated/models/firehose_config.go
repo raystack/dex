@@ -30,10 +30,6 @@ type FirehoseConfig struct {
 	// env vars
 	EnvVars interface{} `json:"env_vars,omitempty"`
 
-	// image
-	// Required: true
-	Image *string `json:"image"`
-
 	// input schema proto class
 	// Required: true
 	InputSchemaProtoClass *string `json:"input_schema_proto_class"`
@@ -78,10 +74,6 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateImage(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateInputSchemaProtoClass(formats); err != nil {
 		res = append(res, err)
 	}
@@ -120,15 +112,6 @@ func (m *FirehoseConfig) validateBootstrapServers(formats strfmt.Registry) error
 func (m *FirehoseConfig) validateConsumerGroupID(formats strfmt.Registry) error {
 
 	if err := validate.Required("consumer_group_id", "body", m.ConsumerGroupID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *FirehoseConfig) validateImage(formats strfmt.Registry) error {
-
-	if err := validate.Required("image", "body", m.Image); err != nil {
 		return err
 	}
 

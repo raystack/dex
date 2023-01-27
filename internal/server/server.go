@@ -16,6 +16,7 @@ import (
 
 	"github.com/odpf/dex/internal/server/reqctx"
 	firehosesv1 "github.com/odpf/dex/internal/server/v1/firehose"
+	kubernetesv1 "github.com/odpf/dex/internal/server/v1/kubernetes"
 	projectsv1 "github.com/odpf/dex/internal/server/v1/project"
 )
 
@@ -43,6 +44,7 @@ func Serve(ctx context.Context, addr string, nrApp *newrelic.Application, logger
 	apiRouter := httpRouter.PathPrefix("/api/").Subrouter()
 	projectsv1.Routes(apiRouter, shieldClient)
 	firehosesv1.Routes(apiRouter, entropyClient, shieldClient, sirenClient)
+	kubernetesv1.Routes(apiRouter, entropyClient, shieldClient)
 
 	logger.Info("starting server", zap.String("addr", addr))
 	return mux.Serve(ctx, addr, mux.WithHTTP(httpRouter))
