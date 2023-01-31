@@ -106,6 +106,7 @@ paths:
             - "PROMETHEUS"
             - "BIGQUERY"
             - "BLOB"
+            - "BIGTABLE"
           required: false
           description: Return firehoses with this sink type.
       responses:
@@ -340,41 +341,6 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade:
-    parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
-      - in: path
-        type: string
-        name: firehoseUrn
-        description: URN of the firehose.
-        required: true
-    post:
-      summary: Upgrade the firehose to the latest version supported.
-      description: Upgrade the firehose to the latest version supported.
-      operationId: upgradeFirehose
-      parameters:
-        - in: body
-          name: body
-          schema:
-            type: object
-            properties: { }
-      responses:
-        "200":
-          description: Upgrade request accepted.
-          schema:
-            $ref: "#/definitions/Firehose"
-        "404":
-          description: Firehose with given URN was not found
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        "500":
-          description: internal error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
   /projects/{projectSlug}/firehoses/{firehoseUrn}/stop:
     parameters:
       - in: path
@@ -408,6 +374,41 @@ paths:
           description: Update request is not valid.
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade:
+    parameters:
+      - in: path
+        type: string
+        name: projectSlug
+        description: Identifier for the project.
+        required: true
+      - in: path
+        type: string
+        name: firehoseUrn
+        description: URN of the firehose.
+        required: true
+    post:
+      summary: Upgrade the firehose to the latest version supported.
+      description: Upgrade the firehose to the latest version supported.
+      operationId: upgradeFirehose
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties: { }
+      responses:
+        "200":
+          description: Upgrade request accepted.
+          schema:
+            $ref: "#/definitions/Firehose"
         "404":
           description: Firehose with given URN was not found
           schema:
@@ -615,6 +616,32 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /projects/{projectSlug}/kubernetes:
+    parameters:
+      - in: path
+        name: projectSlug
+        type: string
+        required: true
+        description: Unique identifier of the project.
+    get:
+      summary: Get list of kubernetes.
+      description: Get list of kubernetes in this project.
+      operationId: listKubernetes
+      parameters:
+        - in: query
+          name: tag
+          type: string
+          required: false
+          description: Return kubernetes clusters with given tag.
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/KubernetesArray"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
 definitions:
   ErrorResponse:
@@ -723,17 +750,13 @@ definitions:
   FirehoseConfig:
     type: object
     required:
-      - image
       - stream_name
       - bootstrap_servers
       - consumer_group_id
       - sink_type
-      - namespace
       - topic_name
       - input_schema_proto_class
     properties:
-      image:
-        type: string
       version:
         type: string
         readOnly: true
@@ -750,8 +773,6 @@ definitions:
       sink_type:
         $ref: "#/definitions/FirehoseSinkType"
       stop_date:
-        type: string
-      namespace:
         type: string
       topic_name:
         type: string
@@ -937,6 +958,34 @@ definitions:
         type: object
       reason:
         type: string
+      updated_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
+
+  KubernetesArray:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/Kubernetes"
+  Kubernetes:
+    type: object
+    properties:
+      urn:
+        type: string
+        example: "orn:foo:kubernetes:k8s1"
+        readOnly: true
+      name:
+        type: string
+        example: k8s1
+      created_at:
+        type: string
+        format: date-time
+        example: "2022-06-23T16:49:15.885541Z"
+        readOnly: true
       updated_at:
         type: string
         format: date-time

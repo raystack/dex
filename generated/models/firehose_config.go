@@ -30,17 +30,9 @@ type FirehoseConfig struct {
 	// env vars
 	EnvVars interface{} `json:"env_vars,omitempty"`
 
-	// image
-	// Required: true
-	Image *string `json:"image"`
-
 	// input schema proto class
 	// Required: true
 	InputSchemaProtoClass *string `json:"input_schema_proto_class"`
-
-	// namespace
-	// Required: true
-	Namespace *string `json:"namespace"`
 
 	// replicas
 	Replicas *float64 `json:"replicas,omitempty"`
@@ -78,15 +70,7 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateImage(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateInputSchemaProtoClass(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateNamespace(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -126,27 +110,9 @@ func (m *FirehoseConfig) validateConsumerGroupID(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *FirehoseConfig) validateImage(formats strfmt.Registry) error {
-
-	if err := validate.Required("image", "body", m.Image); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *FirehoseConfig) validateInputSchemaProtoClass(formats strfmt.Registry) error {
 
 	if err := validate.Required("input_schema_proto_class", "body", m.InputSchemaProtoClass); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *FirehoseConfig) validateNamespace(formats strfmt.Registry) error {
-
-	if err := validate.Required("namespace", "body", m.Namespace); err != nil {
 		return err
 	}
 

@@ -25,6 +25,9 @@ type RevisionDiff struct {
 	// labels
 	Labels interface{} `json:"labels,omitempty"`
 
+	// reason
+	Reason string `json:"reason,omitempty"`
+
 	// updated at
 	// Example: 2022-06-23T16:49:15.885541Z
 	// Read Only: true
