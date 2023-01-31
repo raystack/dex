@@ -341,41 +341,6 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade:
-    parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
-      - in: path
-        type: string
-        name: firehoseUrn
-        description: URN of the firehose.
-        required: true
-    post:
-      summary: Upgrade the firehose to the latest version supported.
-      description: Upgrade the firehose to the latest version supported.
-      operationId: upgradeFirehose
-      parameters:
-        - in: body
-          name: body
-          schema:
-            type: object
-            properties: { }
-      responses:
-        "200":
-          description: Upgrade request accepted.
-          schema:
-            $ref: "#/definitions/Firehose"
-        "404":
-          description: Firehose with given URN was not found
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        "500":
-          description: internal error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
   /projects/{projectSlug}/firehoses/{firehoseUrn}/stop:
     parameters:
       - in: path
@@ -409,6 +374,41 @@ paths:
           description: Update request is not valid.
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade:
+    parameters:
+      - in: path
+        type: string
+        name: projectSlug
+        description: Identifier for the project.
+        required: true
+      - in: path
+        type: string
+        name: firehoseUrn
+        description: URN of the firehose.
+        required: true
+    post:
+      summary: Upgrade the firehose to the latest version supported.
+      description: Upgrade the firehose to the latest version supported.
+      operationId: upgradeFirehose
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties: { }
+      responses:
+        "200":
+          description: Upgrade request accepted.
+          schema:
+            $ref: "#/definitions/Firehose"
         "404":
           description: Firehose with given URN was not found
           schema:
