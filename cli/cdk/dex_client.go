@@ -1,4 +1,4 @@
-package firehoses
+package cdk
 
 import (
 	"context"
@@ -39,7 +39,7 @@ func (tr *swaggerTransport) Submit(operation *runtime.ClientOperation) (interfac
 	return tr.ClientTransport.Submit(operation)
 }
 
-func initClient(cmd *cobra.Command) *client.DexAPI {
+func NewClient(cmd *cobra.Command) *client.DexAPI {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("failed to load configs: %s", err)
@@ -50,7 +50,7 @@ func initClient(cmd *cobra.Command) *client.DexAPI {
 		log.Fatalf("failed to load configs: %s", err)
 	}
 
-	r := httptransport.New(cfg.Host, "/api", client.DefaultSchemes)
+	r := httptransport.New(cfg.Host, "/api", []string{"https"})
 	r.Context = cmd.Context()
 	r.Consumers["application/x-ndjson"] = runtime.ByteStreamConsumer()
 	r.DefaultAuthentication = httptransport.BearerToken(accessToken)

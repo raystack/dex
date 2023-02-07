@@ -20,7 +20,7 @@ func stopCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			dexAPI := initClient(cmd)
+			dexAPI := cdk.NewClient(cmd)
 			params := &operations.StopFirehoseParams{
 				FirehoseUrn: args[1],
 				ProjectSlug: args[0],

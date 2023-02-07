@@ -50,7 +50,7 @@ func scaleFirehose(cmd *cobra.Command, prjSlug, urn string, replicas int) (*mode
 		},
 	}
 
-	dexAPI := initClient(cmd)
+	dexAPI := cdk.NewClient(cmd)
 	resp, err := dexAPI.Operations.ScaleFirehose(params)
 	if err != nil {
 		return nil, err

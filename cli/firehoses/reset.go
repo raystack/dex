@@ -25,7 +25,7 @@ func resetOffsetCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd)
+			client := cdk.NewClient(cmd)
 
 			params := &operations.ResetOffsetParams{
 				FirehoseUrn: args[1],

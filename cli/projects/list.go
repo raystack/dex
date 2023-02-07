@@ -21,7 +21,7 @@ func listCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			client := initClient(cmd)
+			client := cdk.NewClient(cmd)
 
 			params := operations.ListProjectsParams{}
 			params.SetTimeout(10 * time.Second)
