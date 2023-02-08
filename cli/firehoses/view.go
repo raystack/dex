@@ -36,7 +36,7 @@ func getFirehose(cmd *cobra.Command, prjSlug, firehoseID string) (*models.Fireho
 		FirehoseUrn: firehoseID,
 	}
 
-	cl := initClient(cmd)
+	cl := cdk.NewClient(cmd)
 	res, err := cl.Operations.GetFirehose(params)
 	if err != nil {
 		return nil, err

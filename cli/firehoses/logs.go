@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/odpf/dex/cli/cdk"
 	"github.com/odpf/dex/generated/client/operations"
 	"github.com/odpf/dex/pkg/errors"
 )
@@ -34,7 +35,7 @@ func logsCommand() *cobra.Command {
 				_ = cmd.Flags().Set("timeout", "10m")
 			}
 
-			dexAPI := initClient(cmd)
+			dexAPI := cdk.NewClient(cmd)
 
 			params := &operations.GetFirehoseLogsParams{
 				FirehoseUrn: args[1],

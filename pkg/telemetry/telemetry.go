@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 
+	"github.com/odpf/salt/mux"
 	"go.uber.org/zap"
 )
 
@@ -32,19 +33,19 @@ type Config struct {
 // Init initialises OpenCensus based async-telemetry processes and
 // returns (i.e., it does not block).
 func Init(ctx context.Context, cfg Config, lg *zap.Logger) {
-	mux := http.NewServeMux()
-	mux.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
-	mux.Handle("/debug/pprof/heap", pprof.Handler("heap"))
-	mux.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-	mux.Handle("/debug/pprof/block", pprof.Handler("block"))
+	r := http.NewServeMux()
+	r.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	r.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+	r.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	r.Handle("/debug/pprof/block", pprof.Handler("block"))
 
-	if err := setupOpenCensus(ctx, mux, cfg); err != nil {
+	if err := setupOpenCensus(ctx, r, cfg); err != nil {
 		lg.Error("failed to setup OpenCensus", zap.Error(err))
 	}
 
 	if cfg.Debug != "" {
 		go func() {
-			if err := http.ListenAndServe(cfg.Debug, mux); err != nil {
+			if err := mux.Serve(ctx, cfg.Debug, mux.WithHTTP(r)); err != nil {
 				lg.Error("debug server exited due to error", zap.Error(err))
 			}
 		}()

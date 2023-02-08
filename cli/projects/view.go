@@ -21,7 +21,7 @@ func viewCommand() *cobra.Command {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
-			cl := initClient(cmd)
+			cl := cdk.NewClient(cmd)
 			params := operations.GetProjectBySlugParams{
 				Slug: args[0],
 			}

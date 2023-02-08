@@ -74,7 +74,7 @@ func createFirehose(cmd *cobra.Command, prjSlug string, def models.Firehose) (*m
 		ProjectSlug: prjSlug,
 	}
 
-	dexAPI := initClient(cmd)
+	dexAPI := cdk.NewClient(cmd)
 	created, createErr := dexAPI.Operations.CreateFirehose(params)
 	if createErr != nil {
 		return nil, createErr
@@ -95,7 +95,7 @@ func updateFirehose(cmd *cobra.Command, prjSlug string, existing, updated models
 		},
 	}
 
-	dexAPI := initClient(cmd)
+	dexAPI := cdk.NewClient(cmd)
 	updateResp, updateErr := dexAPI.Operations.UpdateFirehose(params)
 	if updateErr != nil {
 		return nil, updateErr

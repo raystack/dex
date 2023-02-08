@@ -48,7 +48,7 @@ func listFirehoses(cmd *cobra.Command, params operations.ListFirehosesParams) ([
 	spinner := printer.Spin(fmt.Sprintf("Fetching firehoses in project '%s'", params.ProjectSlug))
 	defer spinner.Stop()
 
-	dexAPI := initClient(cmd)
+	dexAPI := cdk.NewClient(cmd)
 	res, err := dexAPI.Operations.ListFirehoses(&params)
 	if err != nil {
 		return nil, err
