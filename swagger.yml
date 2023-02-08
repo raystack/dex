@@ -819,6 +819,7 @@ definitions:
       - "PROMETHEUS"
       - "BIGQUERY"
       - "BLOB"
+      - "BIGTABLE"
   Logs:
     type: array
     items:
