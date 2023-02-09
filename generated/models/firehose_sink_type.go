@@ -59,6 +59,9 @@ const (
 
 	// FirehoseSinkTypeBLOB captures enum value "BLOB"
 	FirehoseSinkTypeBLOB FirehoseSinkType = "BLOB"
+
+	// FirehoseSinkTypeBIGTABLE captures enum value "BIGTABLE"
+	FirehoseSinkTypeBIGTABLE FirehoseSinkType = "BIGTABLE"
 )
 
 // for schema
@@ -66,7 +69,7 @@ var firehoseSinkTypeEnum []interface{}
 
 func init() {
 	var res []FirehoseSinkType
-	if err := json.Unmarshal([]byte(`["LOG","HTTP","POSTGRES","INFLUXDB","ELASTIC","REDIS","GRPC","PROMETHEUS","BIGQUERY","BLOB"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["LOG","HTTP","POSTGRES","INFLUXDB","ELASTIC","REDIS","GRPC","PROMETHEUS","BIGQUERY","BLOB","BIGTABLE"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
