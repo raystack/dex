@@ -15,6 +15,7 @@ import (
 
 func applyCommand() *cobra.Command {
 	var configFile string
+	var onlyCreate bool
 
 	cmd := &cobra.Command{
 		Use:   "apply <project> <filepath>",
@@ -26,16 +27,24 @@ func applyCommand() *cobra.Command {
 				return err
 			}
 
-			notFoundErr := &operations.GetFirehoseNotFound{}
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
-			existing, err := getFirehose(cmd, args[0], urn)
-			if err != nil && !errors.As(err, &notFoundErr) {
-				return err
+
+			var existing *models.Firehose
+			var err error
+
+			isUpdate := !onlyCreate
+			if !onlyCreate {
+				notFoundErr := &operations.GetFirehoseNotFound{}
+				existing, err = getFirehose(cmd, args[0], urn)
+				if err != nil && !errors.As(err, &notFoundErr) {
+					return err
+				}
+				isUpdate = existing != nil
 			}
-			isUpdate := existing != nil
 
 			var finalVersion *models.Firehose
 			if isUpdate {
+				// Firehose already exists. Treat this as update.
 				finalVersion, err = updateFirehose(cmd, args[0], *existing, firehoseDef)
 				if err != nil {
 					return errors.Errorf("update failed: %s", err)
@@ -60,6 +69,7 @@ func applyCommand() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().BoolVar(&onlyCreate, "create", false, "Allow creation only")
 	cmd.Flags().StringVarP(&configFile, "config", "c", "./config.yaml", "Config file path")
 	return cmd
 }
