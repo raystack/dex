@@ -66,13 +66,13 @@ func requestID() gorillamux.MiddlewareFunc {
 			rid := strings.TrimSpace(req.Header.Get(headerRequestID))
 			if rid == "" {
 				rid = xid.New().String()
+
+				headers := req.Header.Clone()
+				headers.Set(headerRequestID, rid)
+				req.Header = headers
 			}
 
-			headers := req.Header.Clone()
-			headers.Set(headerRequestID, rid)
-
 			wr.Header().Set(headerRequestID, rid)
-			req.Header = headers
 			next.ServeHTTP(wr, req)
 		})
 	}

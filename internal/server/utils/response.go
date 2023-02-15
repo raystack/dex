@@ -8,6 +8,20 @@ import (
 	"github.com/odpf/dex/pkg/errors"
 )
 
+// ListResponse can be used to write list of items to response.
+// This format is helpful in enabling pagination.
+type ListResponse[T any] struct {
+	Items []T `json:"items"`
+}
+
+func ReadJSON(r *http.Request, into any) error {
+	if err := json.NewDecoder(r.Body).Decode(into); err != nil {
+		return errors.ErrInvalid.
+			WithMsgf("json body is not valid").WithCausef(err.Error())
+	}
+	return nil
+}
+
 // WriteJSON writes 'v' to response-writer in JSON format.
 func WriteJSON(w http.ResponseWriter, status int, v interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -16,20 +30,6 @@ func WriteJSON(w http.ResponseWriter, status int, v interface{}) {
 	if status != http.StatusNoContent {
 		if err := json.NewEncoder(w).Encode(v); err != nil {
 			log.Printf("error: failed to write 'v' JSON: %v", err)
-		}
-	}
-}
-
-func WriteLn(w http.ResponseWriter, status int, b []byte) {
-	w.Header().Set("Content-Type", "application/x-ndjson")
-	w.WriteHeader(status)
-
-	b = append(b, '\n')
-
-	if status != http.StatusNoContent {
-		_, err := w.Write(b)
-		if err != nil {
-			log.Printf("error: failed to write line: %v", err)
 		}
 	}
 }

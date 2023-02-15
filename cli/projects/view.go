@@ -16,7 +16,7 @@ func viewCommand() *cobra.Command {
 		Short:   "View a project",
 		Long:    "Display information about a project",
 		Args:    cobra.ExactArgs(1),
-		Aliases: []string{"show"},
+		Aliases: []string{"show", "get"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()

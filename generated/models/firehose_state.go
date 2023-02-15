@@ -17,8 +17,8 @@ import (
 // swagger:model FirehoseState
 type FirehoseState struct {
 
-	// deployment id
-	DeploymentID string `json:"deployment_id,omitempty"`
+	// output
+	Output interface{} `json:"output,omitempty"`
 
 	// state
 	// Example: STATUS_COMPLETED

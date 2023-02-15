@@ -4,28 +4,31 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-openapi/strfmt"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/odpf/dex/generated/models"
 	"github.com/odpf/dex/pkg/errors"
 )
 
 const (
-	pathParamSlug   = "slug"
+	pathParamSlug   = "projectSlug"
 	headerProjectID = "X-Shield-Project"
 )
 
-// Routes installs project management APIs to router.
-func Routes(r *mux.Router, shieldClient shieldv1beta1.ShieldServiceClient) {
-	r.HandleFunc("/projects", handleListProjects(shieldClient)).Methods(http.MethodGet)
-	r.HandleFunc("/projects/{slug}", handleGetProject(shieldClient)).Methods(http.MethodGet)
+func Routes(shield shieldv1beta1.ShieldServiceClient) func(r chi.Router) {
+	return func(r chi.Router) {
+		r.Get("/", handleListProjects(shield))
+		r.Get("/{projectSlug}", handleGetProject(shield))
+	}
 }
 
-func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient) (*shieldv1beta1.Project, error) {
+func GetProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient) (*shieldv1beta1.Project, error) {
 	projectID := strings.TrimSpace(r.Header.Get(headerProjectID))
-	projectSlug := mux.Vars(r)[pathParamSlug]
+	projectSlug := chi.URLParam(r, pathParamSlug)
 
 	if projectID == "" {
 		// List everything and search by slug.
@@ -53,4 +56,15 @@ func getProject(r *http.Request, shieldClient shieldv1beta1.ShieldServiceClient)
 		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
 	return prj.GetProject(), nil
+}
+
+func mapShieldProjectToProject(prj *shieldv1beta1.Project) models.Project {
+	return models.Project{
+		ID:        prj.Id,
+		Name:      prj.Name,
+		Slug:      prj.Slug,
+		Metadata:  prj.Metadata.AsMap(),
+		CreatedAt: strfmt.DateTime(prj.CreatedAt.AsTime()),
+		UpdatedAt: strfmt.DateTime(prj.UpdatedAt.AsTime()),
+	}
 }
