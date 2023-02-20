@@ -92,8 +92,7 @@ func (api *firehoseAPI) handleStreamLog(w http.ResponseWriter, r *http.Request) 
 
 func writeLine(w http.ResponseWriter, b []byte) {
 	b = append(b, '\n')
-	_, err := w.Write(b)
-	if err != nil {
+	if _, err := w.Write(b); err != nil {
 		log.Printf("error: failed to write line: %v", err)
 	}
 }
