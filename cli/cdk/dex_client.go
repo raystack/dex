@@ -22,7 +22,7 @@ type swaggerParams interface {
 }
 
 type swaggerTransport struct {
-	runtime.ClientTransport
+	*httptransport.Runtime
 
 	Context    context.Context
 	Timeout    time.Duration
@@ -36,7 +36,13 @@ func (tr *swaggerTransport) Submit(operation *runtime.ClientOperation) (interfac
 		}
 		params.SetContext(tr.Context)
 	}
-	return tr.ClientTransport.Submit(operation)
+
+	v, err := tr.Runtime.Submit(operation)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func NewClient(cmd *cobra.Command) *client.DexAPI {
@@ -51,8 +57,8 @@ func NewClient(cmd *cobra.Command) *client.DexAPI {
 	}
 
 	scheme := []string{"http"}
-	if cfg.UseHTTPS {
-		scheme = append(scheme, "https")
+	if cfg.Secure {
+		scheme = []string{"https"}
 	}
 
 	r := httptransport.New(cfg.Host, "/api", scheme)
@@ -65,15 +71,15 @@ func NewClient(cmd *cobra.Command) *client.DexAPI {
 	return client.New(customTr, strfmt.Default)
 }
 
-func newSwaggerTransport(cmd *cobra.Command, r runtime.ClientTransport) *swaggerTransport {
+func newSwaggerTransport(cmd *cobra.Command, r *httptransport.Runtime) *swaggerTransport {
 	d, err := cmd.Flags().GetDuration("timeout")
 	if err != nil || d == 0 {
 		d = 10 * time.Second
 	}
 
 	return &swaggerTransport{
-		ClientTransport: r,
-		Context:         cmd.Context(),
-		Timeout:         d,
+		Runtime: r,
+		Context: cmd.Context(),
+		Timeout: d,
 	}
 }
