@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/odpf/salt/cmdx"
 	"github.com/spf13/cobra"
@@ -26,7 +28,7 @@ var envHelp = map[string]string{
 }
 
 // New root command.
-func New() *cobra.Command {
+func New(_ context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "dex <command> <subcommand> [flags]",
 		Short:         "Data experience console",

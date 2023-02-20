@@ -27,7 +27,7 @@ func main() {
 }
 
 func execute(ctx context.Context) {
-	root := cli.New()
+	root := cli.New(ctx)
 
 	cmd, err := root.ExecuteContextC(ctx)
 	if err != nil {
