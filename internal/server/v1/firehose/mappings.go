@@ -2,59 +2,24 @@ package firehose
 
 import (
 	"encoding/json"
+	"regexp"
+	"strings"
 	"time"
 
+	"github.com/go-openapi/strfmt"
 	"github.com/mitchellh/mapstructure"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/odpf/dex/internal/server/reqctx"
+	"github.com/odpf/dex/generated/models"
+	"github.com/odpf/dex/internal/server/utils"
 	"github.com/odpf/dex/pkg/errors"
 )
 
-const resourceDepKey = "kube_cluster"
+const kubeClusterDependencyKey = "kube_cluster"
 
-type firehoseDefinition struct {
-	URN         string           `json:"urn"`
-	Name        string           `json:"name"`
-	Group       string           `json:"group"`
-	Title       string           `json:"title"`
-	CreatedAt   time.Time        `json:"created_at"`
-	UpdatedAt   time.Time        `json:"updated_at"`
-	Description string           `json:"description"`
-	KubeCluster string           `json:"kube_cluster"`
-	Configs     *firehoseConfigs `json:"configs,omitempty"`
-	State       *firehoseState   `json:"state,omitempty"`
-	Metadata    firehoseMetadata `json:"metadata"`
-}
-
-type firehoseMetadata struct {
-	CreatedBy      string `json:"created_by"`
-	CreatedByEmail string `json:"created_by_email"`
-	UpdatedBy      string `json:"updated_by"`
-	UpdatedByEmail string `json:"updated_by_email"`
-}
-
-type firehoseConfigs struct {
-	EnvVars               map[string]string `json:"env_vars"`
-	Replicas              int               `json:"replicas"`
-	SinkType              string            `json:"sink_type"`
-	StopDate              *time.Time        `json:"stop_date"`
-	TopicName             string            `json:"topic_name"`
-	StreamName            string            `json:"stream_name"`
-	ConsumerGroupID       string            `json:"consumer_group_id"`
-	BootstrapServers      string            `json:"bootstrap_servers"`
-	InputSchemaProtoClass string            `json:"input_schema_proto_class"`
-}
-
-type firehoseState struct {
-	State        string                 `json:"state"`
-	Status       string                 `json:"status"`
-	Output       map[string]interface{} `json:"output,omitempty"`
-	DeploymentID string                 `json:"deployment_id"`
-}
+var nonAlphaNumPattern = regexp.MustCompile("[^a-zA-Z0-9]+")
 
 type firehoseLabels struct {
 	Title          string `mapstructure:"title"`
@@ -81,200 +46,190 @@ type moduleConfigFirehoseDef struct {
 	EnvVariables       map[string]string `json:"env_variables,omitempty"`
 }
 
-type revisionDiff struct {
-	Diff      json.RawMessage   `json:"diff"`
-	Labels    map[string]string `json:"labels"`
-	Reason    string            `json:"reason"`
-	UpdatedAt time.Time         `json:"updated_at"`
+func sanitiseAndValidate(def *models.Firehose) error {
+	if def == nil {
+		return errors.ErrInvalid.WithMsgf("definition is nil")
+	}
+
+	def.Title = strings.TrimSpace(def.Title)
+	def.Name = strings.TrimSpace(def.Name)
+	def.Description = strings.TrimSpace(def.Description)
+	def.KubeCluster = strings.TrimSpace(def.KubeCluster)
+
+	if def.Title == "" {
+		return errors.ErrInvalid.WithMsgf("title must be set")
+	}
+
+	if def.Name == "" {
+		def.Name = slugify(def.Title)
+	}
+
+	if def.KubeCluster == "" {
+		return errors.ErrInvalid.WithMsgf("kube_cluster must be set")
+	}
+
+	return nil
 }
 
-func mapFirehoseToResource(rCtx reqctx.ReqCtx, def firehoseDefinition, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
-	if def.Configs == nil {
-		return nil, errors.ErrInvalid.WithMsgf("configs must be set")
-	}
-
-	cfg, err := def.Configs.toConfigStruct(prj)
-	if err != nil {
-		return nil, errors.ErrInternal.WithCausef(err.Error())
-	}
-
-	spec := &entropyv1beta1.ResourceSpec{
-		Configs: cfg,
-		Dependencies: []*entropyv1beta1.ResourceDependency{
-			{Key: resourceDepKey, Value: def.KubeCluster},
-		},
-	}
-
-	labels := def.getLabels()
-	labels.setUpdatedBy(rCtx)
-	labels.setCreatedBy(rCtx)
-	labelsMap, err := labels.toMap()
+func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
+	cfgStruct, err := makeConfigStruct(def.Configs, prj)
 	if err != nil {
 		return nil, err
 	}
 
 	return &entropyv1beta1.Resource{
-		Urn:     def.URN,
+		Urn:     def.Urn,
 		Kind:    kindFirehose,
 		Name:    def.Name,
 		Project: prj.GetSlug(),
-		Labels:  labelsMap,
-		Spec:    spec,
+		Labels:  makeLabelsMap(def),
+		Spec: &entropyv1beta1.ResourceSpec{
+			Configs: cfgStruct,
+			Dependencies: []*entropyv1beta1.ResourceDependency{
+				{Key: kubeClusterDependencyKey, Value: def.KubeCluster},
+			},
+		},
 	}, nil
 }
 
-func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*firehoseDefinition, error) {
+func makeLabelsMap(def models.Firehose) map[string]string {
+	var meta models.FirehoseMetadata
+	if def.Metadata != nil {
+		meta = *def.Metadata
+	}
+
+	return map[string]string{
+		"title":            def.Title,
+		"group":            def.Group.String(),
+		"description":      def.Description,
+		"created_by":       meta.CreatedBy.String(),
+		"created_by_email": meta.CreatedByEmail.String(),
+		"updated_by":       meta.UpdatedBy.String(),
+		"updated_by_email": meta.UpdatedByEmail.String(),
+	}
+}
+
+func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*structpb.Value, error) {
+	if cfg.BootstrapServers == nil {
+		return nil, errors.ErrInvalid.WithMsgf("bootstrap_servers must be set")
+	} else if cfg.TopicName == nil {
+		return nil, errors.ErrInvalid.WithMsgf("topic_name must be set")
+	} else if cfg.ConsumerGroupID == nil {
+		return nil, errors.ErrInvalid.WithMsgf("consumer_group_id must be set")
+	}
+
+	var stopAt time.Time
+	if cfg.StopDate != "" {
+		var err error
+		stopAt, err = time.Parse(time.RFC3339, cfg.StopDate)
+		if err != nil {
+			return nil, errors.ErrInvalid.WithMsgf("stop date must be valid RFC3339 timestamp")
+		}
+	} else {
+		// TODO: (hack) entropy has invalid check.
+		const day = 24 * time.Hour
+		stopAt = time.Now().Add(30 * day)
+	}
+
+	if cfg.Replicas == nil {
+		replicas := float64(1)
+		cfg.Replicas = &replicas
+	}
+
+	var telegrafConf map[string]any
+	prjMetadata := prj.GetMetadata().AsMap()
+	if confStr, ok := prjMetadata["telegraf"].(string); ok {
+		_ = json.Unmarshal([]byte(confStr), &telegrafConf)
+
+		// disable telegraf by default.
+		if len(telegrafConf) == 0 {
+			telegrafConf = map[string]interface{}{"enabled": false}
+		}
+	}
+
+	return utils.GoValToProtoStruct(moduleConfig{
+		State:    "RUNNING",
+		StopTime: stopAt,
+		Telegraf: telegrafConf,
+		Firehose: moduleConfigFirehoseDef{
+			Replicas:           int(*cfg.Replicas),
+			KafkaBrokerAddress: *cfg.BootstrapServers,
+			KafkaTopic:         *cfg.TopicName,
+			KafkaConsumerID:    *cfg.ConsumerGroupID,
+			EnvVariables:       cfg.EnvVars,
+		},
+	})
+}
+
+func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models.Firehose, error) {
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
 
-	var modConf moduleConfig
-	if err := protoStructToGo(res.GetSpec().GetConfigs(), &modConf); err != nil {
-		return nil, err
-	}
-
-	labelsMap := res.GetLabels()
-	labels, err := toFirehoseLabels(labelsMap)
-	if err != nil {
-		return nil, err
+	var labels firehoseLabels
+	if err := mapstructure.Decode(res.GetLabels(), &labels); err != nil {
+		return nil, errors.ErrInternal.WithCausef(err.Error())
 	}
 
 	var kubeCluster string
 	for _, dep := range res.GetSpec().GetDependencies() {
-		if dep.GetKey() == resourceDepKey {
+		if dep.GetKey() == kubeClusterDependencyKey {
 			kubeCluster = dep.GetValue()
 		}
 	}
 
-	def := firehoseDefinition{
-		URN:         res.GetUrn(),
+	firehoseDef := models.Firehose{
+		Urn:         res.GetUrn(),
 		Name:        res.GetName(),
 		Title:       labels.Title,
-		Group:       labels.Group,
-		CreatedAt:   res.GetCreatedAt().AsTime(),
-		UpdatedAt:   res.GetUpdatedAt().AsTime(),
+		Group:       strfmt.UUID(labels.Group),
+		CreatedAt:   strfmt.DateTime(res.GetCreatedAt().AsTime()),
+		UpdatedAt:   strfmt.DateTime(res.GetUpdatedAt().AsTime()),
 		Description: labels.Description,
 		KubeCluster: kubeCluster,
-		Metadata: firehoseMetadata{
-			CreatedBy:      labels.CreatedBy,
-			CreatedByEmail: labels.CreatedByEmail,
-			UpdatedBy:      labels.UpdatedBy,
-			UpdatedByEmail: labels.UpdatedByEmail,
+		Metadata: &models.FirehoseMetadata{
+			CreatedBy:      strfmt.UUID(labels.CreatedBy),
+			CreatedByEmail: strfmt.Email(labels.CreatedByEmail),
+			UpdatedBy:      strfmt.UUID(labels.UpdatedBy),
+			UpdatedByEmail: strfmt.Email(labels.UpdatedByEmail),
 		},
 	}
 
 	if !onlyMeta {
-		def.Configs = &firehoseConfigs{
-			EnvVars:               modConf.Firehose.EnvVariables,
-			Replicas:              modConf.Firehose.Replicas,
-			SinkType:              modConf.Firehose.EnvVariables["SINK_TYPE"],
-			StopDate:              &modConf.StopTime,
-			TopicName:             modConf.Firehose.KafkaTopic,
-			StreamName:            modConf.Firehose.EnvVariables["STREAM_NAME"],
-			ConsumerGroupID:       modConf.Firehose.KafkaConsumerID,
-			BootstrapServers:      modConf.Firehose.KafkaBrokerAddress,
-			InputSchemaProtoClass: modConf.Firehose.EnvVariables["INPUT_SCHEMA_PROTO_CLASS"],
+		var modConf moduleConfig
+		if err := utils.ProtoStructToGoVal(res.GetSpec().GetConfigs(), &modConf); err != nil {
+			return nil, err
 		}
-		def.State = &firehoseState{
+
+		sinkType := models.FirehoseSinkType(modConf.Firehose.EnvVariables["SINK_TYPE"])
+		streamName := modConf.Firehose.EnvVariables["STREAM_NAME"]
+		protoClass := modConf.Firehose.EnvVariables["INPUT_SCHEMA_PROTO_CLASS"]
+
+		firehoseDef.Configs = &models.FirehoseConfig{
+			BootstrapServers:      &modConf.Firehose.KafkaBrokerAddress,
+			ConsumerGroupID:       &modConf.Firehose.KafkaConsumerID,
+			EnvVars:               modConf.Firehose.EnvVariables,
+			InputSchemaProtoClass: &protoClass,
+			Replicas:              nil,
+			SinkType:              &sinkType,
+			StopDate:              modConf.StopTime.String(),
+			StreamName:            &streamName,
+			TopicName:             &modConf.Firehose.KafkaTopic,
+		}
+
+		firehoseDef.State = &models.FirehoseState{
 			State:  modConf.State,
 			Status: res.GetState().GetStatus().String(),
 			Output: res.GetState().Output.GetStructValue().AsMap(),
 		}
 	}
 
-	return &def, nil
+	return &firehoseDef, nil
 }
 
-func (fd firehoseDefinition) getLabels() firehoseLabels {
-	return firehoseLabels{
-		Title:          fd.Title,
-		Group:          fd.Group,
-		Description:    fd.Description,
-		CreatedBy:      fd.Metadata.CreatedBy,
-		CreatedByEmail: fd.Metadata.CreatedByEmail,
-		UpdatedBy:      fd.Metadata.UpdatedBy,
-		UpdatedByEmail: fd.Metadata.UpdatedByEmail,
-	}
-}
-
-func (fl *firehoseLabels) toMap() (map[string]string, error) {
-	result := map[string]string{}
-	err := mapstructure.Decode(fl, &result)
-	if err != nil {
-		return nil, err
-	}
-	return result, err
-}
-
-func toFirehoseLabels(labels map[string]string) (*firehoseLabels, error) {
-	result := firehoseLabels{}
-	err := mapstructure.Decode(labels, &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, err
-}
-
-func (fl *firehoseLabels) setUpdatedBy(ctx reqctx.ReqCtx) {
-	fl.UpdatedBy = ctx.UserID
-	fl.UpdatedByEmail = ctx.UserEmail
-}
-
-func (fl *firehoseLabels) setCreatedBy(ctx reqctx.ReqCtx) {
-	fl.CreatedBy = ctx.UserID
-	fl.CreatedByEmail = ctx.UserEmail
-}
-
-func (fc *firehoseConfigs) toConfigStruct(prj *shieldv1beta1.Project) (*structpb.Value, error) {
-	const defaultState = "RUNNING"
-
-	metadata := prj.GetMetadata().AsMap()
-	var telegrafConf map[string]interface{}
-	telegrafConfString, ok := metadata["telegraf"].(string)
-	if ok {
-		_ = json.Unmarshal([]byte(telegrafConfString), &telegrafConf)
-	}
-
-	if len(telegrafConf) == 0 {
-		telegrafConf = map[string]interface{}{"enabled": false}
-	}
-
-	return toProtobufStruct(moduleConfig{
-		State:    defaultState,
-		StopTime: time.Now().Add(10 * time.Hour),
-		Telegraf: telegrafConf,
-		Firehose: moduleConfigFirehoseDef{
-			Replicas:           fc.Replicas,
-			KafkaTopic:         fc.TopicName,
-			EnvVariables:       fc.EnvVars,
-			KafkaConsumerID:    fc.ConsumerGroupID,
-			KafkaBrokerAddress: fc.BootstrapServers,
-		},
-	})
-}
-
-func toProtobufStruct(v interface{}) (*structpb.Value, error) {
-	jsonB, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-
-	configStruct := structpb.Value{}
-	if err := protojson.Unmarshal(jsonB, &configStruct); err != nil {
-		return nil, err
-	}
-
-	return &configStruct, nil
-}
-
-func protoStructToGo(v *structpb.Value, into interface{}) error {
-	structJSON, err := protojson.Marshal(v)
-	if err != nil {
-		return errors.ErrInternal.WithCausef(err.Error())
-	}
-
-	if err := json.Unmarshal(structJSON, into); err != nil {
-		return errors.ErrInternal.WithCausef(err.Error())
-	}
-	return nil
+func slugify(s string) string {
+	s = strings.ToLower(s)
+	s = nonAlphaNumPattern.ReplaceAllString(s, "-")
+	s = strings.Trim(s, "-")
+	return s
 }

@@ -28,7 +28,7 @@ type FirehoseConfig struct {
 	ConsumerGroupID *string `json:"consumer_group_id"`
 
 	// env vars
-	EnvVars interface{} `json:"env_vars,omitempty"`
+	EnvVars map[string]string `json:"env_vars,omitempty"`
 
 	// input schema proto class
 	// Required: true

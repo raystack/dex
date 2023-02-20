@@ -16,7 +16,8 @@ var ErrClientConfigNotFound = errors.New(heredoc.Doc(`
 `))
 
 type ClientConfig struct {
-	Host string `yaml:"host" cmdx:"host"`
+	Host     string `yaml:"host" cmdx:"host"`
+	UseHTTPS bool   `yaml:"use_https" cmdx:"use_https"`
 }
 
 func Load() (*ClientConfig, error) {

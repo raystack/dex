@@ -8,6 +8,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/runtime v0.24.1
 	github.com/go-openapi/strfmt v0.21.3
@@ -16,7 +17,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/newrelic/go-agent/v3 v3.18.2
-	github.com/newrelic/go-agent/v3/integrations/nrgorilla v1.1.1
 	github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0
 	github.com/odpf/salt v0.2.4
 	github.com/rs/xid v1.4.0

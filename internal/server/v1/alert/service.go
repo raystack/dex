@@ -2,26 +2,53 @@ package alert
 
 import (
 	"context"
+	"net/http"
 	"strings"
 
 	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/odpf/dex/internal/server/utils"
 	"github.com/odpf/dex/pkg/errors"
+)
+
+const (
+	alertPolicyNotFound      = "no Alert Policy found for given resource"
+	alertProviderName        = "cortex"
+	projectSlugSirenLabelKey = "projects"
 )
 
 type Service struct {
 	Siren sirenv1beta1.SirenServiceClient
 }
 
-func (s *Service) UpsertAlertPolicy(ctx context.Context, projectSlug string, update Policy) (*Policy, error) {
-	ns, err := s.getNamespaceForProject(ctx, projectSlug)
+func (svc *Service) HandleListTemplates() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		tag := strings.TrimSpace(r.URL.Query().Get("tag"))
+
+		templates, err := svc.ListAlertTemplates(ctx, tag)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK,
+			utils.ListResponse[Template]{
+				Items: RemoveSuppliedVariablesFromTemplates(templates, SuppliedVariables),
+			},
+		)
+	}
+}
+
+func (svc *Service) UpsertAlertPolicy(ctx context.Context, projectSlug string, update Policy) (*Policy, error) {
+	ns, err := svc.getNamespaceForProject(ctx, projectSlug)
 	if err != nil {
 		return nil, err
 	}
 
-	alertPolicy, err := s.getAlertPolicyForResource(ctx, ns.ID, update.Resource)
+	alertPolicy, err := svc.getAlertPolicyForResource(ctx, ns.ID, update.Resource)
 	if err != nil && !errors.Is(err, errors.ErrNotFound) {
 		return nil, err
 	}
@@ -30,7 +57,7 @@ func (s *Service) UpsertAlertPolicy(ctx context.Context, projectSlug string, upd
 		disableRuleRequests := mapAlertPolicyToUpdateRulesRequest(*alertPolicy, ns.ID)
 		for _, request := range disableRuleRequests {
 			request.Enabled = false
-			_, err := s.Siren.UpdateRule(ctx, request)
+			_, err := svc.Siren.UpdateRule(ctx, request)
 			if err != nil {
 				return nil, err
 			}
@@ -39,13 +66,13 @@ func (s *Service) UpsertAlertPolicy(ctx context.Context, projectSlug string, upd
 
 	updateRuleRequests := mapAlertPolicyToUpdateRulesRequest(update, ns.ID)
 	for _, request := range updateRuleRequests {
-		_, err := s.Siren.UpdateRule(ctx, request)
+		_, err := svc.Siren.UpdateRule(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	alertPolicy, err = s.getAlertPolicyForResource(ctx, ns.ID, update.Resource)
+	alertPolicy, err = svc.getAlertPolicyForResource(ctx, ns.ID, update.Resource)
 	if err != nil {
 		return nil, err
 	}
@@ -53,13 +80,13 @@ func (s *Service) UpsertAlertPolicy(ctx context.Context, projectSlug string, upd
 	return alertPolicy, nil
 }
 
-func (s *Service) GetAlertPolicy(ctx context.Context, projectSlug string, resource string) (*Policy, error) {
-	ns, err := s.getNamespaceForProject(ctx, projectSlug)
+func (svc *Service) GetAlertPolicy(ctx context.Context, projectSlug string, resource string) (*Policy, error) {
+	ns, err := svc.getNamespaceForProject(ctx, projectSlug)
 	if err != nil {
 		return nil, err
 	}
 
-	alertPolicy, err := s.getAlertPolicyForResource(ctx, ns.ID, resource)
+	alertPolicy, err := svc.getAlertPolicyForResource(ctx, ns.ID, resource)
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +94,13 @@ func (s *Service) GetAlertPolicy(ctx context.Context, projectSlug string, resour
 	return alertPolicy, nil
 }
 
-func (s *Service) ListAlerts(ctx context.Context, projectSlug string, resource string) ([]Alert, error) {
-	ns, err := s.getNamespaceForProject(ctx, projectSlug)
+func (svc *Service) ListAlerts(ctx context.Context, projectSlug string, resource string) ([]Alert, error) {
+	ns, err := svc.getNamespaceForProject(ctx, projectSlug)
 	if err != nil {
 		return nil, err
 	}
 
-	alertsResp, err := s.Siren.ListAlerts(ctx, &sirenv1beta1.ListAlertsRequest{
+	alertsResp, err := svc.Siren.ListAlerts(ctx, &sirenv1beta1.ListAlertsRequest{
 		ProviderType: alertProviderName,
 		ProviderId:   ns.Provider,
 		ResourceName: resource,
@@ -85,8 +112,8 @@ func (s *Service) ListAlerts(ctx context.Context, projectSlug string, resource s
 	return mapProtoAlertsToAlerts(alertsResp.GetAlerts()), nil
 }
 
-func (s *Service) ListAlertTemplates(ctx context.Context, tag string) ([]Template, error) {
-	templatesResp, err := s.Siren.ListTemplates(ctx, &sirenv1beta1.ListTemplatesRequest{
+func (svc *Service) ListAlertTemplates(ctx context.Context, tag string) ([]Template, error) {
+	templatesResp, err := svc.Siren.ListTemplates(ctx, &sirenv1beta1.ListTemplatesRequest{
 		Tag: tag,
 	})
 	if err != nil {
@@ -96,8 +123,8 @@ func (s *Service) ListAlertTemplates(ctx context.Context, tag string) ([]Templat
 	return mapProtoTemplatesToTemplates(templatesResp.Templates), nil
 }
 
-func (s *Service) GetAlertTemplate(ctx context.Context, urn string) (*Template, error) {
-	templateResp, err := s.Siren.GetTemplate(ctx, &sirenv1beta1.GetTemplateRequest{
+func (svc *Service) GetAlertTemplate(ctx context.Context, urn string) (*Template, error) {
+	templateResp, err := svc.Siren.GetTemplate(ctx, &sirenv1beta1.GetTemplateRequest{
 		Name: urn,
 	})
 	if err != nil {
@@ -114,13 +141,13 @@ func (s *Service) GetAlertTemplate(ctx context.Context, urn string) (*Template, 
 	return &resp, nil
 }
 
-func (s *Service) getAlertPolicyForResource(ctx context.Context, providerNamespace uint64, resource string) (*Policy, error) {
+func (svc *Service) getAlertPolicyForResource(ctx context.Context, providerNamespace uint64, resource string) (*Policy, error) {
 	rpcReq := &sirenv1beta1.ListRulesRequest{
 		Namespace:         resource,
 		ProviderNamespace: providerNamespace,
 	}
 
-	rpcResp, err := s.Siren.ListRules(ctx, rpcReq)
+	rpcResp, err := svc.Siren.ListRules(ctx, rpcReq)
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +164,8 @@ func (s *Service) getAlertPolicyForResource(ctx context.Context, providerNamespa
 	return &alertPolicies[0], nil
 }
 
-func (s *Service) getNamespaceForProject(ctx context.Context, projectSlug string) (*namespace, error) {
-	listNamespacesResponse, err := s.Siren.ListNamespaces(ctx, &sirenv1beta1.ListNamespacesRequest{})
+func (svc *Service) getNamespaceForProject(ctx context.Context, projectSlug string) (*namespace, error) {
+	listNamespacesResponse, err := svc.Siren.ListNamespaces(ctx, &sirenv1beta1.ListNamespacesRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +180,8 @@ func (s *Service) getNamespaceForProject(ctx context.Context, projectSlug string
 	return nil, errors.ErrNotFound.WithMsgf("Alert namespace not found for given project id")
 }
 
-func (s *Service) GetProjectDataSource(ctx context.Context, projectSlug string) (string, error) {
-	ns, err := s.getNamespaceForProject(ctx, projectSlug)
+func (svc *Service) GetProjectDataSource(ctx context.Context, projectSlug string) (string, error) {
+	ns, err := svc.getNamespaceForProject(ctx, projectSlug)
 	if err != nil {
 		return "", err
 	}

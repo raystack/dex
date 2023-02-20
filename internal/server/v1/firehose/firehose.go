@@ -1,58 +1,100 @@
 package firehose
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
+	"github.com/odpf/dex/generated/models"
 	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
+	"github.com/odpf/dex/internal/server/v1/project"
+	"github.com/odpf/dex/pkg/errors"
 )
 
-const (
-	pathParamURN         = "urn"
-	pathParamProjectSlug = "projectSlug"
+const pathParamURN = "urn"
 
-	kindFirehose = "firehose"
+var errFirehoseNotFound = errors.ErrNotFound.WithMsgf("no firehose with given URN")
 
-	actionStop        = "stop"
-	actionScale       = "scale"
-	actionStart       = "start"
-	actionResetOffset = "reset"
-	actionUpgrade     = "upgrade"
+func Routes(entropy entropyv1beta1.ResourceServiceClient,
+	shield shieldv1beta1.ShieldServiceClient,
+	alertSvc *alertsv1.Service,
+) func(chi.Router) {
+	api := &firehoseAPI{
+		Shield:   shield,
+		Entropy:  entropy,
+		AlertSvc: alertSvc,
+	}
 
-	// shield header names.
-	// Refer https://github.com/odpf/shield
-	headerProjectID = "X-Shield-Project"
-)
+	return func(r chi.Router) {
+		// CRUD operations
+		r.Get("/", api.handleList)
+		r.Post("/", api.handleCreate)
+		r.Get("/{urn}", api.handleGet)
+		r.Put("/{urn}", api.handleUpdate)
+		r.Delete("/{urn}", api.handleDelete)
+		r.Get("/{urn}/logs", api.handleStreamLog)
+		r.Get("/{urn}/history", api.handleGetHistory)
 
-func Routes(r *mux.Router, client entropyv1beta1.ResourceServiceClient, shieldClient shieldv1beta1.ShieldServiceClient,
-	sirenClient sirenv1beta1.SirenServiceClient,
-) {
-	alertSvc := &alertsv1.Service{Siren: sirenClient}
+		// Firehose Actions
+		r.Post("/{urn}/reset", api.handleReset)
+		r.Post("/{urn}/scale", api.handleScale)
+		r.Post("/{urn}/start", api.handleStart)
+		r.Post("/{urn}/stop", api.handleStop)
+		r.Post("/{urn}/upgrade", api.handleUpgrade)
 
-	// read APIs
-	r.Handle("/projects/{projectSlug}/firehoses", handleListFirehoses(client, shieldClient)).Methods(http.MethodGet)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleGetFirehose(client)).Methods(http.MethodGet)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/history", handleGetFirehoseHistory(client)).Methods(http.MethodGet)
+		// Alert management
+		r.Get("/{urn}/alerts", api.handleListAlerts)
+		r.Get("/{urn}/alertPolicy", api.handleGetAlertPolicy)
+		r.Put("/{urn}/alertPolicy", api.handleUpsertAlertPolicy)
+	}
+}
 
-	// write APIs
-	r.Handle("/projects/{projectSlug}/firehoses", handleCreateFirehose(client, shieldClient)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleUpdateFirehose(client, shieldClient)).Methods(http.MethodPut)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}", handleDeleteFirehose(client)).Methods(http.MethodDelete)
+type firehoseAPI struct {
+	Entropy entropyv1beta1.ResourceServiceClient
+	Shield  shieldv1beta1.ShieldServiceClient
+	Siren   sirenv1beta1.SirenServiceClient
 
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/reset", handleResetFirehose(client)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/scale", handleScaleFirehose(client)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/start", handleStartOrStop(client, shieldClient, alertSvc, false)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/stop", handleStartOrStop(client, shieldClient, alertSvc, true)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/upgrade", handleUpgradeFirehose(client)).Methods(http.MethodPost)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/logs", handleGetFirehoseLogs(client)).Methods(http.MethodGet)
+	AlertSvc *alertsv1.Service
+}
 
-	// alert APIs
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/alertPolicy", handleGetFirehoseAlertPolicies(client, shieldClient, alertSvc)).Methods(http.MethodGet)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/alertPolicy", handleUpsertFirehoseAlertPolicies(client, shieldClient, alertSvc)).Methods(http.MethodPut)
-	r.Handle("/projects/{projectSlug}/firehoses/{urn}/alerts", handleListFirehoseAlerts(client, shieldClient, alertSvc)).Methods(http.MethodGet)
-	r.Handle("/alertTemplates", alertsv1.HandleListAlertTemplates(alertSvc, kindFirehose, suppliedAlertVariableNames)).Methods(http.MethodGet)
+func (api *firehoseAPI) getProject(r *http.Request) (*shieldv1beta1.Project, error) {
+	return project.GetProject(r, api.Shield)
+}
+
+func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*models.Firehose, error) {
+	resp, err := api.Entropy.GetResource(ctx, &entropyv1beta1.GetResourceRequest{Urn: firehoseURN})
+	if err != nil {
+		st := status.Convert(err)
+		if st.Code() == codes.NotFound {
+			return nil, errFirehoseNotFound.WithCausef(st.Message())
+		}
+		return nil, err
+	} else if resp.GetResource().GetKind() != kindFirehose {
+		return nil, errFirehoseNotFound
+	}
+
+	return mapResourceToFirehose(resp.GetResource(), false)
+}
+
+func jsonDiff(left, right []byte) (string, error) {
+	differ := gojsondiff.New()
+	compare, err := differ.Compare(left, right)
+	if err != nil {
+		return "", err
+	}
+
+	diffString, err := formatter.NewDeltaFormatter().Format(compare)
+	if err != nil {
+		return "", err
+	}
+
+	return diffString, nil
 }

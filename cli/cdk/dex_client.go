@@ -50,7 +50,12 @@ func NewClient(cmd *cobra.Command) *client.DexAPI {
 		log.Fatalf("failed to load configs: %s", err)
 	}
 
-	r := httptransport.New(cfg.Host, "/api", []string{"https"})
+	scheme := []string{"http"}
+	if cfg.UseHTTPS {
+		scheme = append(scheme, "https")
+	}
+
+	r := httptransport.New(cfg.Host, "/api", scheme)
 	r.Context = cmd.Context()
 	r.Consumers["application/x-ndjson"] = runtime.ByteStreamConsumer()
 	r.DefaultAuthentication = httptransport.BearerToken(accessToken)

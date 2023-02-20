@@ -4,6 +4,7 @@ consumes:
   - application/json
 schemes:
   - http
+  - https
 swagger: "2.0"
 
 info:
@@ -780,6 +781,8 @@ definitions:
         type: string
       env_vars:
         type: object
+        additionalProperties:
+          type: string
   FirehoseState:
     type: object
     properties:
@@ -789,8 +792,9 @@ definitions:
       status:
         type: string
         example: ""
-      deployment_id:
-        type: string
+      output:
+        type: object
+        additionalProperties: true
   FirehoseMetadata:
     type: object
     properties:
