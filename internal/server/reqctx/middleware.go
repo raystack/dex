@@ -3,8 +3,6 @@ package reqctx
 import (
 	"net/http"
 	"strings"
-
-	gorillamux "github.com/gorilla/mux"
 )
 
 // shield header names.
@@ -15,7 +13,7 @@ const (
 	headerRequestID = "X-Request-Id"
 )
 
-func WithRequestCtx() gorillamux.MiddlewareFunc {
+func WithRequestCtx() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			reqID := strings.TrimSpace(r.Header.Get(headerRequestID))

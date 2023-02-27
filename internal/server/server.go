@@ -31,11 +31,12 @@ func Serve(ctx context.Context, addr string,
 	alertSvc := &alertsv1.Service{Siren: sirenClient}
 
 	router := chi.NewRouter()
+	curRoute := currentRouteGetter(router)
 	router.Use(
-		newRelicAPM(router, nrApp),
+		newRelicAPM(nrApp, curRoute),
 		requestID(),
 		reqctx.WithRequestCtx(),
-		withOpenCensus(),
+		withOpenCensus(curRoute),
 		requestLogger(logger), // nolint
 	)
 
@@ -55,26 +56,4 @@ func Serve(ctx context.Context, addr string,
 
 	logger.Info("starting server", zap.String("addr", addr))
 	return mux.Serve(ctx, addr, mux.WithHTTP(router))
-}
-
-func newRelicAPM(router chi.Router, nrApp *newrelic.Application) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var txn *newrelic.Transaction
-
-			rCtx := chi.NewRouteContext()
-			if router.Match(rCtx, r.Method, r.URL.Path) {
-				txn = nrApp.StartTransaction(rCtx.RouteMethod + " " + rCtx.RoutePattern())
-			} else {
-				txn = nrApp.StartTransaction("NotFoundHandler")
-			}
-			defer txn.End()
-
-			w = txn.SetWebResponse(w)
-			txn.SetWebRequestHTTP(r)
-			r = newrelic.RequestWithTransactionContext(r, txn)
-
-			next.ServeHTTP(w, r)
-		})
-	}
 }

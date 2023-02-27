@@ -14,7 +14,6 @@ require (
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-openapi/swag v0.21.1
 	github.com/go-openapi/validate v0.22.0
-	github.com/gorilla/mux v1.8.0
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/newrelic/go-agent/v3 v3.18.2
 	github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0
