@@ -33,7 +33,7 @@ type firehoseLabels struct {
 
 type moduleConfig struct {
 	State    string                  `json:"state"`
-	StopTime *time.Time              `json:"stop_time"`
+	StopTime *time.Time              `json:"stop_time,omitempty"`
 	Telegraf map[string]interface{}  `json:"telegraf"`
 	Firehose moduleConfigFirehoseDef `json:"firehose"`
 }
