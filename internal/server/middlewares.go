@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	gorillamux "github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/rs/xid"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/tag"
@@ -14,10 +15,11 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	grpcGatewayPrefix = "/api"
-	headerRequestID   = "X-Request-Id"
-)
+const headerRequestID = "X-Request-Id"
+
+type curRouteFn func(r *http.Request) string
+
+type middleware func(http.Handler) http.Handler
 
 type wrappedWriter struct {
 	http.ResponseWriter
@@ -30,24 +32,44 @@ func (wr *wrappedWriter) WriteHeader(statusCode int) {
 	wr.ResponseWriter.WriteHeader(statusCode)
 }
 
-func withOpenCensus() gorillamux.MiddlewareFunc {
+func newRelicAPM(nrApp *newrelic.Application, curRoute curRouteFn) middleware {
 	return func(next http.Handler) http.Handler {
-		oc := &ochttp.Handler{
-			Handler:          next,
-			FormatSpanName:   formatSpanName,
-			IsPublicEndpoint: false,
-		}
-		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
-			route := gorillamux.CurrentRoute(req)
-
-			pathTpl := req.URL.Path
-			if route != nil {
-				pathTpl, _ = route.GetPathTemplate()
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			route := curRoute(r)
+			if route == "" {
+				route = r.URL.Path
 			}
 
-			if strings.HasPrefix(pathTpl, grpcGatewayPrefix) {
-				// FIX: figure out a way to extract path-pattern from gateway requests.
-				pathTpl = "/api/"
+			txn := nrApp.StartTransaction(r.Method + " " + route)
+			defer txn.End()
+
+			w = txn.SetWebResponse(w)
+			txn.SetWebRequestHTTP(r)
+			r = newrelic.RequestWithTransactionContext(r, txn)
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func withOpenCensus(curRoute curRouteFn) middleware {
+	return func(next http.Handler) http.Handler {
+		oc := &ochttp.Handler{
+			Handler: next,
+			FormatSpanName: func(r *http.Request) string {
+				route := curRoute(r)
+				if route == "" {
+					route = r.URL.Path
+				}
+				return fmt.Sprintf("%s %s", r.Method, route)
+			},
+			IsPublicEndpoint: false,
+		}
+
+		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
+			pathTpl := curRoute(req)
+			if pathTpl == "" {
+				pathTpl = req.URL.Path
 			}
 
 			ctx, _ := tag.New(req.Context(),
@@ -60,7 +82,7 @@ func withOpenCensus() gorillamux.MiddlewareFunc {
 	}
 }
 
-func requestID() gorillamux.MiddlewareFunc {
+func requestID() middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
 			rid := strings.TrimSpace(req.Header.Get(headerRequestID))
@@ -78,7 +100,7 @@ func requestID() gorillamux.MiddlewareFunc {
 	}
 }
 
-func requestLogger(lg *zap.Logger) gorillamux.MiddlewareFunc {
+func requestLogger(lg *zap.Logger) middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
 			t := time.Now()
@@ -121,15 +143,14 @@ func requestLogger(lg *zap.Logger) gorillamux.MiddlewareFunc {
 	}
 }
 
-func formatSpanName(req *http.Request) string {
-	route := gorillamux.CurrentRoute(req)
-
-	pathTpl := req.URL.Path
-	if route != nil {
-		pathTpl, _ = route.GetPathTemplate()
+func currentRouteGetter(router chi.Router) func(r *http.Request) string {
+	return func(r *http.Request) string {
+		rCtx := chi.NewRouteContext()
+		if !router.Match(rCtx, r.Method, r.URL.Path) {
+			return ""
+		}
+		return rCtx.RoutePattern()
 	}
-
-	return fmt.Sprintf("%s %s", req.Method, pathTpl)
 }
 
 func is2xx(status int) bool {
