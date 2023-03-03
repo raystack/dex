@@ -43,6 +43,7 @@ type moduleConfigFirehoseDef struct {
 	KafkaBrokerAddress string            `json:"kafka_broker_address,omitempty"`
 	KafkaTopic         string            `json:"kafka_topic,omitempty"`
 	KafkaConsumerID    string            `json:"kafka_consumer_id,omitempty"`
+	DeploymentID       string            `json:"deployment_id"`
 	EnvVariables       map[string]string `json:"env_variables,omitempty"`
 }
 
@@ -169,6 +170,7 @@ func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*
 			KafkaTopic:         *cfg.TopicName,
 			KafkaConsumerID:    *cfg.ConsumerGroupID,
 			EnvVariables:       cfg.EnvVars,
+			DeploymentID:       cfg.DeploymentID,
 		},
 	})
 }

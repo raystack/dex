@@ -771,6 +771,9 @@ definitions:
         default: 1
       consumer_group_id:
         type: string
+      deployment_id:
+        type: string
+        description: Unique name to be used for the deployment of firehose.
       sink_type:
         $ref: "#/definitions/FirehoseSinkType"
       stop_date:
