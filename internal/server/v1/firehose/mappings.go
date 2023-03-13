@@ -224,7 +224,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 			InputSchemaProtoClass: &protoClass,
 			Replicas:              nil,
 			SinkType:              &sinkType,
-			StopDate:              modConf.StopTime.String(),
+			StopDate:              timePtrToStr(modConf.StopTime),
 			StreamName:            &streamName,
 			TopicName:             &modConf.Firehose.KafkaTopic,
 		}
@@ -244,4 +244,11 @@ func slugify(s string) string {
 	s = nonAlphaNumPattern.ReplaceAllString(s, "-")
 	s = strings.Trim(s, "-")
 	return s
+}
+
+func timePtrToStr(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.String()
 }
