@@ -10,9 +10,9 @@ Dex is stateless and as such has no requirement of stateful components like data
 
 But Dex is an orchestrator and needs the following ODPF services:
 
-1. [Entropy](https://github.com/odpf/entropy) - Used for deployment and management of applications (e.g., firehose)
-2. [Siren](https://github.com/odpf/siren) - Used for configuring and managing alerting for tools deployed using Dex.
-3. [Shield](https://github.com/odpf/shield) - Used for access-control and project level metadata.
+1. [Entropy](https://github.com/goto/entropy) - Used for deployment and management of applications (e.g., firehose)
+2. [Siren](https://github.com/goto/siren) - Used for configuring and managing alerting for tools deployed using Dex.
+3. [Shield](https://github.com/goto/shield) - Used for access-control and project level metadata.
 
 ## Configurations
 

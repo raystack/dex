@@ -4,15 +4,15 @@ import (
 	"context"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/odpf/salt/cmdx"
+	"github.com/goto/salt/cmdx"
 	"github.com/spf13/cobra"
 
-	"github.com/odpf/dex/cli/auth"
-	"github.com/odpf/dex/cli/config"
-	"github.com/odpf/dex/cli/firehoses"
-	"github.com/odpf/dex/cli/projects"
-	"github.com/odpf/dex/cli/server"
-	"github.com/odpf/dex/pkg/version"
+	"github.com/goto/dex/cli/auth"
+	"github.com/goto/dex/cli/config"
+	"github.com/goto/dex/cli/firehoses"
+	"github.com/goto/dex/cli/projects"
+	"github.com/goto/dex/cli/server"
+	"github.com/goto/dex/pkg/version"
 )
 
 var envHelp = map[string]string{
@@ -39,10 +39,10 @@ func New(_ context.Context) *cobra.Command {
 			"group": "core",
 			"help:learn": heredoc.Doc(`
 				Use 'dex <command> --help' for info about a command.
-				Read the manual at https://odpf.github.io/dex/
+				Read the manual at https://goto.github.io/dex/
 			`),
 			"help:feedback": heredoc.Doc(`
-				Open an issue here https://github.com/odpf/dex/issues
+				Open an issue here https://github.com/goto/dex/issues
 			`),
 		},
 	}

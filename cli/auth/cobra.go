@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/odpf/salt/oidc"
+	"github.com/goto/salt/oidc"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 )

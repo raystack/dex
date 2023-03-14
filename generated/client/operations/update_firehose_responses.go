@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/odpf/dex/generated/models"
+	"github.com/goto/dex/generated/models"
 )
 
 // UpdateFirehoseReader is a Reader for the UpdateFirehose structure.

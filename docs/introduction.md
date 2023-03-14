@@ -12,4 +12,4 @@ ODPF offers a suite of different data engineering tools. Each tool is designed w
 
 Dex is being developed to reduce the support effort that goes into provisioning, integrating and scaling of these tools.
 
-Dex will use [Entropy](https://github.com/odpf/entropy) to provision and manage deployments of various ODPF tools.
+Dex will use [Entropy](https://github.com/goto/entropy) to provision and manage deployments of various ODPF tools.

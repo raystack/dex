@@ -10,9 +10,9 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/spf13/cobra"
 
-	"github.com/odpf/dex/cli/auth"
-	"github.com/odpf/dex/cli/config"
-	"github.com/odpf/dex/generated/client"
+	"github.com/goto/dex/cli/auth"
+	"github.com/goto/dex/cli/config"
+	"github.com/goto/dex/generated/client"
 )
 
 type swaggerParams interface {

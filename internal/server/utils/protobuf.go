@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/pkg/errors"
 )
 
 func GoValToProtoStruct(v interface{}) (*structpb.Value, error) {

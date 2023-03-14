@@ -3,21 +3,22 @@ package server
 import (
 	"context"
 	"net/http"
+	"time"
 
+	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
+	sirenv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
 	"github.com/go-chi/chi/v5"
+	"github.com/goto/salt/mux"
 	"github.com/newrelic/go-agent/v3/newrelic"
-	"github.com/odpf/salt/mux"
-	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
-	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
 	"go.uber.org/zap"
 
-	"github.com/odpf/dex/internal/server/reqctx"
-	"github.com/odpf/dex/internal/server/utils"
-	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
-	firehosev1 "github.com/odpf/dex/internal/server/v1/firehose"
-	kubernetesv1 "github.com/odpf/dex/internal/server/v1/kubernetes"
-	projectsv1 "github.com/odpf/dex/internal/server/v1/project"
+	"github.com/goto/dex/internal/server/reqctx"
+	"github.com/goto/dex/internal/server/utils"
+	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
+	firehosev1 "github.com/goto/dex/internal/server/v1/firehose"
+	kubernetesv1 "github.com/goto/dex/internal/server/v1/kubernetes"
+	projectsv1 "github.com/goto/dex/internal/server/v1/project"
 )
 
 // Serve initialises all the HTTP API routes, starts listening for requests at addr, and blocks until
@@ -55,5 +56,13 @@ func Serve(ctx context.Context, addr string,
 	})
 
 	logger.Info("starting server", zap.String("addr", addr))
-	return mux.Serve(ctx, addr, mux.WithHTTP(router))
+	return mux.Serve(ctx,
+		mux.WithHTTPTarget(addr, &http.Server{
+			Handler:        router,
+			ReadTimeout:    120 * time.Second,
+			WriteTimeout:   120 * time.Second,
+			MaxHeaderBytes: 1 << 20,
+		}),
+		mux.WithGracePeriod(5*time.Second),
+	)
 }

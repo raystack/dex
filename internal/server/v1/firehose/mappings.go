@@ -6,15 +6,16 @@ import (
 	"strings"
 	"time"
 
+	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
+
 	"github.com/go-openapi/strfmt"
 	"github.com/mitchellh/mapstructure"
-	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/odpf/dex/generated/models"
-	"github.com/odpf/dex/internal/server/utils"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/internal/server/utils"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const kubeClusterDependencyKey = "kube_cluster"

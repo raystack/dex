@@ -6,7 +6,7 @@ import (
 )
 
 // shield header names.
-// Refer https://github.com/odpf/shield
+// Refer https://github.com/goto/shield
 const (
 	headerUserEmail = "X-Auth-Email"
 	headerShieldID  = "X-Shield-User"

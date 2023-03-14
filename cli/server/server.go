@@ -3,19 +3,19 @@ package server
 import (
 	"context"
 
+	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
+	sirenv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/spf13/cobra"
-	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
-	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/odpf/dex/internal/server"
-	"github.com/odpf/dex/pkg/logger"
-	"github.com/odpf/dex/pkg/telemetry"
+	"github.com/goto/dex/internal/server"
+	"github.com/goto/dex/pkg/logger"
+	"github.com/goto/dex/pkg/telemetry"
 )
 
 func Commands() *cobra.Command {

@@ -5,17 +5,17 @@ import (
 	"encoding/json"
 	"net/http"
 
+	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-openapi/strfmt"
-	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"github.com/odpf/dex/generated/models"
-	"github.com/odpf/dex/internal/server/reqctx"
-	"github.com/odpf/dex/internal/server/utils"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/internal/server/reqctx"
+	"github.com/goto/dex/internal/server/utils"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const kindFirehose = "firehose"

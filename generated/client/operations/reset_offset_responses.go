@@ -17,7 +17,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	"github.com/odpf/dex/generated/models"
+	"github.com/goto/dex/generated/models"
 )
 
 // ResetOffsetReader is a Reader for the ResetOffset structure.

@@ -115,12 +115,12 @@ linters-settings:
     checks:
       - "all"
   goimports:
-    local-prefixes: github.com/odpf/dex
+    local-prefixes: github.com/goto/dex
   gci:
     sections:
       - standard # Captures all standard packages if they do not match another section.
       - default # Contains all imports that could not be matched to another section type.
-      - prefix(github.com/odpf/dex) # Groups all imports with the specified Prefix.
+      - prefix(github.com/goto/dex) # Groups all imports with the specified Prefix.
   gocritic:
     disabled-checks:
       - ifElseChain

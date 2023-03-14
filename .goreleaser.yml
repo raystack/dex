@@ -10,9 +10,9 @@ builds:
     binary: dex
     flags: [ -a ]
     ldflags:
-      - -X github.com/odpf/dex/pkg/version.Version={{.Tag}}
-      - -X github.com/odpf/dex/pkg/version.Commit={{.FullCommit}}
-      - -X github.com/odpf/dex/pkg/version.BuildTime={{.Date}}
+      - -X github.com/goto/dex/pkg/version.Version={{.Tag}}
+      - -X github.com/goto/dex/pkg/version.Commit={{.FullCommit}}
+      - -X github.com/goto/dex/pkg/version.BuildTime={{.Date}}
     goos:
       - darwin
       - linux
@@ -58,13 +58,13 @@ dockers:
       - dex
     dockerfile: Dockerfile
     image_templates:
-      - 'docker.io/odpf/{{.ProjectName}}:latest'
-      - 'docker.io/odpf/{{.ProjectName}}:{{ .Version }}'
-      - 'docker.io/odpf/{{.ProjectName}}:{{ .Version }}-amd64'
+      - 'docker.io/goto/{{.ProjectName}}:latest'
+      - 'docker.io/goto/{{.ProjectName}}:{{ .Version }}'
+      - 'docker.io/goto/{{.ProjectName}}:{{ .Version }}-amd64'
 
 brews:
   - name: dex
-    homepage: "https://github.com/odpf/dex"
+    homepage: "https://github.com/goto/dex"
     description: "Infrastructure orchestration tool."
     tap:
       owner: odpf

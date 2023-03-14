@@ -11,9 +11,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/odpf/dex/cli/cdk"
-	"github.com/odpf/dex/generated/client/operations"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/cli/cdk"
+	"github.com/goto/dex/generated/client/operations"
+	"github.com/goto/dex/pkg/errors"
 )
 
 type logChunk struct {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/pkg/errors"
 )
 
 func Test_E(t *testing.T) {

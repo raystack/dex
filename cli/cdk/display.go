@@ -11,7 +11,7 @@ import (
 	"github.com/yudai/pp"
 	"gopkg.in/yaml.v2"
 
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/pkg/errors"
 )
 
 type FormatFn func(w io.Writer, v any) error

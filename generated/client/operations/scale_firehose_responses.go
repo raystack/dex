@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
-	"github.com/odpf/dex/generated/models"
+	"github.com/goto/dex/generated/models"
 )
 
 // ScaleFirehoseReader is a Reader for the ScaleFirehose structure.

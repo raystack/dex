@@ -15,7 +15,7 @@ import (
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/odpf/dex/generated/models"
+	"github.com/goto/dex/generated/models"
 )
 
 // NewCreateFirehoseParams creates a new CreateFirehoseParams object,
