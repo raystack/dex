@@ -5,9 +5,7 @@ import (
 	"strings"
 
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
-
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-openapi/strfmt"
 	"google.golang.org/grpc/codes"
