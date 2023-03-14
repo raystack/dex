@@ -3,13 +3,14 @@ package project
 import (
 	"net/http"
 
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
+	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 
-	"github.com/odpf/dex/generated/models"
-	"github.com/odpf/dex/internal/server/utils"
+	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/internal/server/utils"
 )
 
-func handleGetProject(shield shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
+func handleGetProject(shield shieldv1beta1rpc.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		prj, err := GetProject(r, shield)
 		if err != nil {
@@ -20,7 +21,7 @@ func handleGetProject(shield shieldv1beta1.ShieldServiceClient) http.HandlerFunc
 	}
 }
 
-func handleListProjects(shield shieldv1beta1.ShieldServiceClient) http.HandlerFunc {
+func handleListProjects(shield shieldv1beta1rpc.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		listReq := &shieldv1beta1.ListProjectsRequest{}
 

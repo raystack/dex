@@ -4,8 +4,9 @@ import (
 	"context"
 	"net/http"
 	"net/http/pprof"
+	"time"
 
-	"github.com/odpf/salt/mux"
+	"github.com/goto/salt/mux"
 	"go.uber.org/zap"
 )
 
@@ -45,7 +46,14 @@ func Init(ctx context.Context, cfg Config, lg *zap.Logger) {
 
 	if cfg.Debug != "" {
 		go func() {
-			if err := mux.Serve(ctx, cfg.Debug, mux.WithHTTP(r)); err != nil {
+			if err := mux.Serve(ctx,
+				mux.WithHTTPTarget(cfg.Debug, &http.Server{
+					Handler:        r,
+					ReadTimeout:    120 * time.Second,
+					WriteTimeout:   120 * time.Second,
+					MaxHeaderBytes: 1 << 20,
+				}),
+			); err != nil {
 				lg.Error("debug server exited due to error", zap.Error(err))
 			}
 		}()

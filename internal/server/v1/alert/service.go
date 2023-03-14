@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
+	sirenv1beta1grpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
+	sirenv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/siren/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/odpf/dex/internal/server/utils"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/internal/server/utils"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 )
 
 type Service struct {
-	Siren sirenv1beta1.SirenServiceClient
+	Siren sirenv1beta1grpc.SirenServiceClient
 }
 
 func (svc *Service) HandleListTemplates() http.HandlerFunc {

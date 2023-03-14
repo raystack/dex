@@ -1,4 +1,4 @@
-NAME=github.com/odpf/dex
+NAME=github.com/goto/dex
 VERSION=$(shell git describe --tags --always --first-parent 2>/dev/null)
 COMMIT=$(shell git rev-parse --short HEAD)
 BUILD_TIME=$(shell date)

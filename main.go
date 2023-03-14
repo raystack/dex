@@ -8,10 +8,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/odpf/salt/cmdx"
-	"github.com/odpf/salt/term"
+	"github.com/goto/salt/cmdx"
+	"github.com/goto/salt/term"
 
-	"github.com/odpf/dex/cli"
+	"github.com/goto/dex/cli"
 )
 
 const (

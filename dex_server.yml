@@ -47,15 +47,15 @@ telemetry:
   # opene-telemetry exporter will publish the collected traces/views to.
   otel_agent_addr: "localhost:8088"
 
-# [Shield](https://github.com/odpf/shield) client related configurations
+# [Shield](https://github.com/goto/shield) client related configurations
 shield:
   addr: localhost:8000
 
-# [Entropy](https://github.com/odpf/entropy) client related configurations
+# [Entropy](https://github.com/goto/entropy) client related configurations
 entropy:
   addr: localhost:8010
   firehose_version: v0.5.0
 
-# [Siren](https://github.com/odpf/siren) client related configurations
+# [Siren](https://github.com/goto/siren) client related configurations
 siren:
   addr: localhost:8020

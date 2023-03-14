@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/odpf/salt/cmdx"
+	"github.com/goto/salt/cmdx"
 	"golang.org/x/oauth2"
 
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/pkg/errors"
 )
 
 type OAuthProviderConfig struct {

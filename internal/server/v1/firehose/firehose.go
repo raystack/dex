@@ -4,27 +4,31 @@ import (
 	"context"
 	"net/http"
 
+	entropyv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
+	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
+	sirenv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
+
+	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
-	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
-	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/odpf/dex/generated/models"
-	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
-	"github.com/odpf/dex/internal/server/v1/project"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/generated/models"
+	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
+	"github.com/goto/dex/internal/server/v1/project"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const pathParamURN = "urn"
 
 var errFirehoseNotFound = errors.ErrNotFound.WithMsgf("no firehose with given URN")
 
-func Routes(entropy entropyv1beta1.ResourceServiceClient,
-	shield shieldv1beta1.ShieldServiceClient,
+func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
+	shield shieldv1beta1rpc.ShieldServiceClient,
 	alertSvc *alertsv1.Service,
 ) func(chi.Router) {
 	api := &firehoseAPI{
@@ -58,9 +62,9 @@ func Routes(entropy entropyv1beta1.ResourceServiceClient,
 }
 
 type firehoseAPI struct {
-	Entropy entropyv1beta1.ResourceServiceClient
-	Shield  shieldv1beta1.ShieldServiceClient
-	Siren   sirenv1beta1.SirenServiceClient
+	Entropy entropyv1beta1rpc.ResourceServiceClient
+	Shield  shieldv1beta1rpc.ShieldServiceClient
+	Siren   sirenv1beta1rpc.SirenServiceClient
 
 	AlertSvc *alertsv1.Service
 }

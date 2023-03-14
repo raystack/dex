@@ -9,7 +9,7 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	"github.com/odpf/dex/generated/client/operations"
+	"github.com/goto/dex/generated/client/operations"
 )
 
 // Default dex API HTTP client.

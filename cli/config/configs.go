@@ -2,9 +2,9 @@ package config
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	"github.com/odpf/salt/cmdx"
+	"github.com/goto/salt/cmdx"
 
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const configAppName = "dex"

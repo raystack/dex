@@ -4,13 +4,13 @@ import (
 	"context"
 	"net/http"
 
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 	"github.com/go-chi/chi/v5"
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 
-	"github.com/odpf/dex/generated/models"
-	"github.com/odpf/dex/internal/server/utils"
-	alertsv1 "github.com/odpf/dex/internal/server/v1/alert"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/internal/server/utils"
+	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const firehoseOutputReleaseNameKey = "release_name"

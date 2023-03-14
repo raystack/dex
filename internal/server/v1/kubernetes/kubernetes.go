@@ -3,25 +3,28 @@ package kubernetes
 import (
 	"net/http"
 
+	entropyv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
+	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
+
+	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-openapi/strfmt"
-	entropyv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/entropy/v1beta1"
-	shieldv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/shield/v1beta1"
 
-	"github.com/odpf/dex/generated/models"
-	"github.com/odpf/dex/internal/server/utils"
-	"github.com/odpf/dex/internal/server/v1/project"
+	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/internal/server/utils"
+	"github.com/goto/dex/internal/server/v1/project"
 )
 
 const kindKubernetes = "kubernetes"
 
-func Routes(shield shieldv1beta1.ShieldServiceClient, entropy entropyv1beta1.ResourceServiceClient) func(chi.Router) {
+func Routes(shield shieldv1beta1rpc.ShieldServiceClient, entropy entropyv1beta1rpc.ResourceServiceClient) func(chi.Router) {
 	return func(r chi.Router) {
 		r.Get("/", handleListKubeClusters(shield, entropy))
 	}
 }
 
-func handleListKubeClusters(shield shieldv1beta1.ShieldServiceClient, entropy entropyv1beta1.ResourceServiceClient) http.HandlerFunc {
+func handleListKubeClusters(shield shieldv1beta1rpc.ShieldServiceClient, entropy entropyv1beta1rpc.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tag := r.URL.Query().Get("tag")
 

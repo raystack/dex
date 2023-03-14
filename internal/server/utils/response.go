@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/pkg/errors"
 )
 
 // ListResponse can be used to write list of items to response.

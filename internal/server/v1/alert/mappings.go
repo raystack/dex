@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	sirenv1beta1 "go.buf.build/odpf/gwv/odpf/proton/odpf/siren/v1beta1"
+	sirenv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/siren/v1beta1"
 )
 
 const defaultDecimalBase = 10

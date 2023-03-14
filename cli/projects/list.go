@@ -5,12 +5,12 @@ import (
 	"io"
 	"time"
 
-	"github.com/odpf/salt/printer"
-	"github.com/odpf/salt/term"
+	"github.com/goto/salt/printer"
+	"github.com/goto/salt/term"
 	"github.com/spf13/cobra"
 
-	"github.com/odpf/dex/cli/cdk"
-	"github.com/odpf/dex/generated/client/operations"
+	"github.com/goto/dex/cli/cdk"
+	"github.com/goto/dex/generated/client/operations"
 )
 
 func listCommand() *cobra.Command {

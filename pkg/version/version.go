@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	commonv1 "go.buf.build/odpf/gwv/odpf/proton/odpf/common/v1"
+	commonv1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/common/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

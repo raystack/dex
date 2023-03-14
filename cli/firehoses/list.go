@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/odpf/salt/printer"
-	"github.com/odpf/salt/term"
+	"github.com/goto/salt/printer"
+	"github.com/goto/salt/term"
 	"github.com/spf13/cobra"
 
-	"github.com/odpf/dex/cli/cdk"
-	"github.com/odpf/dex/generated/client/operations"
-	"github.com/odpf/dex/generated/models"
-	"github.com/odpf/dex/pkg/errors"
+	"github.com/goto/dex/cli/cdk"
+	"github.com/goto/dex/generated/client/operations"
+	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/pkg/errors"
 )
 
 func listCommand() *cobra.Command {

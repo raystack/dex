@@ -3,12 +3,12 @@ package server
 import (
 	"fmt"
 
-	"github.com/odpf/salt/config"
+	"github.com/goto/salt/config"
 	"github.com/spf13/cobra"
 
-	"github.com/odpf/dex/pkg/errors"
-	"github.com/odpf/dex/pkg/logger"
-	"github.com/odpf/dex/pkg/telemetry"
+	"github.com/goto/dex/pkg/errors"
+	"github.com/goto/dex/pkg/logger"
+	"github.com/goto/dex/pkg/telemetry"
 )
 
 // serverConfig contains the application configuration.
