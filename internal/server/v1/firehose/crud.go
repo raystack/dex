@@ -42,7 +42,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 	if err := utils.ReadJSON(r, &def); err != nil {
 		utils.WriteErr(w, err)
 		return
-	} else if err := sanitiseAndValidate(&def); err != nil {
+	} else if err := SanitiseAndValidate(&def); err != nil {
 		utils.WriteErr(w, err)
 		return
 	}

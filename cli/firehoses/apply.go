@@ -10,6 +10,7 @@ import (
 	"github.com/goto/dex/cli/cdk"
 	"github.com/goto/dex/generated/client/operations"
 	"github.com/goto/dex/generated/models"
+	"github.com/goto/dex/internal/server/v1/firehose"
 	"github.com/goto/dex/pkg/errors"
 )
 
@@ -25,6 +26,8 @@ func applyCommand() *cobra.Command {
 			var firehoseDef models.Firehose
 			if err := readYAMLFile(args[1], &firehoseDef); err != nil {
 				return err
+			} else if err := firehose.SanitiseAndValidate(&firehoseDef); err != nil {
+				return err
 			}
 
 			urn := generateFirehoseURN(args[0], firehoseDef.Name)
@@ -32,7 +35,7 @@ func applyCommand() *cobra.Command {
 			var existing *models.Firehose
 			var err error
 
-			isUpdate := !onlyCreate
+			var isUpdate bool
 			if !onlyCreate {
 				notFoundErr := &operations.GetFirehoseNotFound{}
 				existing, err = getFirehose(cmd, args[0], urn)

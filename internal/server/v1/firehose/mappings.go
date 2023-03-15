@@ -47,7 +47,7 @@ type moduleConfigFirehoseDef struct {
 	DeploymentID       string            `json:"deployment_id,omitempty"`
 }
 
-func sanitiseAndValidate(def *models.Firehose) error {
+func SanitiseAndValidate(def *models.Firehose) error {
 	if def == nil {
 		return errors.ErrInvalid.WithMsgf("definition is nil")
 	}
