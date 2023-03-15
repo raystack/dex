@@ -27,6 +27,9 @@ type FirehoseConfig struct {
 	// Required: true
 	ConsumerGroupID *string `json:"consumer_group_id"`
 
+	// deployment id
+	DeploymentID string `json:"deployment_id,omitempty"`
+
 	// env vars
 	EnvVars map[string]string `json:"env_vars,omitempty"`
 

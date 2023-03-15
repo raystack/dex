@@ -44,6 +44,7 @@ type moduleConfigFirehoseDef struct {
 	KafkaTopic         string            `json:"kafka_topic,omitempty"`
 	KafkaConsumerID    string            `json:"kafka_consumer_id,omitempty"`
 	EnvVariables       map[string]string `json:"env_variables,omitempty"`
+	DeploymentID       string            `json:"deployment_id,omitempty"`
 }
 
 func sanitiseAndValidate(def *models.Firehose) error {
@@ -169,6 +170,7 @@ func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*
 			KafkaTopic:         *cfg.TopicName,
 			KafkaConsumerID:    *cfg.ConsumerGroupID,
 			EnvVariables:       cfg.EnvVars,
+			DeploymentID:       cfg.DeploymentID,
 		},
 	})
 }
@@ -227,6 +229,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 			StopDate:              timePtrToStr(modConf.StopTime),
 			StreamName:            &streamName,
 			TopicName:             &modConf.Firehose.KafkaTopic,
+			DeploymentID:          modConf.Firehose.DeploymentID,
 		}
 
 		firehoseDef.State = &models.FirehoseState{
