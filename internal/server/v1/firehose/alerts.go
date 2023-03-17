@@ -139,6 +139,9 @@ func (api *firehoseAPI) stopAlerts(ctx context.Context, firehoseDef models.Fireh
 	}
 
 	_, err = api.AlertSvc.UpsertAlertPolicy(ctx, prj.GetSlug(), policy)
+	if errors.Is(err, errors.ErrNotFound) {
+		err = nil
+	}
 	return err
 }
 
