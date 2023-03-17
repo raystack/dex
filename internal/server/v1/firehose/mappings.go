@@ -9,6 +9,7 @@ import (
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 	"github.com/go-openapi/strfmt"
+	entropyFirehose "github.com/goto/entropy/modules/firehose"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -29,22 +30,6 @@ type firehoseLabels struct {
 	CreatedByEmail string `mapstructure:"created_by_email"`
 	UpdatedBy      string `mapstructure:"updated_by"`
 	UpdatedByEmail string `mapstructure:"updated_by_email"`
-}
-
-type moduleConfig struct {
-	State    string                  `json:"state"`
-	StopTime *time.Time              `json:"stop_time,omitempty"`
-	Telegraf map[string]interface{}  `json:"telegraf"`
-	Firehose moduleConfigFirehoseDef `json:"firehose"`
-}
-
-type moduleConfigFirehoseDef struct {
-	Replicas           int               `json:"replicas,omitempty"`
-	KafkaBrokerAddress string            `json:"kafka_broker_address,omitempty"`
-	KafkaTopic         string            `json:"kafka_topic,omitempty"`
-	KafkaConsumerID    string            `json:"kafka_consumer_id,omitempty"`
-	EnvVariables       map[string]string `json:"env_variables,omitempty"`
-	DeploymentID       string            `json:"deployment_id,omitempty"`
 }
 
 func SanitiseAndValidate(def *models.Firehose) error {
@@ -160,19 +145,18 @@ func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*
 	cfg.EnvVars["STREAM_NAME"] = *cfg.StreamName
 	cfg.EnvVars["INPUT_SCHEMA_PROTO_CLASS"] = *cfg.InputSchemaProtoClass
 
-	return utils.GoValToProtoStruct(moduleConfig{
-		State:    "RUNNING",
-		StopTime: stopAt,
-		Telegraf: telegrafConf,
-		Firehose: moduleConfigFirehoseDef{
-			Replicas:           int(*cfg.Replicas),
-			KafkaBrokerAddress: *cfg.BootstrapServers,
-			KafkaTopic:         *cfg.TopicName,
-			KafkaConsumerID:    *cfg.ConsumerGroupID,
-			EnvVariables:       cfg.EnvVars,
-			DeploymentID:       cfg.DeploymentID,
-		},
-	})
+	var entropyFirehoseConfig entropyFirehose.Config
+	entropyFirehoseConfig.State = "RUNNING"
+	entropyFirehoseConfig.StopTime = stopAt
+	entropyFirehoseConfig.Telegraf = telegrafConf
+	entropyFirehoseConfig.Firehose.Replicas = int(*cfg.Replicas)
+	entropyFirehoseConfig.Firehose.KafkaBrokerAddress = *cfg.BootstrapServers
+	entropyFirehoseConfig.Firehose.KafkaTopic = *cfg.TopicName
+	entropyFirehoseConfig.Firehose.KafkaConsumerID = *cfg.ConsumerGroupID
+	entropyFirehoseConfig.Firehose.EnvVariables = cfg.EnvVars
+	entropyFirehoseConfig.Firehose.DeploymentID = cfg.DeploymentID
+
+	return utils.GoValToProtoStruct(entropyFirehoseConfig)
 }
 
 func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models.Firehose, error) {
@@ -210,7 +194,7 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 	}
 
 	if !onlyMeta {
-		var modConf moduleConfig
+		var modConf entropyFirehose.Config
 		if err := utils.ProtoStructToGoVal(res.GetSpec().GetConfigs(), &modConf); err != nil {
 			return nil, err
 		}
