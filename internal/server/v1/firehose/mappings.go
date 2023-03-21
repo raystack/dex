@@ -26,7 +26,7 @@ const (
 	confProtoClass      = "INPUT_SCHEMA_PROTO_CLASS"
 	confStreamName      = "STREAM_NAME"
 	confSinkType        = "SINK_TYPE"
-	confKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_ID"
+	confKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
 )
 
 var nonAlphaNumPattern = regexp.MustCompile("[^a-zA-Z0-9]+")
