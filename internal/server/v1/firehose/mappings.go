@@ -1,7 +1,6 @@
 package firehose
 
 import (
-	"encoding/json"
 	"regexp"
 	"strings"
 	"time"
@@ -20,6 +19,16 @@ import (
 
 const kubeClusterDependencyKey = "kube_cluster"
 
+// Refer https://odpf.github.io/firehose/advance/generic/
+const (
+	confKafkaTopic      = "SOURCE_KAFKA_TOPIC"
+	confKafkaBrokers    = "SOURCE_KAFKA_BROKERS"
+	confProtoClass      = "INPUT_SCHEMA_PROTO_CLASS"
+	confStreamName      = "STREAM_NAME"
+	confSinkType        = "SINK_TYPE"
+	confKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_ID"
+)
+
 var nonAlphaNumPattern = regexp.MustCompile("[^a-zA-Z0-9]+")
 
 type firehoseLabels struct {
@@ -33,7 +42,7 @@ type firehoseLabels struct {
 }
 
 func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
-	cfgStruct, err := makeConfigStruct(def.Configs, prj)
+	cfgStruct, err := makeConfigStruct(def.Configs)
 	if err != nil {
 		return nil, err
 	}
@@ -74,38 +83,22 @@ func makeLabelsMap(def models.Firehose) map[string]string {
 	}
 }
 
-func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*structpb.Value, error) {
-	stopAt := time.Time(cfg.StopDate)
+func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
+	// TODO: handled stop date.
 
-	var telegrafConf map[string]any
-	prjMetadata := prj.GetMetadata().AsMap()
-	if confStr, ok := prjMetadata["telegraf"].(string); ok {
-		_ = json.Unmarshal([]byte(confStr), &telegrafConf)
+	// Refer: https://odpf.github.io/firehose/advance/generic/
+	cfg.EnvVars[confSinkType] = strings.ToUpper(string(*cfg.SinkType))
+	cfg.EnvVars[confStreamName] = *cfg.StreamName
+	cfg.EnvVars[confProtoClass] = *cfg.InputSchemaProtoClass
+	cfg.EnvVars[confKafkaBrokers] = *cfg.BootstrapServers
+	cfg.EnvVars[confKafkaTopic] = *cfg.TopicName
+	cfg.EnvVars[confKafkaConsumerID] = cfg.ConsumerGroupID
 
-		// disable telegraf by default.
-		if len(telegrafConf) == 0 {
-			telegrafConf = map[string]interface{}{"enabled": false}
-		}
-	}
-
-	cfg.EnvVars["SINK_TYPE"] = strings.ToUpper(string(*cfg.SinkType))
-	cfg.EnvVars["STREAM_NAME"] = *cfg.StreamName
-	cfg.EnvVars["INPUT_SCHEMA_PROTO_CLASS"] = *cfg.InputSchemaProtoClass
-
-	var entropyFirehoseConfig entropyFirehose.Config
-	entropyFirehoseConfig.State = "RUNNING"
-	if !stopAt.IsZero() {
-		entropyFirehoseConfig.StopTime = &stopAt
-	}
-	entropyFirehoseConfig.Telegraf = telegrafConf
-	entropyFirehoseConfig.Firehose.Replicas = int(cfg.Replicas)
-	entropyFirehoseConfig.Firehose.KafkaBrokerAddress = *cfg.BootstrapServers
-	entropyFirehoseConfig.Firehose.KafkaTopic = *cfg.TopicName
-	entropyFirehoseConfig.Firehose.KafkaConsumerID = cfg.ConsumerGroupID
-	entropyFirehoseConfig.Firehose.EnvVariables = cfg.EnvVars
-	entropyFirehoseConfig.Firehose.DeploymentID = cfg.DeploymentID
-
-	return utils.GoValToProtoStruct(entropyFirehoseConfig)
+	return utils.GoValToProtoStruct(entropyFirehose.Config{
+		Replicas:     int(cfg.Replicas),
+		DeploymentID: cfg.DeploymentID,
+		EnvVariables: cfg.EnvVars,
+	})
 }
 
 func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models.Firehose, error) {
@@ -149,26 +142,23 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 			return nil, err
 		}
 
-		var stopTime time.Time
-		if modConf.StopTime != nil {
-			stopTime = *modConf.StopTime
-		}
-
-		sinkType := models.FirehoseSinkType(modConf.Firehose.EnvVariables["SINK_TYPE"])
-		streamName := modConf.Firehose.EnvVariables["STREAM_NAME"]
-		protoClass := modConf.Firehose.EnvVariables["INPUT_SCHEMA_PROTO_CLASS"]
+		sinkType := models.FirehoseSinkType(modConf.EnvVariables[confSinkType])
+		streamName := modConf.EnvVariables[confStreamName]
+		protoClass := modConf.EnvVariables[confProtoClass]
+		bootstrapServers := modConf.EnvVariables[confKafkaBrokers]
+		topicName := modConf.EnvVariables[confKafkaTopic]
 
 		firehoseDef.Configs = &models.FirehoseConfig{
-			BootstrapServers:      &modConf.Firehose.KafkaBrokerAddress,
-			ConsumerGroupID:       modConf.Firehose.KafkaConsumerID,
-			EnvVars:               modConf.Firehose.EnvVariables,
+			BootstrapServers:      &bootstrapServers,
+			ConsumerGroupID:       modConf.EnvVariables[confKafkaConsumerID],
+			EnvVars:               modConf.EnvVariables,
 			InputSchemaProtoClass: &protoClass,
-			Replicas:              1, // TODO: fix this.
+			Replicas:              float64(modConf.Replicas),
 			SinkType:              &sinkType,
-			StopDate:              strfmt.DateTime(stopTime),
+			StopDate:              strfmt.DateTime(time.Time{}), // TODO: set proper value
 			StreamName:            &streamName,
-			TopicName:             &modConf.Firehose.KafkaTopic,
-			DeploymentID:          modConf.Firehose.DeploymentID,
+			TopicName:             &topicName,
+			DeploymentID:          modConf.DeploymentID,
 		}
 
 		firehoseDef.State = &models.FirehoseState{

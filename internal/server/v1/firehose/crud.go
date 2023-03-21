@@ -171,13 +171,7 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		labels["description"] = updates.Description
 	}
 
-	prj, err := api.getProject(r)
-	if err != nil {
-		utils.WriteErr(w, err)
-		return
-	}
-
-	cfgStruct, err := makeConfigStruct(&updates.Configs, prj)
+	cfgStruct, err := makeConfigStruct(&updates.Configs)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
