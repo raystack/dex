@@ -3,6 +3,7 @@ package firehoses
 import (
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/goto/salt/printer"
 	"github.com/spf13/cobra"
@@ -10,7 +11,6 @@ import (
 	"github.com/goto/dex/cli/cdk"
 	"github.com/goto/dex/generated/client/operations"
 	"github.com/goto/dex/generated/models"
-	"github.com/goto/dex/internal/server/v1/firehose"
 	"github.com/goto/dex/pkg/errors"
 )
 
@@ -22,53 +22,60 @@ func applyCommand() *cobra.Command {
 		Use:   "apply <project> <filepath>",
 		Short: "Create/Update a firehose as described in a file",
 		Args:  cobra.ExactArgs(2),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			var firehoseDef models.Firehose
-			if err := readYAMLFile(args[1], &firehoseDef); err != nil {
-				return err
-			} else if err := firehose.SanitiseAndValidate(&firehoseDef); err != nil {
-				return err
-			}
-
-			urn := generateFirehoseURN(args[0], firehoseDef.Name)
-
-			var existing *models.Firehose
-			var err error
-
-			var isUpdate bool
-			if !onlyCreate {
-				notFoundErr := &operations.GetFirehoseNotFound{}
-				existing, err = getFirehose(cmd, args[0], urn)
-				if err != nil && !errors.As(err, &notFoundErr) {
+		Run: func(cmd *cobra.Command, args []string) {
+			fn := func(cmd *cobra.Command, args []string) error {
+				var firehoseDef models.Firehose
+				if err := readYAMLFile(args[1], &firehoseDef); err != nil {
+					return err
+				} else if err := firehoseDef.Validate(nil); err != nil {
 					return err
 				}
-				isUpdate = existing != nil
-			}
 
-			var finalVersion *models.Firehose
-			if isUpdate {
-				// Firehose already exists. Treat this as update.
-				finalVersion, err = updateFirehose(cmd, args[0], *existing, firehoseDef)
-				if err != nil {
-					return errors.Errorf("update failed: %s", err)
-				}
-			} else {
-				// Firehose does not already exist. Treat this as create.
-				finalVersion, err = createFirehose(cmd, args[0], firehoseDef)
-				if err != nil {
-					return errors.Errorf("create failed: %s", err)
-				}
-			}
+				urn := generateFirehoseURN(args[0], firehoseDef.Name)
 
-			return cdk.Display(cmd, finalVersion, func(w io.Writer, v any) error {
-				msg := "Create request placed"
+				var existing *models.Firehose
+				var err error
+
+				var isUpdate bool
+				if !onlyCreate {
+					notFoundErr := &operations.GetFirehoseNotFound{}
+					existing, err = getFirehose(cmd, args[0], urn)
+					if err != nil && !errors.As(err, &notFoundErr) {
+						return err
+					}
+					isUpdate = existing != nil
+				}
+
+				var finalVersion *models.Firehose
 				if isUpdate {
-					msg = "Update request placed"
+					// Firehose already exists. Treat this as update.
+					finalVersion, err = updateFirehose(cmd, args[0], *existing, firehoseDef)
+					if err != nil {
+						return errors.Errorf("update failed: %s", err)
+					}
+				} else {
+					// Firehose does not already exist. Treat this as create.
+					finalVersion, err = createFirehose(cmd, args[0], firehoseDef)
+					if err != nil {
+						return errors.Errorf("create failed: %s", err)
+					}
 				}
-				_, err := fmt.Fprintf(w, "%s.\nUse `dex firehose view %s %s` to check status.\n",
-					msg, args[0], finalVersion.Urn)
-				return err
-			})
+
+				return cdk.Display(cmd, finalVersion, func(w io.Writer, v any) error {
+					msg := "Create request placed"
+					if isUpdate {
+						msg = "Update request placed"
+					}
+					_, err := fmt.Fprintf(w, "%s.\nUse `dex firehose view %s %s` to check status.\n",
+						msg, args[0], finalVersion.Urn)
+					return err
+				})
+			}
+
+			err := fn(cmd, args)
+			if err != nil {
+				log.Fatalf("error: %v", err)
+			}
 		},
 	}
 

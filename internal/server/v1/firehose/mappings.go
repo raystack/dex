@@ -32,35 +32,14 @@ type firehoseLabels struct {
 	UpdatedByEmail string `mapstructure:"updated_by_email"`
 }
 
-func SanitiseAndValidate(def *models.Firehose) error {
-	if def == nil {
-		return errors.ErrInvalid.WithMsgf("definition is nil")
-	}
-
-	def.Title = strings.TrimSpace(def.Title)
-	def.Name = strings.TrimSpace(def.Name)
-	def.Description = strings.TrimSpace(def.Description)
-	def.KubeCluster = strings.TrimSpace(def.KubeCluster)
-
-	if def.Title == "" {
-		return errors.ErrInvalid.WithMsgf("title must be set")
-	}
-
-	if def.Name == "" {
-		def.Name = slugify(def.Title)
-	}
-
-	if def.KubeCluster == "" {
-		return errors.ErrInvalid.WithMsgf("kube_cluster must be set")
-	}
-
-	return nil
-}
-
 func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
 	cfgStruct, err := makeConfigStruct(def.Configs, prj)
 	if err != nil {
 		return nil, err
+	}
+
+	if def.Name == "" {
+		def.Name = slugify(*def.Title)
 	}
 
 	return &entropyv1beta1.Resource{
@@ -72,7 +51,7 @@ func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*en
 		Spec: &entropyv1beta1.ResourceSpec{
 			Configs: cfgStruct,
 			Dependencies: []*entropyv1beta1.ResourceDependency{
-				{Key: kubeClusterDependencyKey, Value: def.KubeCluster},
+				{Key: kubeClusterDependencyKey, Value: *def.KubeCluster},
 			},
 		},
 	}, nil
@@ -85,7 +64,7 @@ func makeLabelsMap(def models.Firehose) map[string]string {
 	}
 
 	return map[string]string{
-		"title":            def.Title,
+		"title":            *def.Title,
 		"group":            def.Group.String(),
 		"description":      def.Description,
 		"created_by":       meta.CreatedBy.String(),
@@ -96,39 +75,7 @@ func makeLabelsMap(def models.Firehose) map[string]string {
 }
 
 func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*structpb.Value, error) {
-	switch {
-	case cfg.BootstrapServers == nil:
-		return nil, errors.ErrInvalid.WithMsgf("bootstrap_servers must be set")
-
-	case cfg.TopicName == nil:
-		return nil, errors.ErrInvalid.WithMsgf("topic_name must be set")
-
-	case cfg.ConsumerGroupID == nil:
-		return nil, errors.ErrInvalid.WithMsgf("consumer_group_id must be set")
-
-	case cfg.SinkType == nil:
-		return nil, errors.ErrInvalid.WithMsgf("sink_type must be set")
-
-	case cfg.StreamName == nil:
-		return nil, errors.ErrInvalid.WithMsgf("stream_name must be set")
-
-	case cfg.InputSchemaProtoClass == nil:
-		return nil, errors.ErrInvalid.WithMsgf("input_schema_proto_class must be set")
-	}
-
-	var stopAt *time.Time
-	if cfg.StopDate != "" {
-		t, err := time.Parse(time.RFC3339, cfg.StopDate)
-		if err != nil {
-			return nil, errors.ErrInvalid.WithMsgf("stop date must be valid RFC3339 timestamp")
-		}
-		stopAt = &t
-	}
-
-	if cfg.Replicas == nil {
-		replicas := float64(1)
-		cfg.Replicas = &replicas
-	}
+	stopAt := time.Time(cfg.StopDate)
 
 	var telegrafConf map[string]any
 	prjMetadata := prj.GetMetadata().AsMap()
@@ -141,18 +88,20 @@ func makeConfigStruct(cfg *models.FirehoseConfig, prj *shieldv1beta1.Project) (*
 		}
 	}
 
-	cfg.EnvVars["SINK_TYPE"] = string(*cfg.SinkType)
+	cfg.EnvVars["SINK_TYPE"] = strings.ToUpper(string(*cfg.SinkType))
 	cfg.EnvVars["STREAM_NAME"] = *cfg.StreamName
 	cfg.EnvVars["INPUT_SCHEMA_PROTO_CLASS"] = *cfg.InputSchemaProtoClass
 
 	var entropyFirehoseConfig entropyFirehose.Config
 	entropyFirehoseConfig.State = "RUNNING"
-	entropyFirehoseConfig.StopTime = stopAt
+	if !stopAt.IsZero() {
+		entropyFirehoseConfig.StopTime = &stopAt
+	}
 	entropyFirehoseConfig.Telegraf = telegrafConf
-	entropyFirehoseConfig.Firehose.Replicas = int(*cfg.Replicas)
+	entropyFirehoseConfig.Firehose.Replicas = int(cfg.Replicas)
 	entropyFirehoseConfig.Firehose.KafkaBrokerAddress = *cfg.BootstrapServers
 	entropyFirehoseConfig.Firehose.KafkaTopic = *cfg.TopicName
-	entropyFirehoseConfig.Firehose.KafkaConsumerID = *cfg.ConsumerGroupID
+	entropyFirehoseConfig.Firehose.KafkaConsumerID = cfg.ConsumerGroupID
 	entropyFirehoseConfig.Firehose.EnvVariables = cfg.EnvVars
 	entropyFirehoseConfig.Firehose.DeploymentID = cfg.DeploymentID
 
@@ -176,15 +125,16 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 		}
 	}
 
+	groupID := strfmt.UUID(labels.Group)
 	firehoseDef := models.Firehose{
 		Urn:         res.GetUrn(),
 		Name:        res.GetName(),
-		Title:       labels.Title,
-		Group:       strfmt.UUID(labels.Group),
+		Title:       &labels.Title,
+		Group:       &groupID,
 		CreatedAt:   strfmt.DateTime(res.GetCreatedAt().AsTime()),
 		UpdatedAt:   strfmt.DateTime(res.GetUpdatedAt().AsTime()),
 		Description: labels.Description,
-		KubeCluster: kubeCluster,
+		KubeCluster: &kubeCluster,
 		Metadata: &models.FirehoseMetadata{
 			CreatedBy:      strfmt.UUID(labels.CreatedBy),
 			CreatedByEmail: strfmt.Email(labels.CreatedByEmail),
@@ -199,25 +149,29 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 			return nil, err
 		}
 
+		var stopTime time.Time
+		if modConf.StopTime != nil {
+			stopTime = *modConf.StopTime
+		}
+
 		sinkType := models.FirehoseSinkType(modConf.Firehose.EnvVariables["SINK_TYPE"])
 		streamName := modConf.Firehose.EnvVariables["STREAM_NAME"]
 		protoClass := modConf.Firehose.EnvVariables["INPUT_SCHEMA_PROTO_CLASS"]
 
 		firehoseDef.Configs = &models.FirehoseConfig{
 			BootstrapServers:      &modConf.Firehose.KafkaBrokerAddress,
-			ConsumerGroupID:       &modConf.Firehose.KafkaConsumerID,
+			ConsumerGroupID:       modConf.Firehose.KafkaConsumerID,
 			EnvVars:               modConf.Firehose.EnvVariables,
 			InputSchemaProtoClass: &protoClass,
-			Replicas:              nil,
+			Replicas:              1, // TODO: fix this.
 			SinkType:              &sinkType,
-			StopDate:              timePtrToStr(modConf.StopTime),
+			StopDate:              strfmt.DateTime(stopTime),
 			StreamName:            &streamName,
 			TopicName:             &modConf.Firehose.KafkaTopic,
 			DeploymentID:          modConf.Firehose.DeploymentID,
 		}
 
 		firehoseDef.State = &models.FirehoseState{
-			State:  modConf.State,
 			Status: res.GetState().GetStatus().String(),
 			Output: res.GetState().Output.GetStructValue().AsMap(),
 		}
@@ -231,11 +185,4 @@ func slugify(s string) string {
 	s = nonAlphaNumPattern.ReplaceAllString(s, "-")
 	s = strings.Trim(s, "-")
 	return s
-}
-
-func timePtrToStr(t *time.Time) string {
-	if t == nil {
-		return ""
-	}
-	return t.String()
 }

@@ -9,7 +9,7 @@ import (
 // Refer https://github.com/goto/shield
 const (
 	headerUserEmail = "X-Auth-Email"
-	headerShieldID  = "X-Shield-User"
+	headerShieldID  = "X-Shield-User-Id"
 	headerRequestID = "X-Request-Id"
 )
 

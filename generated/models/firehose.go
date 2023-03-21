@@ -35,12 +35,14 @@ type Firehose struct {
 
 	// group
 	// Example: e144ea5e-c7d6-48c4-a580-db31cb3389aa
+	// Required: true
 	// Format: uuid
-	Group strfmt.UUID `json:"group,omitempty"`
+	Group *strfmt.UUID `json:"group"`
 
 	// kube cluster
 	// Example: orn:entropy:kubernetes:sample_project:sample_name
-	KubeCluster string `json:"kube_cluster,omitempty"`
+	// Required: true
+	KubeCluster *string `json:"kube_cluster"`
 
 	// metadata
 	// Read Only: true
@@ -48,6 +50,7 @@ type Firehose struct {
 
 	// name
 	// Example: booking-events-ingester
+	// Pattern: ^[A-Za-z][\w-]+[A-Za-z0-9]$
 	Name string `json:"name,omitempty"`
 
 	// state
@@ -55,7 +58,8 @@ type Firehose struct {
 
 	// title
 	// Example: Booking Events Ingester
-	Title string `json:"title,omitempty"`
+	// Required: true
+	Title *string `json:"title"`
 
 	// updated at
 	// Example: 2022-06-23T16:49:15.885541Z
@@ -85,11 +89,23 @@ func (m *Firehose) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateKubeCluster(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMetadata(formats); err != nil {
 		res = append(res, err)
 	}
 
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateState(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTitle(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -136,11 +152,21 @@ func (m *Firehose) validateCreatedAt(formats strfmt.Registry) error {
 }
 
 func (m *Firehose) validateGroup(formats strfmt.Registry) error {
-	if swag.IsZero(m.Group) { // not required
-		return nil
+
+	if err := validate.Required("group", "body", m.Group); err != nil {
+		return err
 	}
 
 	if err := validate.FormatOf("group", "body", "uuid", m.Group.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Firehose) validateKubeCluster(formats strfmt.Registry) error {
+
+	if err := validate.Required("kube_cluster", "body", m.KubeCluster); err != nil {
 		return err
 	}
 
@@ -166,6 +192,18 @@ func (m *Firehose) validateMetadata(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Firehose) validateName(formats strfmt.Registry) error {
+	if swag.IsZero(m.Name) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("name", "body", m.Name, `^[A-Za-z][\w-]+[A-Za-z0-9]$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Firehose) validateState(formats strfmt.Registry) error {
 	if swag.IsZero(m.State) { // not required
 		return nil
@@ -180,6 +218,15 @@ func (m *Firehose) validateState(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *Firehose) validateTitle(formats strfmt.Registry) error {
+
+	if err := validate.Required("title", "body", m.Title); err != nil {
+		return err
 	}
 
 	return nil

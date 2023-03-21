@@ -24,8 +24,7 @@ type FirehoseConfig struct {
 	BootstrapServers *string `json:"bootstrap_servers"`
 
 	// consumer group id
-	// Required: true
-	ConsumerGroupID *string `json:"consumer_group_id"`
+	ConsumerGroupID string `json:"consumer_group_id,omitempty"`
 
 	// deployment id
 	DeploymentID string `json:"deployment_id,omitempty"`
@@ -38,14 +37,16 @@ type FirehoseConfig struct {
 	InputSchemaProtoClass *string `json:"input_schema_proto_class"`
 
 	// replicas
-	Replicas *float64 `json:"replicas,omitempty"`
+	// Minimum: 1
+	Replicas float64 `json:"replicas,omitempty"`
 
 	// sink type
 	// Required: true
 	SinkType *FirehoseSinkType `json:"sink_type"`
 
 	// stop date
-	StopDate string `json:"stop_date,omitempty"`
+	// Format: date-time
+	StopDate strfmt.DateTime `json:"stop_date,omitempty"`
 
 	// stream name
 	// Required: true
@@ -69,15 +70,19 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateConsumerGroupID(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateInputSchemaProtoClass(formats); err != nil {
 		res = append(res, err)
 	}
 
+	if err := m.validateReplicas(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateSinkType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStopDate(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -104,18 +109,21 @@ func (m *FirehoseConfig) validateBootstrapServers(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *FirehoseConfig) validateConsumerGroupID(formats strfmt.Registry) error {
+func (m *FirehoseConfig) validateInputSchemaProtoClass(formats strfmt.Registry) error {
 
-	if err := validate.Required("consumer_group_id", "body", m.ConsumerGroupID); err != nil {
+	if err := validate.Required("input_schema_proto_class", "body", m.InputSchemaProtoClass); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *FirehoseConfig) validateInputSchemaProtoClass(formats strfmt.Registry) error {
+func (m *FirehoseConfig) validateReplicas(formats strfmt.Registry) error {
+	if swag.IsZero(m.Replicas) { // not required
+		return nil
+	}
 
-	if err := validate.Required("input_schema_proto_class", "body", m.InputSchemaProtoClass); err != nil {
+	if err := validate.Minimum("replicas", "body", m.Replicas, 1, false); err != nil {
 		return err
 	}
 
@@ -141,6 +149,18 @@ func (m *FirehoseConfig) validateSinkType(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *FirehoseConfig) validateStopDate(formats strfmt.Registry) error {
+	if swag.IsZero(m.StopDate) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("stop_date", "body", "date-time", m.StopDate.String(), formats); err != nil {
+		return err
 	}
 
 	return nil

@@ -709,6 +709,9 @@ definitions:
     type: object
     required:
       - configs
+      - title
+      - group
+      - kube_cluster
     properties:
       urn:
         type: string
@@ -720,6 +723,7 @@ definitions:
       name:
         type: string
         example: "booking-events-ingester"
+        pattern: "^[A-Za-z][\\w-]+[A-Za-z0-9]$"
       created_at:
         type: string
         format: date-time
@@ -753,7 +757,6 @@ definitions:
     required:
       - stream_name
       - bootstrap_servers
-      - consumer_group_id
       - sink_type
       - topic_name
       - input_schema_proto_class
@@ -769,12 +772,14 @@ definitions:
       replicas:
         type: number
         default: 1
+        minimum: 1
       consumer_group_id:
         type: string
       sink_type:
         $ref: "#/definitions/FirehoseSinkType"
       stop_date:
         type: string
+        format: date-time
       topic_name:
         type: string
       input_schema_proto_class:
@@ -790,10 +795,11 @@ definitions:
     properties:
       state:
         type: string
-        example: "STATUS_COMPLETED"
+        enum:
+          - RUNNING
+          - STOPPED
       status:
         type: string
-        example: ""
       output:
         type: object
         additionalProperties: true
