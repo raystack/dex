@@ -759,10 +759,11 @@ definitions:
       - stream_name
       - env_vars
     properties:
-      version:
+      stopped:
+        type: boolean
+      image:
         type: string
-        readOnly: true
-        example: "1.0.0"
+        example: "gotocompany/firehose:0.1.0"
       stream_name:
         type: string
       replicas:
@@ -786,20 +787,6 @@ definitions:
       output:
         type: object
         additionalProperties: true
-  FirehoseSinkType:
-    type: string
-    enum:
-      - "LOG"
-      - "HTTP"
-      - "POSTGRES"
-      - "INFLUXDB"
-      - "ELASTIC"
-      - "REDIS"
-      - "GRPC"
-      - "PROMETHEUS"
-      - "BIGQUERY"
-      - "BLOB"
-      - "BIGTABLE"
   Logs:
     type: array
     items:
