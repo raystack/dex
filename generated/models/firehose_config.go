@@ -23,7 +23,12 @@ type FirehoseConfig struct {
 	DeploymentID string `json:"deployment_id,omitempty"`
 
 	// env vars
-	EnvVars map[string]string `json:"env_vars,omitempty"`
+	// Required: true
+	EnvVars map[string]string `json:"env_vars"`
+
+	// image
+	// Example: gotocompany/firehose:0.1.0
+	Image string `json:"image,omitempty"`
 
 	// replicas
 	// Minimum: 1
@@ -33,19 +38,21 @@ type FirehoseConfig struct {
 	// Format: date-time
 	StopDate strfmt.DateTime `json:"stop_date,omitempty"`
 
+	// stopped
+	Stopped bool `json:"stopped,omitempty"`
+
 	// stream name
 	// Required: true
 	StreamName *string `json:"stream_name"`
-
-	// version
-	// Example: 1.0.0
-	// Read Only: true
-	Version string `json:"version,omitempty"`
 }
 
 // Validate validates this firehose config
 func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateEnvVars(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateReplicas(formats); err != nil {
 		res = append(res, err)
@@ -62,6 +69,15 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *FirehoseConfig) validateEnvVars(formats strfmt.Registry) error {
+
+	if err := validate.Required("env_vars", "body", m.EnvVars); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -98,26 +114,8 @@ func (m *FirehoseConfig) validateStreamName(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validate this firehose config based on the context it is used
+// ContextValidate validates this firehose config based on context it is used
 func (m *FirehoseConfig) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateVersion(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *FirehoseConfig) contextValidateVersion(ctx context.Context, formats strfmt.Registry) error {
-
-	if err := validate.ReadOnly(ctx, "version", "body", string(m.Version)); err != nil {
-		return err
-	}
-
 	return nil
 }
 

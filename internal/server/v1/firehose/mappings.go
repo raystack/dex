@@ -111,10 +111,12 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (
 		streamName := modConf.EnvVariables[confStreamName]
 
 		firehoseDef.Configs = &models.FirehoseConfig{
-			Version:      modConf.ChartValues.ImageTag,
+			Stopped:  false,                        // TODO: set correct value here.
+			StopDate: strfmt.DateTime(time.Time{}), // TODO: set proper value
+
+			Image:        modConf.ChartValues.ImageTag,
 			EnvVars:      modConf.EnvVariables,
 			Replicas:     float64(modConf.Replicas),
-			StopDate:     strfmt.DateTime(time.Time{}), // TODO: set proper value
 			StreamName:   &streamName,
 			DeploymentID: modConf.DeploymentID,
 		}
