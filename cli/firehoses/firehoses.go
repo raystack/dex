@@ -3,7 +3,6 @@ package firehoses
 import (
 	"encoding/json"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -19,7 +18,7 @@ func Commands() *cobra.Command {
 		Long:    "You can create/manage/view firehoses using this command.",
 		Example: heredoc.Doc(`
 			$ dex firehose list project-x
-			$ dex firehose create -c ./config.yaml
+			$ dex firehose create firehose_def.yml
 		`),
 		Annotations: map[string]string{
 			"group": "core",
@@ -29,7 +28,8 @@ func Commands() *cobra.Command {
 	cmd.AddCommand(
 		viewCommand(),
 		listCommand(),
-		applyCommand(),
+		createCommand(),
+		updateCommand(),
 		scaleCommand(),
 		startCommand(),
 		stopCommand(),
@@ -54,9 +54,4 @@ func readYAMLFile(filePath string, into interface{}) error {
 	}
 
 	return json.Unmarshal(jsonB, into)
-}
-
-func generateFirehoseURN(project, name string) string {
-	parts := []string{"orn", "entropy", "firehose", project, name}
-	return strings.Join(parts, ":")
 }

@@ -137,9 +137,9 @@ func (api *firehoseAPI) executeAction(ctx context.Context, urn, actionType strin
 		return nil, err
 	}
 
-	labels := makeLabelsMap(*existingFirehose)
-	labels["updated_by"] = reqCtx.UserID
-	labels["updated_by_email"] = reqCtx.UserEmail
+	labels := mergeMaps(existingFirehose.Labels, map[string]string{
+		labelUpdatedBy: reqCtx.UserEmail,
+	})
 
 	rpcReq := &entropyv1beta1.ApplyActionRequest{
 		Urn:    urn,
@@ -159,5 +159,5 @@ func (api *firehoseAPI) executeAction(ctx context.Context, urn, actionType strin
 		return nil, err
 	}
 
-	return mapResourceToFirehose(rpcResp.GetResource(), false)
+	return mapEntropyResourceToFirehose(rpcResp.GetResource(), false)
 }

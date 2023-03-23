@@ -44,9 +44,8 @@ type Firehose struct {
 	// Required: true
 	KubeCluster *string `json:"kube_cluster"`
 
-	// metadata
-	// Read Only: true
-	Metadata *FirehoseMetadata `json:"metadata,omitempty"`
+	// labels
+	Labels map[string]string `json:"labels,omitempty"`
 
 	// name
 	// Example: booking-events-ingester
@@ -90,10 +89,6 @@ func (m *Firehose) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateKubeCluster(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateMetadata(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -173,25 +168,6 @@ func (m *Firehose) validateKubeCluster(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Firehose) validateMetadata(formats strfmt.Registry) error {
-	if swag.IsZero(m.Metadata) { // not required
-		return nil
-	}
-
-	if m.Metadata != nil {
-		if err := m.Metadata.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("metadata")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("metadata")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *Firehose) validateName(formats strfmt.Registry) error {
 	if swag.IsZero(m.Name) { // not required
 		return nil
@@ -256,10 +232,6 @@ func (m *Firehose) ContextValidate(ctx context.Context, formats strfmt.Registry)
 		res = append(res, err)
 	}
 
-	if err := m.contextValidateMetadata(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.contextValidateState(ctx, formats); err != nil {
 		res = append(res, err)
 	}
@@ -298,22 +270,6 @@ func (m *Firehose) contextValidateCreatedAt(ctx context.Context, formats strfmt.
 
 	if err := validate.ReadOnly(ctx, "created_at", "body", strfmt.DateTime(m.CreatedAt)); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *Firehose) contextValidateMetadata(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Metadata != nil {
-		if err := m.Metadata.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("metadata")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("metadata")
-			}
-			return err
-		}
 	}
 
 	return nil

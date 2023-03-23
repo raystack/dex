@@ -38,6 +38,8 @@ func (api *firehoseAPI) handleGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
+	reqCtx := reqctx.From(r.Context())
+
 	var def models.Firehose
 	if err := utils.ReadJSON(r, &def); err != nil {
 		utils.WriteErr(w, err)
@@ -46,14 +48,13 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, err)
 		return
 	}
-
-	reqCtx := reqctx.From(r.Context())
-	def.Metadata = &models.FirehoseMetadata{
-		CreatedBy:      strfmt.UUID(reqCtx.UserID),
-		CreatedByEmail: strfmt.Email(reqCtx.UserEmail),
-		UpdatedBy:      strfmt.UUID(reqCtx.UserID),
-		UpdatedByEmail: strfmt.Email(reqCtx.UserEmail),
-	}
+	def.Labels = mergeMaps(def.Labels, map[string]string{
+		labelTitle:       *def.Title,
+		labelGroup:       def.Group.String(),
+		labelCreatedBy:   reqCtx.UserEmail,
+		labelUpdatedBy:   reqCtx.UserEmail,
+		labelDescription: def.Description,
+	})
 
 	prj, err := api.getProject(r)
 	if err != nil {
@@ -61,7 +62,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := mapFirehoseToResource(def, prj)
+	res, err := mapFirehoseEntropyResource(def, prj)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -83,7 +84,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdFirehose, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+	createdFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource(), false)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -136,7 +137,7 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 
 	var arr []models.Firehose
 	for _, res := range rpcResp.GetResources() {
-		def, err := mapResourceToFirehose(res, true)
+		def, err := mapEntropyResourceToFirehose(res, true)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -164,11 +165,11 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	labels := makeLabelsMap(*existingFirehose)
-	labels["updated_by"] = reqCtx.UserID
-	labels["updated_by_email"] = reqCtx.UserEmail
+	labels := mergeMaps(existingFirehose.Labels, map[string]string{
+		labelUpdatedBy: reqCtx.UserEmail,
+	})
 	if updates.Description != "" {
-		labels["description"] = updates.Description
+		labels[labelDescription] = updates.Description
 	}
 
 	cfgStruct, err := makeConfigStruct(&updates.Configs)
@@ -198,7 +199,7 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedFirehose, err := mapResourceToFirehose(rpcResp.GetResource(), false)
+	updatedFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource(), false)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return

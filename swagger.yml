@@ -748,18 +748,16 @@ definitions:
         $ref: "#/definitions/FirehoseConfig"
       state:
         $ref: "#/definitions/FirehoseState"
-      metadata:
-        $ref: "#/definitions/FirehoseMetadata"
-        readOnly: true
+      labels:
+        type: object
+        additionalProperties:
+          type: string
 
   FirehoseConfig:
     type: object
     required:
       - stream_name
-      - bootstrap_servers
-      - sink_type
-      - topic_name
-      - input_schema_proto_class
+      - env_vars
     properties:
       version:
         type: string
@@ -767,23 +765,13 @@ definitions:
         example: "1.0.0"
       stream_name:
         type: string
-      bootstrap_servers:
-        type: string
       replicas:
         type: number
         default: 1
         minimum: 1
-      consumer_group_id:
-        type: string
-      sink_type:
-        $ref: "#/definitions/FirehoseSinkType"
       stop_date:
         type: string
         format: date-time
-      topic_name:
-        type: string
-      input_schema_proto_class:
-        type: string
       deployment_id:
         type: string
       env_vars:
@@ -793,31 +781,11 @@ definitions:
   FirehoseState:
     type: object
     properties:
-      state:
-        type: string
-        enum:
-          - RUNNING
-          - STOPPED
       status:
         type: string
       output:
         type: object
         additionalProperties: true
-  FirehoseMetadata:
-    type: object
-    properties:
-      created_by:
-        type: string
-        format: uuid
-      created_by_email:
-        type: string
-        format: email
-      updated_by:
-        type: string
-        format: uuid
-      updated_by_email:
-        type: string
-        format: email
   FirehoseSinkType:
     type: string
     enum:

@@ -14,13 +14,10 @@ import (
 	"github.com/goto/dex/pkg/errors"
 )
 
-func applyCommand() *cobra.Command {
-	var configFile string
-	var onlyCreate bool
-
+func createCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "apply <project> <filepath>",
-		Short: "Create/Update a firehose as described in a file",
+		Use:   "create <project> <filepath>",
+		Short: "Create a firehose as described in a file",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			fn := func(cmd *cobra.Command, args []string) error {
@@ -31,41 +28,13 @@ func applyCommand() *cobra.Command {
 					return err
 				}
 
-				urn := generateFirehoseURN(args[0], firehoseDef.Name)
-
-				var existing *models.Firehose
-				var err error
-
-				var isUpdate bool
-				if !onlyCreate {
-					notFoundErr := &operations.GetFirehoseNotFound{}
-					existing, err = getFirehose(cmd, args[0], urn)
-					if err != nil && !errors.As(err, &notFoundErr) {
-						return err
-					}
-					isUpdate = existing != nil
-				}
-
-				var finalVersion *models.Firehose
-				if isUpdate {
-					// Firehose already exists. Treat this as update.
-					finalVersion, err = updateFirehose(cmd, args[0], *existing, firehoseDef)
-					if err != nil {
-						return errors.Errorf("update failed: %s", err)
-					}
-				} else {
-					// Firehose does not already exist. Treat this as create.
-					finalVersion, err = createFirehose(cmd, args[0], firehoseDef)
-					if err != nil {
-						return errors.Errorf("create failed: %s", err)
-					}
+				finalVersion, err := createFirehose(cmd, args[0], firehoseDef)
+				if err != nil {
+					return errors.Errorf("create failed: %s", err)
 				}
 
 				return cdk.Display(cmd, finalVersion, func(w io.Writer, v any) error {
 					msg := "Create request placed"
-					if isUpdate {
-						msg = "Update request placed"
-					}
 					_, err := fmt.Fprintf(w, "%s.\nUse `dex firehose view %s %s` to check status.\n",
 						msg, args[0], finalVersion.Urn)
 					return err
@@ -78,9 +47,44 @@ func applyCommand() *cobra.Command {
 			}
 		},
 	}
+	return cmd
+}
 
-	cmd.Flags().BoolVar(&onlyCreate, "create", false, "Allow creation only")
-	cmd.Flags().StringVarP(&configFile, "config", "c", "./config.yaml", "Config file path")
+func updateCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "update <project> <urn> <filepath>",
+		Short: "Update a firehose as described in a file",
+		Args:  cobra.ExactArgs(3),
+		Run: func(cmd *cobra.Command, args []string) {
+			fn := func(cmd *cobra.Command, args []string) error {
+				project, urn, filePath := args[0], args[1], args[2]
+
+				var firehoseDef models.Firehose
+				if err := readYAMLFile(filePath, &firehoseDef); err != nil {
+					return err
+				} else if err := firehoseDef.Validate(nil); err != nil {
+					return err
+				}
+
+				finalVersion, err := updateFirehose(cmd, project, urn, firehoseDef)
+				if err != nil {
+					return errors.Errorf("update failed: %s", err)
+				}
+
+				return cdk.Display(cmd, finalVersion, func(w io.Writer, v any) error {
+					msg := "Update request placed"
+					_, err := fmt.Fprintf(w, "%s.\nUse `dex firehose view %s %s` to check status.\n",
+						msg, args[0], finalVersion.Urn)
+					return err
+				})
+			}
+
+			err := fn(cmd, args)
+			if err != nil {
+				log.Fatalf("error: %v", err)
+			}
+		},
+	}
 	return cmd
 }
 
@@ -102,13 +106,13 @@ func createFirehose(cmd *cobra.Command, prjSlug string, def models.Firehose) (*m
 	return created.GetPayload(), nil
 }
 
-func updateFirehose(cmd *cobra.Command, prjSlug string, existing, updated models.Firehose) (*models.Firehose, error) {
-	spinner := printer.Spin(fmt.Sprintf("Updating %s", existing.Urn))
+func updateFirehose(cmd *cobra.Command, projectSlug, urn string, updated models.Firehose) (*models.Firehose, error) {
+	spinner := printer.Spin(fmt.Sprintf("Updating %s", urn))
 	defer spinner.Stop()
 
 	params := &operations.UpdateFirehoseParams{
-		ProjectSlug: prjSlug,
-		FirehoseUrn: existing.Urn,
+		ProjectSlug: projectSlug,
+		FirehoseUrn: urn,
 		Body: operations.UpdateFirehoseBody{
 			Configs:     updated.Configs,
 			Description: updated.Description,

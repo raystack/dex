@@ -7,12 +7,9 @@ package models
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // FirehoseState firehose state
@@ -23,67 +20,12 @@ type FirehoseState struct {
 	// output
 	Output interface{} `json:"output,omitempty"`
 
-	// state
-	// Enum: [RUNNING STOPPED]
-	State string `json:"state,omitempty"`
-
 	// status
 	Status string `json:"status,omitempty"`
 }
 
 // Validate validates this firehose state
 func (m *FirehoseState) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateState(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-var firehoseStateTypeStatePropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["RUNNING","STOPPED"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		firehoseStateTypeStatePropEnum = append(firehoseStateTypeStatePropEnum, v)
-	}
-}
-
-const (
-
-	// FirehoseStateStateRUNNING captures enum value "RUNNING"
-	FirehoseStateStateRUNNING string = "RUNNING"
-
-	// FirehoseStateStateSTOPPED captures enum value "STOPPED"
-	FirehoseStateStateSTOPPED string = "STOPPED"
-)
-
-// prop value enum
-func (m *FirehoseState) validateStateEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, firehoseStateTypeStatePropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *FirehoseState) validateState(formats strfmt.Registry) error {
-	if swag.IsZero(m.State) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := m.validateStateEnum("state", "body", m.State); err != nil {
-		return err
-	}
-
 	return nil
 }
 

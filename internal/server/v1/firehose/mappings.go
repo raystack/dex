@@ -20,28 +20,19 @@ import (
 const kubeClusterDependencyKey = "kube_cluster"
 
 // Refer https://odpf.github.io/firehose/advance/generic/
+const confStreamName = "STREAM_NAME"
+
 const (
-	confKafkaTopic      = "SOURCE_KAFKA_TOPIC"
-	confKafkaBrokers    = "SOURCE_KAFKA_BROKERS"
-	confProtoClass      = "INPUT_SCHEMA_PROTO_CLASS"
-	confStreamName      = "STREAM_NAME"
-	confSinkType        = "SINK_TYPE"
-	confKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
+	labelTitle       = "title"
+	labelGroup       = "group"
+	labelCreatedBy   = "created_by"
+	labelUpdatedBy   = "updated_by"
+	labelDescription = "description"
 )
 
 var nonAlphaNumPattern = regexp.MustCompile("[^a-zA-Z0-9]+")
 
-type firehoseLabels struct {
-	Title          string `mapstructure:"title"`
-	Group          string `mapstructure:"group"`
-	Description    string `mapstructure:"description"`
-	CreatedBy      string `mapstructure:"created_by"`
-	CreatedByEmail string `mapstructure:"created_by_email"`
-	UpdatedBy      string `mapstructure:"updated_by"`
-	UpdatedByEmail string `mapstructure:"updated_by_email"`
-}
-
-func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
+func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
 	cfgStruct, err := makeConfigStruct(def.Configs)
 	if err != nil {
 		return nil, err
@@ -56,7 +47,7 @@ func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*en
 		Kind:    kindFirehose,
 		Name:    def.Name,
 		Project: prj.GetSlug(),
-		Labels:  makeLabelsMap(def),
+		Labels:  def.Labels,
 		Spec: &entropyv1beta1.ResourceSpec{
 			Configs: cfgStruct,
 			Dependencies: []*entropyv1beta1.ResourceDependency{
@@ -66,33 +57,11 @@ func mapFirehoseToResource(def models.Firehose, prj *shieldv1beta1.Project) (*en
 	}, nil
 }
 
-func makeLabelsMap(def models.Firehose) map[string]string {
-	var meta models.FirehoseMetadata
-	if def.Metadata != nil {
-		meta = *def.Metadata
-	}
-
-	return map[string]string{
-		"title":            *def.Title,
-		"group":            def.Group.String(),
-		"description":      def.Description,
-		"created_by":       meta.CreatedBy.String(),
-		"created_by_email": meta.CreatedByEmail.String(),
-		"updated_by":       meta.UpdatedBy.String(),
-		"updated_by_email": meta.UpdatedByEmail.String(),
-	}
-}
-
 func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	// TODO: handled stop date.
 
 	// Refer: https://odpf.github.io/firehose/advance/generic/
-	cfg.EnvVars[confSinkType] = strings.ToUpper(string(*cfg.SinkType))
 	cfg.EnvVars[confStreamName] = *cfg.StreamName
-	cfg.EnvVars[confProtoClass] = *cfg.InputSchemaProtoClass
-	cfg.EnvVars[confKafkaBrokers] = *cfg.BootstrapServers
-	cfg.EnvVars[confKafkaTopic] = *cfg.TopicName
-	cfg.EnvVars[confKafkaConsumerID] = cfg.ConsumerGroupID
 
 	return utils.GoValToProtoStruct(entropyFirehose.Config{
 		Replicas:     int(cfg.Replicas),
@@ -101,12 +70,12 @@ func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	})
 }
 
-func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models.Firehose, error) {
+func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models.Firehose, error) {
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
 
-	var labels firehoseLabels
+	labels := map[string]string{}
 	if err := mapstructure.Decode(res.GetLabels(), &labels); err != nil {
 		return nil, errors.ErrInternal.WithCausef(err.Error())
 	}
@@ -118,22 +87,19 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 		}
 	}
 
-	groupID := strfmt.UUID(labels.Group)
+	title := labels[labelTitle]
+	groupID := strfmt.UUID(labels[labelGroup])
+
 	firehoseDef := models.Firehose{
 		Urn:         res.GetUrn(),
 		Name:        res.GetName(),
-		Title:       &labels.Title,
+		Title:       &title,
 		Group:       &groupID,
+		Labels:      labels,
 		CreatedAt:   strfmt.DateTime(res.GetCreatedAt().AsTime()),
 		UpdatedAt:   strfmt.DateTime(res.GetUpdatedAt().AsTime()),
-		Description: labels.Description,
+		Description: labels[labelDescription],
 		KubeCluster: &kubeCluster,
-		Metadata: &models.FirehoseMetadata{
-			CreatedBy:      strfmt.UUID(labels.CreatedBy),
-			CreatedByEmail: strfmt.Email(labels.CreatedByEmail),
-			UpdatedBy:      strfmt.UUID(labels.UpdatedBy),
-			UpdatedByEmail: strfmt.Email(labels.UpdatedByEmail),
-		},
 	}
 
 	if !onlyMeta {
@@ -142,23 +108,15 @@ func mapResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (*models
 			return nil, err
 		}
 
-		sinkType := models.FirehoseSinkType(modConf.EnvVariables[confSinkType])
 		streamName := modConf.EnvVariables[confStreamName]
-		protoClass := modConf.EnvVariables[confProtoClass]
-		bootstrapServers := modConf.EnvVariables[confKafkaBrokers]
-		topicName := modConf.EnvVariables[confKafkaTopic]
 
 		firehoseDef.Configs = &models.FirehoseConfig{
-			BootstrapServers:      &bootstrapServers,
-			ConsumerGroupID:       modConf.EnvVariables[confKafkaConsumerID],
-			EnvVars:               modConf.EnvVariables,
-			InputSchemaProtoClass: &protoClass,
-			Replicas:              float64(modConf.Replicas),
-			SinkType:              &sinkType,
-			StopDate:              strfmt.DateTime(time.Time{}), // TODO: set proper value
-			StreamName:            &streamName,
-			TopicName:             &topicName,
-			DeploymentID:          modConf.DeploymentID,
+			Version:      modConf.ChartValues.ImageTag,
+			EnvVars:      modConf.EnvVariables,
+			Replicas:     float64(modConf.Replicas),
+			StopDate:     strfmt.DateTime(time.Time{}), // TODO: set proper value
+			StreamName:   &streamName,
+			DeploymentID: modConf.DeploymentID,
 		}
 
 		firehoseDef.State = &models.FirehoseState{
@@ -175,4 +133,15 @@ func slugify(s string) string {
 	s = nonAlphaNumPattern.ReplaceAllString(s, "-")
 	s = strings.Trim(s, "-")
 	return s
+}
+
+func mergeMaps(m1, m2 map[string]string) map[string]string {
+	res := map[string]string{}
+	for k, v := range m1 {
+		res[k] = v
+	}
+	for k, v := range m2 {
+		res[k] = v
+	}
+	return res
 }
