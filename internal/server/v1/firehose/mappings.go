@@ -3,6 +3,7 @@ package firehose
 import (
 	"regexp"
 	"strings"
+	"time"
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
@@ -62,8 +63,18 @@ func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	// Refer: https://odpf.github.io/firehose/advance/generic/
 	cfg.EnvVars[confStreamName] = *cfg.StreamName
 
+	var stopTime *time.Time
+	if t := time.Time(cfg.StopDate); !t.IsZero() {
+		stopTime = &t
+	}
+
 	return utils.GoValToProtoStruct(entropyFirehose.Config{
-		Replicas:     int(cfg.Replicas),
+		Stopped:  cfg.Stopped,
+		StopTime: stopTime,
+		Replicas: int(cfg.Replicas),
+		ChartValues: &entropyFirehose.ChartValues{
+			ImageTag: cfg.Image,
+		},
 		DeploymentID: cfg.DeploymentID,
 		EnvVariables: cfg.EnvVars,
 	})
@@ -115,10 +126,10 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (
 		}
 
 		firehoseDef.Configs = &models.FirehoseConfig{
-			Stopped:      modConf.Stopped,
-			StopDate:     stopDate,
 			Image:        modConf.ChartValues.ImageTag,
 			EnvVars:      modConf.EnvVariables,
+			Stopped:      modConf.Stopped,
+			StopDate:     stopDate,
 			Replicas:     float64(modConf.Replicas),
 			StreamName:   &streamName,
 			DeploymentID: modConf.DeploymentID,
