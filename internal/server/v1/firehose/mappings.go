@@ -3,7 +3,6 @@ package firehose
 import (
 	"regexp"
 	"strings"
-	"time"
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
@@ -110,10 +109,14 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (
 
 		streamName := modConf.EnvVariables[confStreamName]
 
-		firehoseDef.Configs = &models.FirehoseConfig{
-			Stopped:  false,                        // TODO: set correct value here.
-			StopDate: strfmt.DateTime(time.Time{}), // TODO: set proper value
+		var stopDate strfmt.DateTime
+		if modConf.StopTime != nil {
+			stopDate = strfmt.DateTime(*modConf.StopTime)
+		}
 
+		firehoseDef.Configs = &models.FirehoseConfig{
+			Stopped:      modConf.Stopped,
+			StopDate:     stopDate,
 			Image:        modConf.ChartValues.ImageTag,
 			EnvVars:      modConf.EnvVariables,
 			Replicas:     float64(modConf.Replicas),
