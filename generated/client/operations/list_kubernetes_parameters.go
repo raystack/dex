@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewListKubernetesParams creates a new ListKubernetesParams object,
@@ -69,9 +70,9 @@ type ListKubernetesParams struct {
 
 	/* Tag.
 
-	   Return kubernetes clusters with given tag.
+	   Tags to filter by (e.g., `firehose:true`).
 	*/
-	Tag *string
+	Tag []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -138,13 +139,13 @@ func (o *ListKubernetesParams) SetProjectSlug(projectSlug string) {
 }
 
 // WithTag adds the tag to the list kubernetes params
-func (o *ListKubernetesParams) WithTag(tag *string) *ListKubernetesParams {
+func (o *ListKubernetesParams) WithTag(tag []string) *ListKubernetesParams {
 	o.SetTag(tag)
 	return o
 }
 
 // SetTag adds the tag to the list kubernetes params
-func (o *ListKubernetesParams) SetTag(tag *string) {
+func (o *ListKubernetesParams) SetTag(tag []string) {
 	o.Tag = tag
 }
 
@@ -163,18 +164,12 @@ func (o *ListKubernetesParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 
 	if o.Tag != nil {
 
-		// query param tag
-		var qrTag string
+		// binding items for tag[]
+		joinedTag := o.bindParamTag(reg)
 
-		if o.Tag != nil {
-			qrTag = *o.Tag
-		}
-		qTag := qrTag
-		if qTag != "" {
-
-			if err := r.SetQueryParam("tag", qTag); err != nil {
-				return err
-			}
+		// query array param tag[]
+		if err := r.SetQueryParam("tag[]", joinedTag...); err != nil {
+			return err
 		}
 	}
 
@@ -182,4 +177,21 @@ func (o *ListKubernetesParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
+}
+
+// bindParamListKubernetes binds the parameter tag[]
+func (o *ListKubernetesParams) bindParamTag(formats strfmt.Registry) []string {
+	tagIR := o.Tag
+
+	var tagIC []string
+	for _, tagIIR := range tagIR { // explode []string
+
+		tagIIV := tagIIR // string as string
+		tagIC = append(tagIC, tagIIV)
+	}
+
+	// items.CollectionFormat: "multi"
+	tagIS := swag.JoinByFormat(tagIC, "multi")
+
+	return tagIS
 }

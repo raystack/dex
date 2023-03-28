@@ -64,7 +64,7 @@ func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	cfg.EnvVars[confStreamName] = *cfg.StreamName
 
 	var stopTime *time.Time
-	if t := time.Time(cfg.StopDate); !t.IsZero() {
+	if t := time.Time(cfg.StopTime); !t.IsZero() {
 		stopTime = &t
 	}
 
@@ -120,16 +120,16 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, onlyMeta bool) (
 
 		streamName := modConf.EnvVariables[confStreamName]
 
-		var stopDate strfmt.DateTime
+		var stopTime strfmt.DateTime
 		if modConf.StopTime != nil {
-			stopDate = strfmt.DateTime(*modConf.StopTime)
+			stopTime = strfmt.DateTime(*modConf.StopTime)
 		}
 
 		firehoseDef.Configs = &models.FirehoseConfig{
 			Image:        modConf.ChartValues.ImageTag,
 			EnvVars:      modConf.EnvVariables,
 			Stopped:      modConf.Stopped,
-			StopDate:     stopDate,
+			StopTime:     stopTime,
 			Replicas:     float64(modConf.Replicas),
 			StreamName:   &streamName,
 			DeploymentID: modConf.DeploymentID,

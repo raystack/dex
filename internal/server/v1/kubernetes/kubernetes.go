@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"net/http"
+	"strings"
 
 	entropyv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
@@ -24,7 +25,8 @@ func Routes(shield shieldv1beta1rpc.ShieldServiceClient, entropy entropyv1beta1r
 
 func handleListKubeClusters(shield shieldv1beta1rpc.ShieldServiceClient, entropy entropyv1beta1rpc.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tag := r.URL.Query().Get("tag")
+		q := r.URL.Query()
+		tagFilter := q["tag"]
 
 		prj, err := project.GetProject(r, shield)
 		if err != nil {
@@ -45,13 +47,26 @@ func handleListKubeClusters(shield shieldv1beta1rpc.ShieldServiceClient, entropy
 
 		var arr []models.Kubernetes
 		for _, kube := range rpcResp.GetResources() {
-			if matchTag(kube, tag) {
+			if matchAllTags(kube.Labels, tagFilter) {
 				arr = append(arr, mapResourceToKubernetes(kube))
 			}
 		}
+
 		utils.WriteJSON(w, http.StatusOK,
 			utils.ListResponse[models.Kubernetes]{Items: arr})
 	}
+}
+
+func matchAllTags(labels map[string]string, tags []string) bool {
+	for _, tag := range tags {
+		parts := strings.SplitN(tag, ":", 2) // tag is formatted as key:value
+		labelKey, wantVal := parts[0], parts[1]
+		if labelVal, exists := labels[labelKey]; !exists || labelVal != wantVal {
+			// either key does not exist or has a different value than expected.
+			return false
+		}
+	}
+	return true
 }
 
 func mapResourceToKubernetes(res *entropyv1beta1.Resource) models.Kubernetes {
@@ -61,9 +76,4 @@ func mapResourceToKubernetes(res *entropyv1beta1.Resource) models.Kubernetes {
 		CreatedAt: strfmt.DateTime(res.GetCreatedAt().AsTime()),
 		UpdatedAt: strfmt.DateTime(res.GetUpdatedAt().AsTime()),
 	}
-}
-
-func matchTag(res *entropyv1beta1.Resource, tag string) bool {
-	v, ok := res.GetLabels()[tag]
-	return ok && v == "true"
 }

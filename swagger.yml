@@ -630,17 +630,20 @@ paths:
       operationId: listKubernetes
       parameters:
         - in: query
-          name: tag
-          type: string
+          name: tag[]
+          type: array
+          items:
+            type: string
           required: false
-          description: Return kubernetes clusters with given tag.
+          description: Tags to filter by (e.g., `firehose:true`).
+          collectionFormat: multi
       responses:
         "200":
-          description: successful operation
+          description: Successful Operation.
           schema:
             $ref: "#/definitions/KubernetesArray"
         "500":
-          description: internal error
+          description: Internal Error
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -770,7 +773,7 @@ definitions:
         type: number
         default: 1
         minimum: 1
-      stop_date:
+      stop_time:
         type: string
         format: date-time
       deployment_id:

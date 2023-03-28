@@ -34,9 +34,9 @@ type FirehoseConfig struct {
 	// Minimum: 1
 	Replicas float64 `json:"replicas,omitempty"`
 
-	// stop date
+	// stop time
 	// Format: date-time
-	StopDate strfmt.DateTime `json:"stop_date,omitempty"`
+	StopTime strfmt.DateTime `json:"stop_time,omitempty"`
 
 	// stopped
 	Stopped bool `json:"stopped,omitempty"`
@@ -58,7 +58,7 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateStopDate(formats); err != nil {
+	if err := m.validateStopTime(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -93,12 +93,12 @@ func (m *FirehoseConfig) validateReplicas(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FirehoseConfig) validateStopDate(formats strfmt.Registry) error {
-	if swag.IsZero(m.StopDate) { // not required
+func (m *FirehoseConfig) validateStopTime(formats strfmt.Registry) error {
+	if swag.IsZero(m.StopTime) { // not required
 		return nil
 	}
 
-	if err := validate.FormatOf("stop_date", "body", "date-time", m.StopDate.String(), formats); err != nil {
+	if err := validate.FormatOf("stop_time", "body", "date-time", m.StopTime.String(), formats); err != nil {
 		return err
 	}
 
