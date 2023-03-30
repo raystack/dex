@@ -28,11 +28,13 @@ var errFirehoseNotFound = errors.ErrNotFound.WithMsgf("no firehose with given UR
 func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
 	shield shieldv1beta1rpc.ShieldServiceClient,
 	alertSvc *alertsv1.Service,
+	odinAddr string,
 ) func(chi.Router) {
 	api := &firehoseAPI{
 		Shield:   shield,
 		Entropy:  entropy,
 		AlertSvc: alertSvc,
+		OdinAddr: odinAddr,
 	}
 
 	return func(r chi.Router) {
@@ -65,6 +67,8 @@ type firehoseAPI struct {
 	Siren   sirenv1beta1rpc.SirenServiceClient
 
 	AlertSvc *alertsv1.Service
+
+	OdinAddr string
 }
 
 func (api *firehoseAPI) getProject(r *http.Request) (*shieldv1beta1.Project, error) {
@@ -83,7 +87,7 @@ func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*m
 		return nil, errFirehoseNotFound
 	}
 
-	return mapEntropyResourceToFirehose(resp.GetResource(), false)
+	return mapEntropyResourceToFirehose(ctx, resp.GetResource(), false, api.OdinAddr)
 }
 
 func jsonDiff(left, right []byte) (string, error) {

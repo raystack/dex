@@ -19,6 +19,11 @@ type serverConfig struct {
 	Entropy   entropyConfig    `mapstructure:"entropy"`
 	Siren     sirenConfig      `mapstructure:"siren"`
 	Telemetry telemetry.Config `mapstructure:"telemetry"`
+	Odin      odinConfig       `mapstructure:"odin"`
+}
+
+type odinConfig struct {
+	Addr string `mapstructure:"addr"`
 }
 
 type shieldConfig struct {

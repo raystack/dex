@@ -92,5 +92,6 @@ func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap
 		shieldv1beta1.NewShieldServiceClient(shieldConn),
 		entropyv1beta1.NewResourceServiceClient(entropyConn),
 		sirenv1beta1.NewSirenServiceClient(sirenConn),
+		cfg.Odin.Addr,
 	)
 }

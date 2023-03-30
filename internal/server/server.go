@@ -28,6 +28,7 @@ func Serve(ctx context.Context, addr string,
 	shieldClient shieldv1beta1.ShieldServiceClient,
 	entropyClient entropyv1beta1.ResourceServiceClient,
 	sirenClient sirenv1beta1.SirenServiceClient,
+	odinAddr string,
 ) error {
 	alertSvc := &alertsv1.Service{Siren: sirenClient}
 
@@ -51,7 +52,7 @@ func Serve(ctx context.Context, addr string,
 		r.Get("/alertTemplates", alertSvc.HandleListTemplates())
 
 		r.Route("/projects", projectsv1.Routes(shieldClient))
-		r.Route("/projects/{projectSlug}/firehoses", firehosev1.Routes(entropyClient, shieldClient, alertSvc))
+		r.Route("/projects/{projectSlug}/firehoses", firehosev1.Routes(entropyClient, shieldClient, alertSvc, odinAddr))
 		r.Route("/projects/{projectSlug}/kubernetes", kubernetesv1.Routes(shieldClient, entropyClient))
 	})
 
