@@ -137,7 +137,7 @@ func (api *firehoseAPI) executeAction(ctx context.Context, urn, actionType strin
 		return nil, err
 	}
 
-	labels := mergeMaps(existingFirehose.Labels, map[string]string{
+	labels := cloneAndMergeMaps(existingFirehose.Labels, map[string]string{
 		labelUpdatedBy: reqCtx.UserEmail,
 	})
 
@@ -159,5 +159,5 @@ func (api *firehoseAPI) executeAction(ctx context.Context, urn, actionType strin
 		return nil, err
 	}
 
-	return mapEntropyResourceToFirehose(ctx, rpcResp.GetResource(), false, api.OdinAddr)
+	return mapEntropyResourceToFirehose(rpcResp.GetResource(), nil)
 }

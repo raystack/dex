@@ -3,6 +3,7 @@ package firehose
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
@@ -15,6 +16,7 @@ import (
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/reqctx"
 	"github.com/goto/dex/internal/server/utils"
+	"github.com/goto/dex/odin"
 	"github.com/goto/dex/pkg/errors"
 )
 
@@ -48,9 +50,10 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, err)
 		return
 	}
-	def.Labels = mergeMaps(def.Labels, map[string]string{
+	def.Labels = cloneAndMergeMaps(def.Labels, map[string]string{
 		labelTitle:       *def.Title,
 		labelGroup:       def.Group.String(),
+		labelStream:      *def.Configs.StreamName,
 		labelCreatedBy:   reqCtx.UserEmail,
 		labelUpdatedBy:   reqCtx.UserEmail,
 		labelDescription: def.Description,
@@ -61,6 +64,15 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, err)
 		return
 	}
+
+	// resolve stream_name to kafka clusters.
+	streamURN := fmt.Sprintf("%s-%s", prj.GetSlug(), *def.Configs.StreamName)
+	sourceKafkaBroker, err := odin.GetOdinStream(r.Context(), api.OdinAddr, streamURN)
+	if err != nil {
+		utils.WriteErr(w, err)
+		return
+	}
+	def.Configs.EnvVars[confSourceKafkaBrokerAddr] = sourceKafkaBroker
 
 	res, err := mapFirehoseEntropyResource(def, prj)
 	if err != nil {
@@ -84,7 +96,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdFirehose, err := mapEntropyResourceToFirehose(r.Context(), rpcResp.GetResource(), false, api.OdinAddr)
+	createdFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource(), nil)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -135,9 +147,14 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	includeEnv := []string{
+		confSinkType,
+		confSourceKafkaConsumerID,
+	}
+
 	var arr []models.Firehose
 	for _, res := range rpcResp.GetResources() {
-		def, err := mapEntropyResourceToFirehose(r.Context(), res, true, api.OdinAddr)
+		def, err := mapEntropyResourceToFirehose(res, includeEnv)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -165,7 +182,7 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	labels := mergeMaps(existingFirehose.Labels, map[string]string{
+	labels := cloneAndMergeMaps(existingFirehose.Labels, map[string]string{
 		labelUpdatedBy: reqCtx.UserEmail,
 	})
 	if updates.Description != "" {
@@ -199,7 +216,7 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedFirehose, err := mapEntropyResourceToFirehose(r.Context(), rpcResp.GetResource(), false, api.OdinAddr)
+	updatedFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource(), nil)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return

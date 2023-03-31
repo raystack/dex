@@ -1,8 +1,6 @@
 package firehose
 
 import (
-	"context"
-	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -16,26 +14,30 @@ import (
 
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/utils"
-	"github.com/goto/dex/odin"
 	"github.com/goto/dex/pkg/errors"
 )
 
 const kubeClusterDependencyKey = "kube_cluster"
 
 // Refer https://odpf.github.io/firehose/advance/generic/
+const (
+	confSinkType              = "SINK_TYPE"
+	confSourceKafkaBrokerAddr = "SOURCE_KAFKA_BROKERS"
+	confSourceKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
+)
+
 const confStreamName = "STREAM_NAME"
 
 const (
 	labelTitle       = "title"
 	labelGroup       = "group"
+	labelStream      = "stream_name"
 	labelCreatedBy   = "created_by"
 	labelUpdatedBy   = "updated_by"
 	labelDescription = "description"
 )
 
 var nonAlphaNumPattern = regexp.MustCompile("[^a-zA-Z0-9]+")
-
-const sourceKafkaBrokersKey = "SOURCE_KAFKA_BROKERS"
 
 func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project) (*entropyv1beta1.Resource, error) {
 	cfgStruct, err := makeConfigStruct(def.Configs)
@@ -63,11 +65,6 @@ func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project)
 }
 
 func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
-	// TODO: handled stop date.
-
-	// Refer: https://odpf.github.io/firehose/advance/generic/
-	cfg.EnvVars[confStreamName] = *cfg.StreamName
-
 	var stopTime *time.Time
 	if t := time.Time(cfg.StopTime); !t.IsZero() {
 		stopTime = &t
@@ -85,7 +82,7 @@ func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	})
 }
 
-func mapEntropyResourceToFirehose(ctx context.Context, res *entropyv1beta1.Resource, onlyMeta bool, odinAddr string) (*models.Firehose, error) {
+func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []string) (*models.Firehose, error) {
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
@@ -117,40 +114,42 @@ func mapEntropyResourceToFirehose(ctx context.Context, res *entropyv1beta1.Resou
 		KubeCluster: &kubeCluster,
 	}
 
-	if !onlyMeta {
-		var modConf entropyFirehose.Config
-		if err := utils.ProtoStructToGoVal(res.GetSpec().GetConfigs(), &modConf); err != nil {
-			return nil, err
-		}
+	var modConf entropyFirehose.Config
+	if err := utils.ProtoStructToGoVal(res.GetSpec().GetConfigs(), &modConf); err != nil {
+		return nil, err
+	}
 
-		streamName := modConf.EnvVariables[confStreamName]
+	var stopTime strfmt.DateTime
+	if modConf.StopTime != nil {
+		stopTime = strfmt.DateTime(*modConf.StopTime)
+	}
 
-		var stopTime strfmt.DateTime
-		if modConf.StopTime != nil {
-			stopTime = strfmt.DateTime(*modConf.StopTime)
-		}
+	streamName := res.Labels[labelStream]
+	if streamName == "" {
+		streamName = modConf.EnvVariables[confStreamName]
+	}
 
-		streamURN := fmt.Sprintf("%s-%s", res.GetProject(), streamName)
-		sourceKafkaBroker, err := odin.GetOdinStream(ctx, odinAddr, streamURN)
-		if err != nil {
-			return nil, err
+	returnEnv := cloneAndMergeMaps(modConf.EnvVariables, nil)
+	if envKeysSubset != nil {
+		returnEnv = map[string]string{}
+		for _, key := range envKeysSubset {
+			returnEnv[key] = modConf.EnvVariables[key]
 		}
-		modConf.EnvVariables[sourceKafkaBrokersKey] = sourceKafkaBroker
+	}
 
-		firehoseDef.Configs = &models.FirehoseConfig{
-			Image:        modConf.ChartValues.ImageTag,
-			EnvVars:      modConf.EnvVariables,
-			Stopped:      modConf.Stopped,
-			StopTime:     stopTime,
-			Replicas:     float64(modConf.Replicas),
-			StreamName:   &streamName,
-			DeploymentID: modConf.DeploymentID,
-		}
+	firehoseDef.Configs = &models.FirehoseConfig{
+		Image:        modConf.ChartValues.ImageTag,
+		EnvVars:      returnEnv,
+		Stopped:      modConf.Stopped,
+		StopTime:     stopTime,
+		Replicas:     float64(modConf.Replicas),
+		StreamName:   &streamName,
+		DeploymentID: modConf.DeploymentID,
+	}
 
-		firehoseDef.State = &models.FirehoseState{
-			Status: res.GetState().GetStatus().String(),
-			Output: res.GetState().Output.GetStructValue().AsMap(),
-		}
+	firehoseDef.State = &models.FirehoseState{
+		Status: res.GetState().GetStatus().String(),
+		Output: res.GetState().Output.GetStructValue().AsMap(),
 	}
 
 	return &firehoseDef, nil
@@ -163,7 +162,7 @@ func slugify(s string) string {
 	return s
 }
 
-func mergeMaps(m1, m2 map[string]string) map[string]string {
+func cloneAndMergeMaps(m1, m2 map[string]string) map[string]string {
 	res := map[string]string{}
 	for k, v := range m1 {
 		res[k] = v
