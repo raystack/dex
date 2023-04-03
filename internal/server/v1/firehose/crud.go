@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	"github.com/go-chi/chi/v5"
@@ -253,7 +254,13 @@ func (api *firehoseAPI) getRevisions(ctx context.Context, urn string) ([]models.
 		UseProtoNames: true,
 	}
 
-	for _, revision := range rpcResp.GetRevisions() {
+	revisions := rpcResp.GetRevisions()
+
+	sort.Slice(revisions, func(i, j int) bool {
+		return revisions[i].CreatedAt.AsTime().Before(revisions[j].CreatedAt.AsTime())
+	})
+
+	for _, revision := range revisions {
 		var rd models.RevisionDiff
 
 		currentSpec, err := marshaller.Marshal(revision.GetSpec())
