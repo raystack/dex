@@ -1173,8 +1173,8 @@ github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoA
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gosuri/uitable v0.0.4 h1:IG2xLKRvErL3uhY6e1BylFzG+aJiwQviDDTfOKeKTpY=
 github.com/gosuri/uitable v0.0.4/go.mod h1:tKR86bXuXPZazfOTG1FIzvjIdXzd0mo4Vtn16vt0PJo=
-github.com/goto/entropy v0.5.4 h1:eojCmruzlG5W5dAi1AoRAJCfcMLG4vQEfIBsxPZW9ZA=
-github.com/goto/entropy v0.5.4/go.mod h1:HmPibQrqOI3rLnjRs89rdYgGSzimtyTK3V1rZFGr8uQ=
+github.com/goto/entropy v0.6.2 h1:lQ36kQn5NNjJB5vnhAOTmRosE/BC9z0REX6a4xi93c4=
+github.com/goto/entropy v0.6.2/go.mod h1:HmPibQrqOI3rLnjRs89rdYgGSzimtyTK3V1rZFGr8uQ=
 github.com/goto/salt v0.3.0 h1:7bFVqh6/zHfyImkrl2mYJHsFuGd2OBM/8rKs+giDpbc=
 github.com/goto/salt v0.3.0/go.mod h1:L8PtSbpUFFo/Yh5YZ0FTgV9FIAvtqGdNa2BkA5M3jWo=
 github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 h1:pdN6V1QBWetyv/0+wjACpqVH+eVULgEjkurDLq3goeM=
