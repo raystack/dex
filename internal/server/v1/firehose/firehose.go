@@ -2,13 +2,12 @@ package firehose
 
 import (
 	"context"
-	"net/http"
+	"strings"
 
 	entropyv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	sirenv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
-	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 	"github.com/go-chi/chi/v5"
 	"github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
@@ -17,7 +16,6 @@ import (
 
 	"github.com/goto/dex/generated/models"
 	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
-	"github.com/goto/dex/internal/server/v1/project"
 	"github.com/goto/dex/pkg/errors"
 )
 
@@ -71,10 +69,6 @@ type firehoseAPI struct {
 	OdinAddr string
 }
 
-func (api *firehoseAPI) getProject(r *http.Request) (*shieldv1beta1.Project, error) {
-	return project.GetProject(r, api.Shield)
-}
-
 func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*models.Firehose, error) {
 	resp, err := api.Entropy.GetResource(ctx, &entropyv1beta1.GetResourceRequest{Urn: firehoseURN})
 	if err != nil {
@@ -103,4 +97,17 @@ func jsonDiff(left, right []byte) (string, error) {
 	}
 
 	return diffString, nil
+}
+
+// Reference: https://github.com/orgs/odpf/discussions/12
+func projectSlugFromURN(urn string) string {
+	const urnSeparator = ":"
+	parts := strings.Split(urn, urnSeparator)
+	if len(parts) < 4 {
+		return ""
+	}
+
+	// The format is: orn:entropy:<kind>:<project>:<name>
+	// Project is at index 3.
+	return parts[3]
 }

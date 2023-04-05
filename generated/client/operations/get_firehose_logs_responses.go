@@ -96,11 +96,11 @@ func (o *GetFirehoseLogsOK) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseLogsOK) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseLogsOK) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseLogsOK) GetPayload() io.Writer {
@@ -157,11 +157,11 @@ func (o *GetFirehoseLogsBadRequest) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseLogsBadRequest) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetFirehoseLogsBadRequest) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetFirehoseLogsBadRequest) GetPayload() *models.ErrorResponse {
@@ -220,11 +220,11 @@ func (o *GetFirehoseLogsNotFound) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseLogsNotFound) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseLogsNotFound) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseLogsNotFound) GetPayload() *models.ErrorResponse {
@@ -283,11 +283,11 @@ func (o *GetFirehoseLogsInternalServerError) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseLogsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseLogsInternalServerError) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseLogsInternalServerError) GetPayload() *models.ErrorResponse {

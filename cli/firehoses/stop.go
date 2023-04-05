@@ -13,7 +13,7 @@ import (
 
 func stopCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "stop <project> <firehoseURN>",
+		Use:   "stop <firehoseURN>",
 		Short: "Stop the firehose if it's currently running.",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -22,8 +22,7 @@ func stopCommand() *cobra.Command {
 
 			dexAPI := cdk.NewClient(cmd)
 			params := &operations.StopFirehoseParams{
-				FirehoseUrn: args[1],
-				ProjectSlug: args[0],
+				FirehoseUrn: args[0],
 				Body:        struct{}{},
 			}
 

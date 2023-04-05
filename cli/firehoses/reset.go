@@ -18,19 +18,16 @@ func resetOffsetCommand() *cobra.Command {
 	var resetTo, datetime string
 
 	cmd := &cobra.Command{
-		Use:   "reset-offset <project> <firehoseURN>",
+		Use:   "reset-offset <firehoseURN>",
 		Short: "Reset firehose consumption offset",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
 			client := cdk.NewClient(cmd)
 
-			params := &operations.ResetOffsetParams{
-				FirehoseUrn: args[1],
-				ProjectSlug: args[0],
-			}
+			params := &operations.ResetOffsetParams{FirehoseUrn: args[0]}
 
 			resetTo = strings.TrimSpace(strings.ToUpper(resetTo))
 			switch resetTo {

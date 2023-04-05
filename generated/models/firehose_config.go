@@ -30,6 +30,11 @@ type FirehoseConfig struct {
 	// Example: gotocompany/firehose:0.1.0
 	Image string `json:"image,omitempty"`
 
+	// kube cluster
+	// Example: orn:entropy:kubernetes:sample_project:sample_name
+	// Required: true
+	KubeCluster *string `json:"kube_cluster"`
+
 	// replicas
 	// Minimum: 1
 	Replicas float64 `json:"replicas,omitempty"`
@@ -54,6 +59,10 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateKubeCluster(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateReplicas(formats); err != nil {
 		res = append(res, err)
 	}
@@ -75,6 +84,15 @@ func (m *FirehoseConfig) Validate(formats strfmt.Registry) error {
 func (m *FirehoseConfig) validateEnvVars(formats strfmt.Registry) error {
 
 	if err := validate.Required("env_vars", "body", m.EnvVars); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *FirehoseConfig) validateKubeCluster(formats strfmt.Registry) error {
+
+	if err := validate.Required("kube_cluster", "body", m.KubeCluster); err != nil {
 		return err
 	}
 

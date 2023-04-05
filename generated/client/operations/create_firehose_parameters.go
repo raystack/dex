@@ -66,12 +66,6 @@ type CreateFirehoseParams struct {
 	// Body.
 	Body *models.Firehose
 
-	/* ProjectSlug.
-
-	   Unique identifier of the project.
-	*/
-	ProjectSlug string
-
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -136,17 +130,6 @@ func (o *CreateFirehoseParams) SetBody(body *models.Firehose) {
 	o.Body = body
 }
 
-// WithProjectSlug adds the projectSlug to the create firehose params
-func (o *CreateFirehoseParams) WithProjectSlug(projectSlug string) *CreateFirehoseParams {
-	o.SetProjectSlug(projectSlug)
-	return o
-}
-
-// SetProjectSlug adds the projectSlug to the create firehose params
-func (o *CreateFirehoseParams) SetProjectSlug(projectSlug string) {
-	o.ProjectSlug = projectSlug
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *CreateFirehoseParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -158,11 +141,6 @@ func (o *CreateFirehoseParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		if err := r.SetBodyParam(o.Body); err != nil {
 			return err
 		}
-	}
-
-	// path param projectSlug
-	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
-		return err
 	}
 
 	if len(res) > 0 {

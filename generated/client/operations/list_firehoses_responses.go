@@ -80,11 +80,11 @@ func (o *ListFirehosesOK) IsCode(code int) bool {
 }
 
 func (o *ListFirehosesOK) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses][%d] listFirehosesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses][%d] listFirehosesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListFirehosesOK) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses][%d] listFirehosesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses][%d] listFirehosesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListFirehosesOK) GetPayload() *models.FirehoseArray {
@@ -143,11 +143,11 @@ func (o *ListFirehosesInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ListFirehosesInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses][%d] listFirehosesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses][%d] listFirehosesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListFirehosesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses][%d] listFirehosesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses][%d] listFirehosesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListFirehosesInternalServerError) GetPayload() *models.ErrorResponse {

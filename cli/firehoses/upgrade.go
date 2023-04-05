@@ -14,16 +14,15 @@ import (
 
 func upgradeCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "upgrade <project> <firehoseURN>",
+		Use:   "upgrade <firehoseURN>",
 		Short: "Upgrade the firehose to the latest version supported",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
 			params := &operations.UpgradeFirehoseParams{
 				FirehoseUrn: args[1],
-				ProjectSlug: args[0],
 				Body:        struct{}{},
 			}
 

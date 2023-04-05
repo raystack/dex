@@ -26,8 +26,6 @@ const (
 	confSourceKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
 )
 
-const confStreamName = "STREAM_NAME"
-
 const (
 	labelTitle       = "title"
 	labelGroup       = "group"
@@ -58,7 +56,7 @@ func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project)
 		Spec: &entropyv1beta1.ResourceSpec{
 			Configs: cfgStruct,
 			Dependencies: []*entropyv1beta1.ResourceDependency{
-				{Key: kubeClusterDependencyKey, Value: *def.KubeCluster},
+				{Key: kubeClusterDependencyKey, Value: *def.Configs.KubeCluster},
 			},
 		},
 	}, nil
@@ -92,13 +90,6 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []
 		return nil, errors.ErrInternal.WithCausef(err.Error())
 	}
 
-	var kubeCluster string
-	for _, dep := range res.GetSpec().GetDependencies() {
-		if dep.GetKey() == kubeClusterDependencyKey {
-			kubeCluster = dep.GetValue()
-		}
-	}
-
 	title := labels[labelTitle]
 	groupID := strfmt.UUID(labels[labelGroup])
 
@@ -107,11 +98,11 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []
 		Name:        res.GetName(),
 		Title:       &title,
 		Group:       &groupID,
+		Project:     res.Project,
 		Labels:      labels,
 		CreatedAt:   strfmt.DateTime(res.GetCreatedAt().AsTime()),
 		UpdatedAt:   strfmt.DateTime(res.GetUpdatedAt().AsTime()),
 		Description: labels[labelDescription],
-		KubeCluster: &kubeCluster,
 	}
 
 	var modConf entropyFirehose.Config
@@ -124,8 +115,16 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []
 		stopTime = strfmt.DateTime(*modConf.StopTime)
 	}
 
+	var kubeCluster string
+	for _, dep := range res.GetSpec().GetDependencies() {
+		if dep.GetKey() == kubeClusterDependencyKey {
+			kubeCluster = dep.GetValue()
+		}
+	}
+
 	streamName := res.Labels[labelStream]
 	if streamName == "" {
+		const confStreamName = "STREAM_NAME"
 		streamName = modConf.EnvVariables[confStreamName]
 	}
 
@@ -145,6 +144,7 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []
 		Replicas:     float64(modConf.Replicas),
 		StreamName:   &streamName,
 		DeploymentID: modConf.DeploymentID,
+		KubeCluster:  &kubeCluster,
 	}
 
 	firehoseDef.State = &models.FirehoseState{

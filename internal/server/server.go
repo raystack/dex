@@ -52,8 +52,8 @@ func Serve(ctx context.Context, addr string,
 		r.Get("/alertTemplates", alertSvc.HandleListTemplates())
 
 		r.Route("/projects", projectsv1.Routes(shieldClient))
-		r.Route("/projects/{projectSlug}/firehoses", firehosev1.Routes(entropyClient, shieldClient, alertSvc, odinAddr))
-		r.Route("/projects/{projectSlug}/kubernetes", kubernetesv1.Routes(shieldClient, entropyClient))
+		r.Route("/firehoses", firehosev1.Routes(entropyClient, shieldClient, alertSvc, odinAddr))
+		r.Route("/kubernetes", kubernetesv1.Routes(entropyClient))
 	})
 
 	logger.Info("starting server", zap.String("addr", addr))

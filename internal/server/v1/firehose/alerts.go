@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/utils"
 	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
+	"github.com/goto/dex/internal/server/v1/project"
 	"github.com/goto/dex/pkg/errors"
 )
 
@@ -19,8 +19,9 @@ var suppliedAlertVariableNames = []string{"name", "team", "entity"}
 
 func (api *firehoseAPI) handleListAlerts(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
+	prjSlug := projectSlugFromURN(urn)
 
-	prj, err := api.getProject(r)
+	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -50,8 +51,9 @@ func (api *firehoseAPI) handleListAlerts(w http.ResponseWriter, r *http.Request)
 
 func (api *firehoseAPI) handleGetAlertPolicy(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
+	prjSlug := projectSlugFromURN(urn)
 
-	prj, err := api.getProject(r)
+	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -87,6 +89,8 @@ func (api *firehoseAPI) handleUpsertAlertPolicy(w http.ResponseWriter, r *http.R
 	}
 
 	urn := chi.URLParam(r, pathParamURN)
+	prjSlug := projectSlugFromURN(urn)
+
 	firehoseDef, err := api.getFirehose(r.Context(), urn)
 	if err != nil {
 		utils.WriteErr(w, err)
@@ -100,7 +104,7 @@ func (api *firehoseAPI) handleUpsertAlertPolicy(w http.ResponseWriter, r *http.R
 	}
 	group := firehoseDef.Group.String()
 
-	prj, err := api.getProject(r)
+	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -127,7 +131,7 @@ func (api *firehoseAPI) handleUpsertAlertPolicy(w http.ResponseWriter, r *http.R
 	utils.WriteJSON(w, http.StatusOK, alertPolicy)
 }
 
-func (api *firehoseAPI) stopAlerts(ctx context.Context, firehoseDef models.Firehose, prj *shieldv1beta1.Project) error {
+func (api *firehoseAPI) stopAlerts(ctx context.Context, firehoseDef models.Firehose, prjSlug string) error {
 	name, err := getFirehoseReleaseName(firehoseDef)
 	if err != nil {
 		return err
@@ -138,7 +142,7 @@ func (api *firehoseAPI) stopAlerts(ctx context.Context, firehoseDef models.Fireh
 		Rules:    nil,
 	}
 
-	_, err = api.AlertSvc.UpsertAlertPolicy(ctx, prj.GetSlug(), policy)
+	_, err = api.AlertSvc.UpsertAlertPolicy(ctx, prjSlug, policy)
 	if errors.Is(err, errors.ErrNotFound) {
 		err = nil
 	}

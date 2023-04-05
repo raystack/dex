@@ -94,12 +94,6 @@ type GetFirehoseLogsParams struct {
 	*/
 	Previous *bool
 
-	/* ProjectSlug.
-
-	   Unique identifier of the project.
-	*/
-	ProjectSlug string
-
 	/* SinceSeconds.
 
 	   Return logs since given seconds ago
@@ -237,17 +231,6 @@ func (o *GetFirehoseLogsParams) SetPrevious(previous *bool) {
 	o.Previous = previous
 }
 
-// WithProjectSlug adds the projectSlug to the get firehose logs params
-func (o *GetFirehoseLogsParams) WithProjectSlug(projectSlug string) *GetFirehoseLogsParams {
-	o.SetProjectSlug(projectSlug)
-	return o
-}
-
-// SetProjectSlug adds the projectSlug to the get firehose logs params
-func (o *GetFirehoseLogsParams) SetProjectSlug(projectSlug string) {
-	o.ProjectSlug = projectSlug
-}
-
 // WithSinceSeconds adds the sinceSeconds to the get firehose logs params
 func (o *GetFirehoseLogsParams) WithSinceSeconds(sinceSeconds *int64) *GetFirehoseLogsParams {
 	o.SetSinceSeconds(sinceSeconds)
@@ -360,11 +343,6 @@ func (o *GetFirehoseLogsParams) WriteToRequest(r runtime.ClientRequest, reg strf
 				return err
 			}
 		}
-	}
-
-	// path param projectSlug
-	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
-		return err
 	}
 
 	if o.SinceSeconds != nil {

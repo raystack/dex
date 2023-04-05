@@ -17,11 +17,11 @@ func scaleCommand() *cobra.Command {
 	var replicas int
 
 	cmd := &cobra.Command{
-		Use:   "scale <project> <firehoseURN>",
+		Use:   "scale <firehoseURN>",
 		Short: "Scale number of instances of the firehose",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			modifiedFirehose, err := scaleFirehose(cmd, args[0], args[1], replicas)
+			modifiedFirehose, err := scaleFirehose(cmd, args[0], replicas)
 			if err != nil {
 				return errors.Errorf("scale operation failed: %s", err)
 			}
@@ -37,14 +37,13 @@ func scaleCommand() *cobra.Command {
 	return cmd
 }
 
-func scaleFirehose(cmd *cobra.Command, prjSlug, urn string, replicas int) (*models.Firehose, error) {
+func scaleFirehose(cmd *cobra.Command, urn string, replicas int) (*models.Firehose, error) {
 	spinner := printer.Spin("")
 	defer spinner.Stop()
 
 	replicasNum := float64(replicas)
 	params := &operations.ScaleFirehoseParams{
 		FirehoseUrn: urn,
-		ProjectSlug: prjSlug,
 		Body: operations.ScaleFirehoseBody{
 			Replicas: &replicasNum,
 		},

@@ -86,11 +86,11 @@ func (o *UpsertFirehoseAlertPolicyOK) IsCode(code int) bool {
 }
 
 func (o *UpsertFirehoseAlertPolicyOK) Error() string {
-	return fmt.Sprintf("[PUT /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyOK  %+v", 200, o.Payload)
 }
 
 func (o *UpsertFirehoseAlertPolicyOK) String() string {
-	return fmt.Sprintf("[PUT /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyOK  %+v", 200, o.Payload)
 }
 
 func (o *UpsertFirehoseAlertPolicyOK) GetPayload() *models.AlertPolicy {
@@ -149,11 +149,11 @@ func (o *UpsertFirehoseAlertPolicyNotFound) IsCode(code int) bool {
 }
 
 func (o *UpsertFirehoseAlertPolicyNotFound) Error() string {
-	return fmt.Sprintf("[PUT /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpsertFirehoseAlertPolicyNotFound) String() string {
-	return fmt.Sprintf("[PUT /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpsertFirehoseAlertPolicyNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *UpsertFirehoseAlertPolicyInternalServerError) IsCode(code int) bool {
 }
 
 func (o *UpsertFirehoseAlertPolicyInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpsertFirehoseAlertPolicyInternalServerError) String() string {
-	return fmt.Sprintf("[PUT /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpsertFirehoseAlertPolicyInternalServerError) GetPayload() *models.ErrorResponse {

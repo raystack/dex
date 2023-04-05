@@ -48,7 +48,7 @@ func NewListKubernetesOK() *ListKubernetesOK {
 /*
 ListKubernetesOK describes a response with status code 200, with default header values.
 
-successful operation
+Successful Operation.
 */
 type ListKubernetesOK struct {
 	Payload *models.KubernetesArray
@@ -80,11 +80,11 @@ func (o *ListKubernetesOK) IsCode(code int) bool {
 }
 
 func (o *ListKubernetesOK) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListKubernetesOK) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListKubernetesOK) GetPayload() *models.KubernetesArray {
@@ -111,7 +111,7 @@ func NewListKubernetesInternalServerError() *ListKubernetesInternalServerError {
 /*
 ListKubernetesInternalServerError describes a response with status code 500, with default header values.
 
-internal error
+Internal Error
 */
 type ListKubernetesInternalServerError struct {
 	Payload *models.ErrorResponse
@@ -143,11 +143,11 @@ func (o *ListKubernetesInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ListKubernetesInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListKubernetesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListKubernetesInternalServerError) GetPayload() *models.ErrorResponse {

@@ -27,9 +27,9 @@ func logsCommand() *cobra.Command {
 	var tailCount, since int64
 
 	cmd := &cobra.Command{
-		Use:   "logs <project> <firehoseURN>",
+		Use:   "logs <firehoseURN>",
 		Short: "Stream logs from the given firehose processes",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if follow {
 				_ = cmd.Flags().Set("timeout", "10m")
@@ -38,8 +38,7 @@ func logsCommand() *cobra.Command {
 			dexAPI := cdk.NewClient(cmd)
 
 			params := &operations.GetFirehoseLogsParams{
-				FirehoseUrn: args[1],
-				ProjectSlug: args[0],
+				FirehoseUrn: args[0],
 				Follow:      &follow,
 				Previous:    &previous,
 				Timestamps:  &timestamps,

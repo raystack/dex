@@ -16,14 +16,13 @@ func startCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start <project> <firehoseURN>",
 		Short: "Start the firehose if it's currently stopped.",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error { //nolint:dupl
 			spinner := printer.Spin("")
 			defer spinner.Stop()
 
 			params := &operations.StartFirehoseParams{
-				FirehoseUrn: args[1],
-				ProjectSlug: args[0],
+				FirehoseUrn: args[0],
 				Body:        struct{}{},
 			}
 

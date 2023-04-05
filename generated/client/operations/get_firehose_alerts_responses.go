@@ -86,11 +86,11 @@ func (o *GetFirehoseAlertsOK) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseAlertsOK) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseAlertsOK) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseAlertsOK) GetPayload() *models.AlertArray {
@@ -149,11 +149,11 @@ func (o *GetFirehoseAlertsNotFound) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseAlertsNotFound) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseAlertsNotFound) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseAlertsNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *GetFirehoseAlertsInternalServerError) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseAlertsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseAlertsInternalServerError) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alerts][%d] getFirehoseAlertsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseAlertsInternalServerError) GetPayload() *models.ErrorResponse {

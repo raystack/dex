@@ -157,9 +157,14 @@ func (o *ListKubernetesParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 	}
 	var res []error
 
-	// path param projectSlug
-	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
-		return err
+	// query param projectSlug
+	qrProjectSlug := o.ProjectSlug
+	qProjectSlug := qrProjectSlug
+	if qProjectSlug != "" {
+
+		if err := r.SetQueryParam("projectSlug", qProjectSlug); err != nil {
+			return err
+		}
 	}
 
 	if o.Tag != nil {

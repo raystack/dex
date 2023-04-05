@@ -39,11 +39,6 @@ type Firehose struct {
 	// Format: uuid
 	Group *strfmt.UUID `json:"group"`
 
-	// kube cluster
-	// Example: orn:entropy:kubernetes:sample_project:sample_name
-	// Required: true
-	KubeCluster *string `json:"kube_cluster"`
-
 	// labels
 	Labels map[string]string `json:"labels,omitempty"`
 
@@ -51,6 +46,10 @@ type Firehose struct {
 	// Example: booking-events-ingester
 	// Pattern: ^[A-Za-z][\w-]+[A-Za-z0-9]$
 	Name string `json:"name,omitempty"`
+
+	// project
+	// Example: g-goto-id
+	Project string `json:"project,omitempty"`
 
 	// state
 	State *FirehoseState `json:"state,omitempty"`
@@ -85,10 +84,6 @@ func (m *Firehose) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGroup(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKubeCluster(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -153,15 +148,6 @@ func (m *Firehose) validateGroup(formats strfmt.Registry) error {
 	}
 
 	if err := validate.FormatOf("group", "body", "uuid", m.Group.String(), formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Firehose) validateKubeCluster(formats strfmt.Registry) error {
-
-	if err := validate.Required("kube_cluster", "body", m.KubeCluster); err != nil {
 		return err
 	}
 

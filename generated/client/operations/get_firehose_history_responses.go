@@ -86,11 +86,11 @@ func (o *GetFirehoseHistoryOK) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseHistoryOK) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseHistoryOK) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseHistoryOK) GetPayload() *models.History {
@@ -149,11 +149,11 @@ func (o *GetFirehoseHistoryNotFound) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseHistoryNotFound) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseHistoryNotFound) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseHistoryNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *GetFirehoseHistoryInternalServerError) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseHistoryInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseHistoryInternalServerError) String() string {
-	return fmt.Sprintf("[GET /projects/{projectSlug}/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/history][%d] getFirehoseHistoryInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseHistoryInternalServerError) GetPayload() *models.ErrorResponse {

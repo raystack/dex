@@ -83,7 +83,7 @@ func (a *Client) CreateFirehose(params *CreateFirehoseParams, opts ...ClientOpti
 	op := &runtime.ClientOperation{
 		ID:                 "createFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectSlug}/firehoses",
+		PathPattern:        "/api/firehoses",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -123,7 +123,7 @@ func (a *Client) GetFirehose(params *GetFirehoseParams, opts ...ClientOption) (*
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehose",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}",
+		PathPattern:        "/api/firehoses/{firehoseUrn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -163,7 +163,7 @@ func (a *Client) GetFirehoseAlertPolicy(params *GetFirehoseAlertPolicyParams, op
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehoseAlertPolicy",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/alertPolicy",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -203,7 +203,7 @@ func (a *Client) GetFirehoseAlerts(params *GetFirehoseAlertsParams, opts ...Clie
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehoseAlerts",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/alerts",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/alerts",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -243,7 +243,7 @@ func (a *Client) GetFirehoseHistory(params *GetFirehoseHistoryParams, opts ...Cl
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehoseHistory",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/history",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/history",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -283,7 +283,7 @@ func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer
 	op := &runtime.ClientOperation{
 		ID:                 "getFirehoseLogs",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/logs",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/logs",
 		ProducesMediaTypes: []string{"application/x-ndjson", "text/plain"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -323,7 +323,7 @@ func (a *Client) GetProjectBySlug(params *GetProjectBySlugParams, opts ...Client
 	op := &runtime.ClientOperation{
 		ID:                 "getProjectBySlug",
 		Method:             "GET",
-		PathPattern:        "/projects/{slug}",
+		PathPattern:        "/api/projects/{slug}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -403,7 +403,7 @@ func (a *Client) ListFirehoses(params *ListFirehosesParams, opts ...ClientOption
 	op := &runtime.ClientOperation{
 		ID:                 "listFirehoses",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/firehoses",
+		PathPattern:        "/api/firehoses",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -443,7 +443,7 @@ func (a *Client) ListKubernetes(params *ListKubernetesParams, opts ...ClientOpti
 	op := &runtime.ClientOperation{
 		ID:                 "listKubernetes",
 		Method:             "GET",
-		PathPattern:        "/projects/{projectSlug}/kubernetes",
+		PathPattern:        "/kubernetes",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -483,7 +483,7 @@ func (a *Client) ListProjects(params *ListProjectsParams, opts ...ClientOption) 
 	op := &runtime.ClientOperation{
 		ID:                 "listProjects",
 		Method:             "GET",
-		PathPattern:        "/projects",
+		PathPattern:        "/api/projects",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -523,7 +523,7 @@ func (a *Client) ResetOffset(params *ResetOffsetParams, opts ...ClientOption) (*
 	op := &runtime.ClientOperation{
 		ID:                 "resetOffset",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/reset",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/reset",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -563,7 +563,7 @@ func (a *Client) ScaleFirehose(params *ScaleFirehoseParams, opts ...ClientOption
 	op := &runtime.ClientOperation{
 		ID:                 "scaleFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/scale",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/scale",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -603,7 +603,7 @@ func (a *Client) StartFirehose(params *StartFirehoseParams, opts ...ClientOption
 	op := &runtime.ClientOperation{
 		ID:                 "startFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/start",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/start",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -643,7 +643,7 @@ func (a *Client) StopFirehose(params *StopFirehoseParams, opts ...ClientOption) 
 	op := &runtime.ClientOperation{
 		ID:                 "stopFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/stop",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/stop",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -683,7 +683,7 @@ func (a *Client) UpdateFirehose(params *UpdateFirehoseParams, opts ...ClientOpti
 	op := &runtime.ClientOperation{
 		ID:                 "updateFirehose",
 		Method:             "PUT",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}",
+		PathPattern:        "/api/firehoses/{firehoseUrn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -723,7 +723,7 @@ func (a *Client) UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOp
 	op := &runtime.ClientOperation{
 		ID:                 "upgradeFirehose",
 		Method:             "POST",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/upgrade",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -763,7 +763,7 @@ func (a *Client) UpsertFirehoseAlertPolicy(params *UpsertFirehoseAlertPolicyPara
 	op := &runtime.ClientOperation{
 		ID:                 "upsertFirehoseAlertPolicy",
 		Method:             "PUT",
-		PathPattern:        "/projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy",
+		PathPattern:        "/api/firehoses/{firehoseUrn}/alertPolicy",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

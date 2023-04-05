@@ -67,12 +67,6 @@ type GetFirehoseAlertPolicyParams struct {
 	*/
 	FirehoseUrn string
 
-	/* ProjectSlug.
-
-	   Unique slug name of the project.
-	*/
-	ProjectSlug string
-
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -137,17 +131,6 @@ func (o *GetFirehoseAlertPolicyParams) SetFirehoseUrn(firehoseUrn string) {
 	o.FirehoseUrn = firehoseUrn
 }
 
-// WithProjectSlug adds the projectSlug to the get firehose alert policy params
-func (o *GetFirehoseAlertPolicyParams) WithProjectSlug(projectSlug string) *GetFirehoseAlertPolicyParams {
-	o.SetProjectSlug(projectSlug)
-	return o
-}
-
-// SetProjectSlug adds the projectSlug to the get firehose alert policy params
-func (o *GetFirehoseAlertPolicyParams) SetProjectSlug(projectSlug string) {
-	o.ProjectSlug = projectSlug
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *GetFirehoseAlertPolicyParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -158,11 +141,6 @@ func (o *GetFirehoseAlertPolicyParams) WriteToRequest(r runtime.ClientRequest, r
 
 	// path param firehoseUrn
 	if err := r.SetPathParam("firehoseUrn", o.FirehoseUrn); err != nil {
-		return err
-	}
-
-	// path param projectSlug
-	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 

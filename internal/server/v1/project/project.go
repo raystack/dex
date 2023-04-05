@@ -1,8 +1,7 @@
 package project
 
 import (
-	"net/http"
-	"strings"
+	"context"
 
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
@@ -15,10 +14,7 @@ import (
 	"github.com/goto/dex/pkg/errors"
 )
 
-const (
-	pathParamSlug   = "projectSlug"
-	headerProjectID = "X-Shield-Project"
-)
+const pathParamSlug = "projectSlug"
 
 func Routes(shield shieldv1beta1rpc.ShieldServiceClient) func(r chi.Router) {
 	return func(r chi.Router) {
@@ -27,34 +23,14 @@ func Routes(shield shieldv1beta1rpc.ShieldServiceClient) func(r chi.Router) {
 	}
 }
 
-func GetProject(r *http.Request, shieldClient shieldv1beta1rpc.ShieldServiceClient) (*shieldv1beta1.Project, error) {
-	projectID := strings.TrimSpace(r.Header.Get(headerProjectID))
-	projectSlug := chi.URLParam(r, pathParamSlug)
-
-	if projectID == "" {
-		// List everything and search by slug.
-		projects, err := shieldClient.ListProjects(r.Context(), &shieldv1beta1.ListProjectsRequest{})
-		if err != nil {
-			return nil, err
-		}
-		for _, prj := range projects.GetProjects() {
-			if prj.GetSlug() == projectSlug {
-				return prj, nil
-			}
-		}
-		return nil, errors.ErrNotFound
-	}
-
-	// Project ID is available. Use it to fetch the project directly.
-	prj, err := shieldClient.GetProject(r.Context(), &shieldv1beta1.GetProjectRequest{Id: projectID})
+func GetProject(ctx context.Context, idOrSlug string, shieldClient shieldv1beta1rpc.ShieldServiceClient) (*shieldv1beta1.Project, error) {
+	prj, err := shieldClient.GetProject(ctx, &shieldv1beta1.GetProjectRequest{Id: idOrSlug})
 	if err != nil {
 		st := status.Convert(err)
 		if st.Code() == codes.NotFound {
 			return nil, errors.ErrNotFound
 		}
 		return nil, err
-	} else if prj.GetProject().Slug != projectSlug {
-		return nil, errors.ErrNotFound.WithCausef("projectSlug in URL does not match project of given ID")
 	}
 	return prj.GetProject(), nil
 }

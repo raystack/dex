@@ -93,13 +93,7 @@ func (api *firehoseAPI) handleStop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prj, err := api.getProject(r)
-	if err != nil {
-		utils.WriteErr(w, err)
-		return
-	}
-
-	if err := api.stopAlerts(r.Context(), *updatedFirehose, prj); err != nil {
+	if err := api.stopAlerts(r.Context(), *updatedFirehose, projectSlugFromURN(urn)); err != nil {
 		utils.WriteErr(w, err)
 		return
 	}

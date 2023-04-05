@@ -70,12 +70,6 @@ type ScaleFirehoseParams struct {
 	*/
 	FirehoseUrn string
 
-	/* ProjectSlug.
-
-	   Identifier for the project.
-	*/
-	ProjectSlug string
-
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -151,17 +145,6 @@ func (o *ScaleFirehoseParams) SetFirehoseUrn(firehoseUrn string) {
 	o.FirehoseUrn = firehoseUrn
 }
 
-// WithProjectSlug adds the projectSlug to the scale firehose params
-func (o *ScaleFirehoseParams) WithProjectSlug(projectSlug string) *ScaleFirehoseParams {
-	o.SetProjectSlug(projectSlug)
-	return o
-}
-
-// SetProjectSlug adds the projectSlug to the scale firehose params
-func (o *ScaleFirehoseParams) SetProjectSlug(projectSlug string) {
-	o.ProjectSlug = projectSlug
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *ScaleFirehoseParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -175,11 +158,6 @@ func (o *ScaleFirehoseParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 
 	// path param firehoseUrn
 	if err := r.SetPathParam("firehoseUrn", o.FirehoseUrn); err != nil {
-		return err
-	}
-
-	// path param projectSlug
-	if err := r.SetPathParam("projectSlug", o.ProjectSlug); err != nil {
 		return err
 	}
 

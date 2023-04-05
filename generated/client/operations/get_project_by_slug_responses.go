@@ -86,11 +86,11 @@ func (o *GetProjectBySlugOK) IsCode(code int) bool {
 }
 
 func (o *GetProjectBySlugOK) Error() string {
-	return fmt.Sprintf("[GET /projects/{slug}][%d] getProjectBySlugOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/projects/{slug}][%d] getProjectBySlugOK  %+v", 200, o.Payload)
 }
 
 func (o *GetProjectBySlugOK) String() string {
-	return fmt.Sprintf("[GET /projects/{slug}][%d] getProjectBySlugOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /api/projects/{slug}][%d] getProjectBySlugOK  %+v", 200, o.Payload)
 }
 
 func (o *GetProjectBySlugOK) GetPayload() *models.Project {
@@ -149,11 +149,11 @@ func (o *GetProjectBySlugNotFound) IsCode(code int) bool {
 }
 
 func (o *GetProjectBySlugNotFound) Error() string {
-	return fmt.Sprintf("[GET /projects/{slug}][%d] getProjectBySlugNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/projects/{slug}][%d] getProjectBySlugNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetProjectBySlugNotFound) String() string {
-	return fmt.Sprintf("[GET /projects/{slug}][%d] getProjectBySlugNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /api/projects/{slug}][%d] getProjectBySlugNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetProjectBySlugNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *GetProjectBySlugInternalServerError) IsCode(code int) bool {
 }
 
 func (o *GetProjectBySlugInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /projects/{slug}][%d] getProjectBySlugInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/projects/{slug}][%d] getProjectBySlugInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetProjectBySlugInternalServerError) String() string {
-	return fmt.Sprintf("[GET /projects/{slug}][%d] getProjectBySlugInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /api/projects/{slug}][%d] getProjectBySlugInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetProjectBySlugInternalServerError) GetPayload() *models.ErrorResponse {

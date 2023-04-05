@@ -5,38 +5,37 @@ import (
 	"strings"
 
 	entropyv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
-	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-openapi/strfmt"
 
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/utils"
-	"github.com/goto/dex/internal/server/v1/project"
+	"github.com/goto/dex/pkg/errors"
 )
 
 const kindKubernetes = "kubernetes"
 
-func Routes(shield shieldv1beta1rpc.ShieldServiceClient, entropy entropyv1beta1rpc.ResourceServiceClient) func(chi.Router) {
+func Routes(entropy entropyv1beta1rpc.ResourceServiceClient) func(chi.Router) {
 	return func(r chi.Router) {
-		r.Get("/", handleListKubeClusters(shield, entropy))
+		r.Get("/", handleListKubeClusters(entropy))
 	}
 }
 
-func handleListKubeClusters(shield shieldv1beta1rpc.ShieldServiceClient, entropy entropyv1beta1rpc.ResourceServiceClient) http.HandlerFunc {
+func handleListKubeClusters(entropy entropyv1beta1rpc.ResourceServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		tagFilter := q["tag"]
 
-		prj, err := project.GetProject(r, shield)
-		if err != nil {
-			utils.WriteErr(w, err)
+		prjSlug := q.Get("project")
+		if prjSlug == "" {
+			utils.WriteErr(w, errors.ErrInvalid.WithMsgf("project query param must be specified"))
 			return
 		}
 
 		rpcReq := &entropyv1beta1.ListResourcesRequest{
 			Kind:    kindKubernetes,
-			Project: prj.GetSlug(),
+			Project: prjSlug,
 		}
 
 		rpcResp, err := entropy.ListResources(r.Context(), rpcReq)

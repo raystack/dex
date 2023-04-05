@@ -11,12 +11,13 @@ import (
 
 func viewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "view <project> <name>",
-		Short: "View a firehose",
-		Long:  "Display information about a firehose",
-		Args:  cobra.ExactArgs(2),
+		Use:     "view <name>",
+		Short:   "View a firehose",
+		Long:    "Display information about a firehose",
+		Args:    cobra.ExactArgs(1),
+		Aliases: []string{"get", "show"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			firehose, err := getFirehose(cmd, args[0], args[1])
+			firehose, err := getFirehose(cmd, args[0])
 			if err != nil {
 				return err
 			}
@@ -27,12 +28,11 @@ func viewCommand() *cobra.Command {
 	return cmd
 }
 
-func getFirehose(cmd *cobra.Command, prjSlug, firehoseID string) (*models.Firehose, error) {
+func getFirehose(cmd *cobra.Command, firehoseID string) (*models.Firehose, error) {
 	sp := printer.Spin("Fetching firehose...")
 	defer sp.Stop()
 
 	params := &operations.GetFirehoseParams{
-		ProjectSlug: prjSlug,
 		FirehoseUrn: firehoseID,
 	}
 

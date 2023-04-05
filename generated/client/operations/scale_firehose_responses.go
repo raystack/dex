@@ -96,11 +96,11 @@ func (o *ScaleFirehoseOK) IsCode(code int) bool {
 }
 
 func (o *ScaleFirehoseOK) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *ScaleFirehoseOK) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *ScaleFirehoseOK) GetPayload() *models.Firehose {
@@ -159,11 +159,11 @@ func (o *ScaleFirehoseBadRequest) IsCode(code int) bool {
 }
 
 func (o *ScaleFirehoseBadRequest) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *ScaleFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *ScaleFirehoseBadRequest) GetPayload() *models.ErrorResponse {
@@ -222,11 +222,11 @@ func (o *ScaleFirehoseNotFound) IsCode(code int) bool {
 }
 
 func (o *ScaleFirehoseNotFound) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *ScaleFirehoseNotFound) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *ScaleFirehoseNotFound) GetPayload() *models.ErrorResponse {
@@ -285,11 +285,11 @@ func (o *ScaleFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ScaleFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ScaleFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ScaleFirehoseInternalServerError) GetPayload() *models.ErrorResponse {

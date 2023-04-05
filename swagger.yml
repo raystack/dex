@@ -12,8 +12,9 @@ info:
   description: DEX API specifications.
   version: 0.1.0
 
+
 paths:
-  /projects:
+  /api/projects:
     get:
       summary: Get list of projects.
       description: Get list of projects.
@@ -27,7 +28,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{slug}:
+  /api/projects/{slug}:
     get:
       summary: Get project by slug.
       description: Get project by its unique slug name.
@@ -51,18 +52,17 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses:
-    parameters:
-      - in: path
-        name: projectSlug
-        type: string
-        required: true
-        description: Unique identifier of the project.
+  /api/firehoses:
     get:
       summary: Get list of firehoses.
       description: Get list of firehoses in this project.
       operationId: listFirehoses
       parameters:
+        - in: query
+          name: projectSlug
+          type: string
+          required: true
+          description: Unique identifier of the project.
         - in: query
           name: group
           type: string
@@ -145,13 +145,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}:
+  /api/firehoses/{firehoseUrn}:
     parameters:
-      - in: path
-        name: projectSlug
-        type: string
-        required: true
-        description: Unique identifier of the project.
       - in: path
         name: firehoseUrn
         type: string
@@ -207,13 +202,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/reset:
+  /api/firehoses/{firehoseUrn}/reset:
     parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
       - in: path
         type: string
         name: firehoseUrn
@@ -258,13 +248,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/scale:
+  /api/firehoses/{firehoseUrn}/scale:
     parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
       - in: path
         type: string
         name: firehoseUrn
@@ -303,13 +288,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/start:
+  /api/firehoses/{firehoseUrn}/start:
     parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
       - in: path
         type: string
         name: firehoseUrn
@@ -342,13 +322,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/stop:
+  /api/firehoses/{firehoseUrn}/stop:
     parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
       - in: path
         type: string
         name: firehoseUrn
@@ -383,13 +358,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/upgrade:
+  /api/firehoses/{firehoseUrn}/upgrade:
     parameters:
-      - in: path
-        type: string
-        name: projectSlug
-        description: Identifier for the project.
-        required: true
       - in: path
         type: string
         name: firehoseUrn
@@ -418,13 +388,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/logs:
+  /api/firehoses/{firehoseUrn}/logs:
     parameters:
-      - in: path
-        name: projectSlug
-        type: string
-        required: true
-        description: Unique identifier of the project.
       - in: path
         name: firehoseUrn
         type: string
@@ -494,13 +459,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/alertPolicy:
+  /api/firehoses/{firehoseUrn}/alertPolicy:
     parameters:
-      - in: path
-        name: projectSlug
-        type: string
-        required: true
-        description: Unique slug name of the project.
       - in: path
         name: firehoseUrn
         type: string
@@ -545,13 +505,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/alerts:
+  /api/firehoses/{firehoseUrn}/alerts:
     parameters:
-      - in: path
-        name: projectSlug
-        type: string
-        required: true
-        description: Unique slug name of the project.
       - in: path
         name: firehoseUrn
         type: string
@@ -574,13 +529,8 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/firehoses/{firehoseUrn}/history:
+  /api/firehoses/{firehoseUrn}/history:
     parameters:
-      - in: path
-        name: projectSlug
-        type: string
-        required: true
-        description: Unique slug name of the project.
       - in: path
         name: firehoseUrn
         type: string
@@ -617,9 +567,9 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /projects/{projectSlug}/kubernetes:
+  /kubernetes:
     parameters:
-      - in: path
+      - in: query
         name: projectSlug
         type: string
         required: true
@@ -714,7 +664,6 @@ definitions:
       - configs
       - title
       - group
-      - kube_cluster
     properties:
       urn:
         type: string
@@ -727,6 +676,9 @@ definitions:
         type: string
         example: "booking-events-ingester"
         pattern: "^[A-Za-z][\\w-]+[A-Za-z0-9]$"
+      project:
+        type: string
+        example: "g-goto-id"
       created_at:
         type: string
         format: date-time
@@ -744,9 +696,6 @@ definitions:
         type: string
         format: uuid
         example: "e144ea5e-c7d6-48c4-a580-db31cb3389aa"
-      kube_cluster:
-        type: string
-        example: "orn:entropy:kubernetes:sample_project:sample_name"
       configs:
         $ref: "#/definitions/FirehoseConfig"
       state:
@@ -761,6 +710,7 @@ definitions:
     required:
       - stream_name
       - env_vars
+      - kube_cluster
     properties:
       stopped:
         type: boolean
@@ -769,6 +719,9 @@ definitions:
         example: "gotocompany/firehose:0.1.0"
       stream_name:
         type: string
+      kube_cluster:
+        type: string
+        example: "orn:entropy:kubernetes:sample_project:sample_name"
       replicas:
         type: number
         default: 1

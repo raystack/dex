@@ -5,6 +5,7 @@ import (
 
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/utils"
@@ -12,7 +13,9 @@ import (
 
 func handleGetProject(shield shieldv1beta1rpc.ShieldServiceClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		prj, err := GetProject(r, shield)
+		idOrSlug := chi.URLParam(r, pathParamSlug)
+
+		prj, err := GetProject(r.Context(), idOrSlug, shield)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return

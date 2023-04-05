@@ -17,6 +17,7 @@ import (
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/reqctx"
 	"github.com/goto/dex/internal/server/utils"
+	"github.com/goto/dex/internal/server/v1/project"
 	"github.com/goto/dex/odin"
 	"github.com/goto/dex/pkg/errors"
 )
@@ -50,7 +51,11 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 	} else if err := def.Validate(nil); err != nil {
 		utils.WriteErr(w, err)
 		return
+	} else if def.Project == "" {
+		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("project must be specified"))
+		return
 	}
+
 	def.Labels = cloneAndMergeMaps(def.Labels, map[string]string{
 		labelTitle:       *def.Title,
 		labelGroup:       def.Group.String(),
@@ -60,7 +65,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		labelDescription: def.Description,
 	})
 
-	prj, err := api.getProject(r)
+	prj, err := project.GetProject(r.Context(), def.Project, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -131,7 +136,13 @@ func (api *firehoseAPI) handleDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
-	prj, err := api.getProject(r)
+	prjSlug := r.URL.Query().Get("project")
+	if prjSlug == "" {
+		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("project query param is required"))
+		return
+	}
+
+	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return

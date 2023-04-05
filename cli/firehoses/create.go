@@ -16,19 +16,21 @@ import (
 
 func createCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create <project> <filepath>",
+		Use:   "create <filepath>",
 		Short: "Create a firehose as described in a file",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			fn := func(cmd *cobra.Command, args []string) error {
+				filePath := args[0]
+
 				var firehoseDef models.Firehose
-				if err := readYAMLFile(args[1], &firehoseDef); err != nil {
+				if err := readYAMLFile(filePath, &firehoseDef); err != nil {
 					return err
 				} else if err := firehoseDef.Validate(nil); err != nil {
 					return err
 				}
 
-				finalVersion, err := createFirehose(cmd, args[0], firehoseDef)
+				finalVersion, err := createFirehose(cmd, firehoseDef)
 				if err != nil {
 					return errors.Errorf("create failed: %s", err)
 				}
@@ -36,7 +38,7 @@ func createCommand() *cobra.Command {
 				return cdk.Display(cmd, finalVersion, func(w io.Writer, v any) error {
 					msg := "Create request placed"
 					_, err := fmt.Fprintf(w, "%s.\nUse `dex firehose view %s %s` to check status.\n",
-						msg, args[0], finalVersion.Urn)
+						msg, filePath, finalVersion.Urn)
 					return err
 				})
 			}
@@ -52,12 +54,12 @@ func createCommand() *cobra.Command {
 
 func updateCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update <project> <urn> <filepath>",
+		Use:   "update <urn> <filepath>",
 		Short: "Update a firehose as described in a file",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			fn := func(cmd *cobra.Command, args []string) error {
-				project, urn, filePath := args[0], args[1], args[2]
+				urn, filePath := args[0], args[1]
 
 				var firehoseDef models.Firehose
 				if err := readYAMLFile(filePath, &firehoseDef); err != nil {
@@ -66,7 +68,7 @@ func updateCommand() *cobra.Command {
 					return err
 				}
 
-				finalVersion, err := updateFirehose(cmd, project, urn, firehoseDef)
+				finalVersion, err := updateFirehose(cmd, urn, firehoseDef)
 				if err != nil {
 					return errors.Errorf("update failed: %s", err)
 				}
@@ -88,15 +90,12 @@ func updateCommand() *cobra.Command {
 	return cmd
 }
 
-func createFirehose(cmd *cobra.Command, prjSlug string, def models.Firehose) (*models.Firehose, error) {
+func createFirehose(cmd *cobra.Command, def models.Firehose) (*models.Firehose, error) {
 	spinner := printer.Spin("Creating new firehose")
 	defer spinner.Stop()
 
 	// Firehose does not already exist. Treat this as create.
-	params := &operations.CreateFirehoseParams{
-		Body:        &def,
-		ProjectSlug: prjSlug,
-	}
+	params := &operations.CreateFirehoseParams{Body: &def}
 
 	dexAPI := cdk.NewClient(cmd)
 	created, createErr := dexAPI.Operations.CreateFirehose(params)
@@ -106,12 +105,11 @@ func createFirehose(cmd *cobra.Command, prjSlug string, def models.Firehose) (*m
 	return created.GetPayload(), nil
 }
 
-func updateFirehose(cmd *cobra.Command, projectSlug, urn string, updated models.Firehose) (*models.Firehose, error) {
+func updateFirehose(cmd *cobra.Command, urn string, updated models.Firehose) (*models.Firehose, error) {
 	spinner := printer.Spin(fmt.Sprintf("Updating %s", urn))
 	defer spinner.Stop()
 
 	params := &operations.UpdateFirehoseParams{
-		ProjectSlug: projectSlug,
 		FirehoseUrn: urn,
 		Body: operations.UpdateFirehoseBody{
 			Configs:     updated.Configs,

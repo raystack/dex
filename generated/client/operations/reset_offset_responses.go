@@ -97,11 +97,11 @@ func (o *ResetOffsetOK) IsCode(code int) bool {
 }
 
 func (o *ResetOffsetOK) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetOK  %+v", 200, o.Payload)
 }
 
 func (o *ResetOffsetOK) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetOK  %+v", 200, o.Payload)
 }
 
 func (o *ResetOffsetOK) GetPayload() *models.Firehose {
@@ -160,11 +160,11 @@ func (o *ResetOffsetBadRequest) IsCode(code int) bool {
 }
 
 func (o *ResetOffsetBadRequest) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *ResetOffsetBadRequest) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *ResetOffsetBadRequest) GetPayload() *models.ErrorResponse {
@@ -223,11 +223,11 @@ func (o *ResetOffsetNotFound) IsCode(code int) bool {
 }
 
 func (o *ResetOffsetNotFound) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetNotFound  %+v", 404, o.Payload)
 }
 
 func (o *ResetOffsetNotFound) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetNotFound  %+v", 404, o.Payload)
 }
 
 func (o *ResetOffsetNotFound) GetPayload() *models.ErrorResponse {
@@ -286,11 +286,11 @@ func (o *ResetOffsetInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ResetOffsetInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ResetOffsetInternalServerError) String() string {
-	return fmt.Sprintf("[POST /projects/{projectSlug}/firehoses/{firehoseUrn}/reset][%d] resetOffsetInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/reset][%d] resetOffsetInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ResetOffsetInternalServerError) GetPayload() *models.ErrorResponse {
