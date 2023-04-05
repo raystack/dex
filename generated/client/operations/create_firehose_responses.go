@@ -92,11 +92,11 @@ func (o *CreateFirehoseCreated) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseCreated) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
 }
 
 func (o *CreateFirehoseCreated) String() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
 }
 
 func (o *CreateFirehoseCreated) GetPayload() *models.Firehose {
@@ -155,11 +155,11 @@ func (o *CreateFirehoseBadRequest) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseBadRequest) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *CreateFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *CreateFirehoseBadRequest) GetPayload() *models.ErrorResponse {
@@ -218,11 +218,11 @@ func (o *CreateFirehoseConflict) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseConflict) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
 }
 
 func (o *CreateFirehoseConflict) String() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
 }
 
 func (o *CreateFirehoseConflict) GetPayload() *models.ErrorResponse {
@@ -281,11 +281,11 @@ func (o *CreateFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *CreateFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *CreateFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /api/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *CreateFirehoseInternalServerError) GetPayload() *models.ErrorResponse {

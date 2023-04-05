@@ -61,7 +61,7 @@ func NewClient(cmd *cobra.Command) *client.DexAPI {
 		scheme = []string{"https"}
 	}
 
-	r := httptransport.New(cfg.Host, "/api", scheme)
+	r := httptransport.New(cfg.Host, cfg.PathPrefix, scheme)
 	r.Context = cmd.Context()
 	r.Consumers["application/x-ndjson"] = runtime.ByteStreamConsumer()
 	r.DefaultAuthentication = httptransport.BearerToken(accessToken)

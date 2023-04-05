@@ -108,8 +108,8 @@ func requestLogger(lg *zap.Logger) middleware {
 
 			clientID, _, _ := req.BasicAuth()
 			fields := []zap.Field{
-				zap.String("path", req.URL.Path),
-				zap.String("method", req.Method),
+				zap.String("request_path", req.URL.Path),
+				zap.String("request_method", req.Method),
 				zap.String("request_id", req.Header.Get(headerRequestID)),
 				zap.String("client_id", clientID),
 				zap.String("trace_id", span.SpanContext().TraceID.String()),

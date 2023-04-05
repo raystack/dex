@@ -80,11 +80,11 @@ func (o *ListAlertTemplatesOK) IsCode(code int) bool {
 }
 
 func (o *ListAlertTemplatesOK) Error() string {
-	return fmt.Sprintf("[GET /alertTemplates][%d] listAlertTemplatesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListAlertTemplatesOK) String() string {
-	return fmt.Sprintf("[GET /alertTemplates][%d] listAlertTemplatesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListAlertTemplatesOK) GetPayload() *models.AlertTemplatesArray {
@@ -143,11 +143,11 @@ func (o *ListAlertTemplatesInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ListAlertTemplatesInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /alertTemplates][%d] listAlertTemplatesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListAlertTemplatesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /alertTemplates][%d] listAlertTemplatesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListAlertTemplatesInternalServerError) GetPayload() *models.ErrorResponse {

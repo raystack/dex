@@ -80,11 +80,11 @@ func (o *ListKubernetesOK) IsCode(code int) bool {
 }
 
 func (o *ListKubernetesOK) Error() string {
-	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListKubernetesOK) String() string {
-	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
 }
 
 func (o *ListKubernetesOK) GetPayload() *models.KubernetesArray {
@@ -143,11 +143,11 @@ func (o *ListKubernetesInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ListKubernetesInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListKubernetesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListKubernetesInternalServerError) GetPayload() *models.ErrorResponse {

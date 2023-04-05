@@ -14,7 +14,7 @@ info:
 
 
 paths:
-  /api/projects:
+  /dex/projects:
     get:
       summary: Get list of projects.
       description: Get list of projects.
@@ -28,7 +28,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/projects/{slug}:
+  /dex/projects/{slug}:
     get:
       summary: Get project by slug.
       description: Get project by its unique slug name.
@@ -52,14 +52,14 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses:
+  /dex/firehoses:
     get:
       summary: Get list of firehoses.
       description: Get list of firehoses in this project.
       operationId: listFirehoses
       parameters:
         - in: query
-          name: projectSlug
+          name: project
           type: string
           required: true
           description: Unique identifier of the project.
@@ -145,7 +145,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}:
+  /dex/firehoses/{firehoseUrn}:
     parameters:
       - in: path
         name: firehoseUrn
@@ -202,7 +202,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/reset:
+  /dex/firehoses/{firehoseUrn}/reset:
     parameters:
       - in: path
         type: string
@@ -248,7 +248,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/scale:
+  /dex/firehoses/{firehoseUrn}/scale:
     parameters:
       - in: path
         type: string
@@ -288,7 +288,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/start:
+  /dex/firehoses/{firehoseUrn}/start:
     parameters:
       - in: path
         type: string
@@ -322,7 +322,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/stop:
+  /dex/firehoses/{firehoseUrn}/stop:
     parameters:
       - in: path
         type: string
@@ -358,7 +358,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/upgrade:
+  /dex/firehoses/{firehoseUrn}/upgrade:
     parameters:
       - in: path
         type: string
@@ -388,7 +388,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/logs:
+  /dex/firehoses/{firehoseUrn}/logs:
     parameters:
       - in: path
         name: firehoseUrn
@@ -459,7 +459,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/alertPolicy:
+  /dex/firehoses/{firehoseUrn}/alertPolicy:
     parameters:
       - in: path
         name: firehoseUrn
@@ -505,7 +505,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/alerts:
+  /dex/firehoses/{firehoseUrn}/alerts:
     parameters:
       - in: path
         name: firehoseUrn
@@ -529,7 +529,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /api/firehoses/{firehoseUrn}/history:
+  /dex/firehoses/{firehoseUrn}/history:
     parameters:
       - in: path
         name: firehoseUrn
@@ -553,7 +553,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /alertTemplates:
+  /dex/alertTemplates:
     get:
       summary: Get list of alert templates for firehose.
       description: Get list of alert templates for firehose.
@@ -567,7 +567,7 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /kubernetes:
+  /dex/kubernetes:
     parameters:
       - in: query
         name: projectSlug

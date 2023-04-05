@@ -80,11 +80,11 @@ func (o *ListProjectsOK) IsCode(code int) bool {
 }
 
 func (o *ListProjectsOK) Error() string {
-	return fmt.Sprintf("[GET /api/projects][%d] listProjectsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsOK  %+v", 200, o.Payload)
 }
 
 func (o *ListProjectsOK) String() string {
-	return fmt.Sprintf("[GET /api/projects][%d] listProjectsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsOK  %+v", 200, o.Payload)
 }
 
 func (o *ListProjectsOK) GetPayload() *models.ProjectArray {
@@ -143,11 +143,11 @@ func (o *ListProjectsInternalServerError) IsCode(code int) bool {
 }
 
 func (o *ListProjectsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /api/projects][%d] listProjectsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListProjectsInternalServerError) String() string {
-	return fmt.Sprintf("[GET /api/projects][%d] listProjectsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *ListProjectsInternalServerError) GetPayload() *models.ErrorResponse {

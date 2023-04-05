@@ -95,11 +95,11 @@ func (o *UpdateFirehoseOK) IsCode(code int) bool {
 }
 
 func (o *UpdateFirehoseOK) Error() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *UpdateFirehoseOK) String() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *UpdateFirehoseOK) GetPayload() *models.Firehose {
@@ -158,11 +158,11 @@ func (o *UpdateFirehoseBadRequest) IsCode(code int) bool {
 }
 
 func (o *UpdateFirehoseBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *UpdateFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *UpdateFirehoseBadRequest) GetPayload() *models.ErrorResponse {
@@ -221,11 +221,11 @@ func (o *UpdateFirehoseNotFound) IsCode(code int) bool {
 }
 
 func (o *UpdateFirehoseNotFound) Error() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpdateFirehoseNotFound) String() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpdateFirehoseNotFound) GetPayload() *models.ErrorResponse {
@@ -284,11 +284,11 @@ func (o *UpdateFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *UpdateFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpdateFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[PUT /api/firehoses/{firehoseUrn}][%d] updateFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}][%d] updateFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpdateFirehoseInternalServerError) GetPayload() *models.ErrorResponse {

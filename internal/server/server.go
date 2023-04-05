@@ -48,7 +48,7 @@ func Serve(ctx context.Context, addr string,
 		})
 	})
 
-	router.Route("/api", func(r chi.Router) {
+	router.Route("/dex", func(r chi.Router) {
 		r.Get("/alertTemplates", alertSvc.HandleListTemplates())
 
 		r.Route("/projects", projectsv1.Routes(shieldClient))

@@ -3,6 +3,7 @@ package firehoses
 import (
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/goto/salt/printer"
 	"github.com/goto/salt/term"
@@ -11,7 +12,6 @@ import (
 	"github.com/goto/dex/cli/cdk"
 	"github.com/goto/dex/generated/client/operations"
 	"github.com/goto/dex/generated/models"
-	"github.com/goto/dex/pkg/errors"
 )
 
 func listCommand() *cobra.Command {
@@ -21,12 +21,12 @@ func listCommand() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			params := operations.ListFirehosesParams{
-				ProjectSlug: args[0],
+				Project: args[0],
 			}
 
 			firehoses, err := listFirehoses(cmd, params)
 			if err != nil {
-				return errors.Errorf("failed to list: %s", err)
+				log.Fatalf("failed to list: %s", err)
 			}
 
 			return cdk.Display(cmd, firehoses, func(w io.Writer, v interface{}) error {
@@ -45,7 +45,7 @@ func listCommand() *cobra.Command {
 }
 
 func listFirehoses(cmd *cobra.Command, params operations.ListFirehosesParams) ([]*models.Firehose, error) {
-	spinner := printer.Spin(fmt.Sprintf("Fetching firehoses in project '%s'", params.ProjectSlug))
+	spinner := printer.Spin(fmt.Sprintf("Fetching firehoses in project '%s'", params.Project))
 	defer spinner.Stop()
 
 	dexAPI := cdk.NewClient(cmd)

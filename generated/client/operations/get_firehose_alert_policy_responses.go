@@ -86,11 +86,11 @@ func (o *GetFirehoseAlertPolicyOK) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseAlertPolicyOK) Error() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseAlertPolicyOK) String() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseAlertPolicyOK) GetPayload() *models.AlertPolicy {
@@ -149,11 +149,11 @@ func (o *GetFirehoseAlertPolicyNotFound) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseAlertPolicyNotFound) Error() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseAlertPolicyNotFound) String() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseAlertPolicyNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *GetFirehoseAlertPolicyInternalServerError) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseAlertPolicyInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseAlertPolicyInternalServerError) String() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/alertPolicy][%d] getFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseAlertPolicyInternalServerError) GetPayload() *models.ErrorResponse {

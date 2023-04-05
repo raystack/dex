@@ -73,11 +73,11 @@ type ListFirehosesParams struct {
 	*/
 	KubeCluster *string
 
-	/* ProjectSlug.
+	/* Project.
 
 	   Unique identifier of the project.
 	*/
-	ProjectSlug string
+	Project string
 
 	/* SinkType.
 
@@ -180,15 +180,15 @@ func (o *ListFirehosesParams) SetKubeCluster(kubeCluster *string) {
 	o.KubeCluster = kubeCluster
 }
 
-// WithProjectSlug adds the projectSlug to the list firehoses params
-func (o *ListFirehosesParams) WithProjectSlug(projectSlug string) *ListFirehosesParams {
-	o.SetProjectSlug(projectSlug)
+// WithProject adds the project to the list firehoses params
+func (o *ListFirehosesParams) WithProject(project string) *ListFirehosesParams {
+	o.SetProject(project)
 	return o
 }
 
-// SetProjectSlug adds the projectSlug to the list firehoses params
-func (o *ListFirehosesParams) SetProjectSlug(projectSlug string) {
-	o.ProjectSlug = projectSlug
+// SetProject adds the project to the list firehoses params
+func (o *ListFirehosesParams) SetProject(project string) {
+	o.Project = project
 }
 
 // WithSinkType adds the sinkType to the list firehoses params
@@ -277,12 +277,12 @@ func (o *ListFirehosesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		}
 	}
 
-	// query param projectSlug
-	qrProjectSlug := o.ProjectSlug
-	qProjectSlug := qrProjectSlug
-	if qProjectSlug != "" {
+	// query param project
+	qrProject := o.Project
+	qProject := qrProject
+	if qProject != "" {
 
-		if err := r.SetQueryParam("projectSlug", qProjectSlug); err != nil {
+		if err := r.SetQueryParam("project", qProject); err != nil {
 			return err
 		}
 	}

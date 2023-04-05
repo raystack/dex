@@ -86,11 +86,11 @@ func (o *GetFirehoseOK) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseOK) Error() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}][%d] getFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}][%d] getFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseOK) String() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}][%d] getFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}][%d] getFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFirehoseOK) GetPayload() *models.Firehose {
@@ -149,11 +149,11 @@ func (o *GetFirehoseNotFound) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseNotFound) Error() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}][%d] getFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}][%d] getFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseNotFound) String() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}][%d] getFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}][%d] getFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFirehoseNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *GetFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *GetFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}][%d] getFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}][%d] getFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[GET /api/firehoses/{firehoseUrn}][%d] getFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}][%d] getFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFirehoseInternalServerError) GetPayload() *models.ErrorResponse {

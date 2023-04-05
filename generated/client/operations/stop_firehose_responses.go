@@ -92,11 +92,11 @@ func (o *StopFirehoseOK) IsCode(code int) bool {
 }
 
 func (o *StopFirehoseOK) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *StopFirehoseOK) String() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *StopFirehoseOK) GetPayload() *models.Firehose {
@@ -155,11 +155,11 @@ func (o *StopFirehoseBadRequest) IsCode(code int) bool {
 }
 
 func (o *StopFirehoseBadRequest) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *StopFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *StopFirehoseBadRequest) GetPayload() *models.ErrorResponse {
@@ -218,11 +218,11 @@ func (o *StopFirehoseNotFound) IsCode(code int) bool {
 }
 
 func (o *StopFirehoseNotFound) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *StopFirehoseNotFound) String() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *StopFirehoseNotFound) GetPayload() *models.ErrorResponse {
@@ -281,11 +281,11 @@ func (o *StopFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *StopFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *StopFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /api/firehoses/{firehoseUrn}/stop][%d] stopFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/stop][%d] stopFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *StopFirehoseInternalServerError) GetPayload() *models.ErrorResponse {
