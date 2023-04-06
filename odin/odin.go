@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+
+	"github.com/goto/dex/pkg/errors"
 )
 
 type odinStream struct {
@@ -49,13 +50,17 @@ func GetOdinStream(ctx context.Context, odinAddr, urn string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return "", errors.ErrNotFound.WithMsgf("stream '%s' not found", urn)
+		}
+		return "", errors.ErrInternal.
+			WithMsgf("failed to resolve stream").
+			WithCausef("unexpected status code: %d", resp.StatusCode)
 	}
 
 	var odinResp odinStream
-	err = json.Unmarshal(body, &odinResp)
+	err = json.NewDecoder(resp.Body).Decode(&odinResp)
 	if err != nil {
 		return "", err
 	}
