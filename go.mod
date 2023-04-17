@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	buf.build/gen/go/gotocompany/proton/grpc/go v1.3.0-20230313074656-d6636a3710b8.1
-	buf.build/gen/go/gotocompany/proton/protocolbuffers/go v1.29.0-20230313074656-d6636a3710b8.1
+	buf.build/gen/go/gotocompany/proton/protocolbuffers/go v1.30.0-20230412083631-aad8cd1ac433.1
 	contrib.go.opencensus.io/exporter/ocagent v0.7.0
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
 	github.com/BurntSushi/toml v1.0.0
@@ -16,7 +16,7 @@ require (
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-openapi/swag v0.21.1
 	github.com/go-openapi/validate v0.22.0
-	github.com/goto/entropy v0.6.2
+	github.com/goto/entropy v0.6.7
 	github.com/goto/salt v0.3.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/newrelic/go-agent/v3 v3.18.2
@@ -31,13 +31,13 @@ require (
 	golang.org/x/exp v0.0.0-20221111204811-129d8d6c17ab
 	golang.org/x/oauth2 v0.4.0
 	google.golang.org/grpc v1.53.0
-	google.golang.org/protobuf v1.29.0
+	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	buf.build/gen/go/envoyproxy/protoc-gen-validate/protocolbuffers/go v1.29.0-20220812150255-45685e052c7e.1 // indirect
-	buf.build/gen/go/grpc-ecosystem/grpc-gateway/protocolbuffers/go v1.29.0-20220906183531-bc28b723cd77.1 // indirect
+	buf.build/gen/go/envoyproxy/protoc-gen-validate/protocolbuffers/go v1.30.0-20220812150255-45685e052c7e.1 // indirect
+	buf.build/gen/go/grpc-ecosystem/grpc-gateway/protocolbuffers/go v1.30.0-20220906183531-bc28b723cd77.1 // indirect
 	cloud.google.com/go/compute v1.15.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
@@ -103,6 +103,7 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
@@ -141,6 +142,8 @@ require (
 	github.com/muesli/reflow v0.2.0 // indirect
 	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/newrelic/go-agent/v3/integrations/nrgorilla v1.1.1 // indirect
+	github.com/newrelic/go-agent/v3/integrations/nrgrpc v1.3.1 // indirect
 	github.com/newrelic/newrelic-telemetry-sdk-go v0.2.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect

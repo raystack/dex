@@ -23,6 +23,7 @@ import (
 )
 
 const kindFirehose = "firehose"
+const confTopicName = "SOURCE_KAFKA_TOPIC"
 
 type firehoseUpdates struct {
 	Description string                `json:"description"`
@@ -136,7 +137,10 @@ func (api *firehoseAPI) handleDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
-	prjSlug := r.URL.Query().Get("project")
+	q := r.URL.Query()
+
+	prjSlug := q.Get("project")
+
 	if prjSlug == "" {
 		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("project query param is required"))
 		return
@@ -148,9 +152,19 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	labelFilter := map[string]string{}
+	if filterGroup := q.Get("group"); filterGroup != "" {
+		labelFilter[labelGroup] = filterGroup
+	}
+
+	if streamName := q.Get("stream_name"); streamName != "" {
+		labelFilter[labelStream] = streamName
+	}
+
 	rpcReq := &entropyv1beta1.ListResourcesRequest{
 		Kind:    kindFirehose,
 		Project: prj.GetSlug(),
+		Labels:  labelFilter,
 	}
 
 	rpcResp, err := api.Entropy.ListResources(r.Context(), rpcReq)
@@ -164,6 +178,8 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 		confSourceKafkaConsumerID,
 	}
 
+	topicName := q.Get("topic_name")
+	kubeCluster := q.Get("kube_cluster")
 	var arr []models.Firehose
 	for _, res := range rpcResp.GetResources() {
 		def, err := mapEntropyResourceToFirehose(res, includeEnv)
@@ -171,6 +187,15 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 			utils.WriteErr(w, err)
 			return
 		}
+
+		if kubeCluster != "" && *def.Configs.KubeCluster != kubeCluster {
+			continue
+		}
+
+		if topicName != "" && def.Configs.EnvVars[confTopicName] != topicName {
+			continue
+		}
+
 		arr = append(arr, *def)
 	}
 

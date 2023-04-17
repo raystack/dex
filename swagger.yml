@@ -295,7 +295,7 @@ paths:
         name: firehoseUrn
         description: URN of the firehose.
         required: true
-    post:
+    put:
       summary: Start the Firehose if it is currently stopped.
       description: Start the Firehose if it is currently stopped.
       operationId: startFirehose
@@ -329,7 +329,7 @@ paths:
         name: firehoseUrn
         description: URN of the firehose.
         required: true
-    post:
+    put:
       summary: Stop the Firehose if it is currently running.
       description: Stop the Firehose if it is currently running.
       operationId: stopFirehose
@@ -365,7 +365,7 @@ paths:
         name: firehoseUrn
         description: URN of the firehose.
         required: true
-    post:
+    put:
       summary: Upgrade the firehose to the latest version supported.
       description: Upgrade the firehose to the latest version supported.
       operationId: upgradeFirehose

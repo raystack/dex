@@ -48,9 +48,9 @@ func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
 		// Firehose Actions
 		r.Post("/{urn}/reset", api.handleReset)
 		r.Post("/{urn}/scale", api.handleScale)
-		r.Post("/{urn}/start", api.handleStart)
-		r.Post("/{urn}/stop", api.handleStop)
-		r.Post("/{urn}/upgrade", api.handleUpgrade)
+		r.Put("/{urn}/start", api.handleStart)
+		r.Put("/{urn}/stop", api.handleStop)
+		r.Put("/{urn}/upgrade", api.handleUpgrade)
 
 		// Alert management
 		r.Get("/{urn}/alerts", api.handleListAlerts)
