@@ -178,6 +178,7 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 
 	includeEnv := []string{
 		confSinkType,
+		confTopicName,
 		confSourceKafkaConsumerID,
 	}
 
@@ -338,6 +339,11 @@ func (api *firehoseAPI) getRevisions(ctx context.Context, urn string) ([]models.
 }
 
 func sinkTypeSet(sinkTypes string) map[string]struct{} {
+	sinkTypes = strings.TrimSpace(sinkTypes)
+	if sinkTypes == "" {
+		return nil
+	}
+
 	res := map[string]struct{}{}
 	for _, st := range strings.Split(sinkTypes, ",") {
 		res[strings.ToUpper(st)] = struct{}{}
