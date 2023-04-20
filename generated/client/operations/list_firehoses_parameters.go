@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewListFirehosesParams creates a new ListFirehosesParams object,
@@ -83,7 +84,7 @@ type ListFirehosesParams struct {
 
 	   Return firehoses with this sink type.
 	*/
-	SinkType *string
+	SinkType []string
 
 	/* Status.
 
@@ -192,13 +193,13 @@ func (o *ListFirehosesParams) SetProject(project string) {
 }
 
 // WithSinkType adds the sinkType to the list firehoses params
-func (o *ListFirehosesParams) WithSinkType(sinkType *string) *ListFirehosesParams {
+func (o *ListFirehosesParams) WithSinkType(sinkType []string) *ListFirehosesParams {
 	o.SetSinkType(sinkType)
 	return o
 }
 
 // SetSinkType adds the sinkType to the list firehoses params
-func (o *ListFirehosesParams) SetSinkType(sinkType *string) {
+func (o *ListFirehosesParams) SetSinkType(sinkType []string) {
 	o.SinkType = sinkType
 }
 
@@ -289,18 +290,12 @@ func (o *ListFirehosesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 
 	if o.SinkType != nil {
 
-		// query param sink_type
-		var qrSinkType string
+		// binding items for sink_type
+		joinedSinkType := o.bindParamSinkType(reg)
 
-		if o.SinkType != nil {
-			qrSinkType = *o.SinkType
-		}
-		qSinkType := qrSinkType
-		if qSinkType != "" {
-
-			if err := r.SetQueryParam("sink_type", qSinkType); err != nil {
-				return err
-			}
+		// query array param sink_type
+		if err := r.SetQueryParam("sink_type", joinedSinkType...); err != nil {
+			return err
 		}
 	}
 
@@ -359,4 +354,21 @@ func (o *ListFirehosesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
+}
+
+// bindParamListFirehoses binds the parameter sink_type
+func (o *ListFirehosesParams) bindParamSinkType(formats strfmt.Registry) []string {
+	sinkTypeIR := o.SinkType
+
+	var sinkTypeIC []string
+	for _, sinkTypeIIR := range sinkTypeIR { // explode []string
+
+		sinkTypeIIV := sinkTypeIIR // string as string
+		sinkTypeIC = append(sinkTypeIC, sinkTypeIIV)
+	}
+
+	// items.CollectionFormat: "csv"
+	sinkTypeIS := swag.JoinByFormat(sinkTypeIC, "csv")
+
+	return sinkTypeIS
 }

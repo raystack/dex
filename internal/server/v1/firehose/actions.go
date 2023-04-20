@@ -153,5 +153,5 @@ func (api *firehoseAPI) executeAction(ctx context.Context, urn, actionType strin
 		return nil, err
 	}
 
-	return mapEntropyResourceToFirehose(rpcResp.GetResource(), nil)
+	return mapEntropyResourceToFirehose(rpcResp.GetResource())
 }

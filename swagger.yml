@@ -95,7 +95,10 @@ paths:
             Usually stream refers to the kafka cluster.
         - in: query
           name: sink_type
-          type: string
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
           enum:
             - "LOG"
             - "HTTP"

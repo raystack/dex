@@ -86,11 +86,11 @@ func (o *UpgradeFirehoseOK) IsCode(code int) bool {
 }
 
 func (o *UpgradeFirehoseOK) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *UpgradeFirehoseOK) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseOK  %+v", 200, o.Payload)
 }
 
 func (o *UpgradeFirehoseOK) GetPayload() *models.Firehose {
@@ -149,11 +149,11 @@ func (o *UpgradeFirehoseNotFound) IsCode(code int) bool {
 }
 
 func (o *UpgradeFirehoseNotFound) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpgradeFirehoseNotFound) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpgradeFirehoseNotFound) GetPayload() *models.ErrorResponse {
@@ -212,11 +212,11 @@ func (o *UpgradeFirehoseInternalServerError) IsCode(code int) bool {
 }
 
 func (o *UpgradeFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpgradeFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/upgrade][%d] upgradeFirehoseInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpgradeFirehoseInternalServerError) GetPayload() *models.ErrorResponse {

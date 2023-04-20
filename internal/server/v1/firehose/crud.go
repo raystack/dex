@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	"github.com/go-chi/chi/v5"
@@ -22,8 +23,10 @@ import (
 	"github.com/goto/dex/pkg/errors"
 )
 
-const kindFirehose = "firehose"
-const confTopicName = "SOURCE_KAFKA_TOPIC"
+const (
+	kindFirehose  = "firehose"
+	confTopicName = "SOURCE_KAFKA_TOPIC"
+)
 
 type firehoseUpdates struct {
 	Description string                `json:"description"`
@@ -103,7 +106,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource(), nil)
+	createdFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource())
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -180,9 +183,10 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 
 	topicName := q.Get("topic_name")
 	kubeCluster := q.Get("kube_cluster")
+	sinkTypes := sinkTypeSet(q.Get("sink_type"))
 	var arr []models.Firehose
 	for _, res := range rpcResp.GetResources() {
-		def, err := mapEntropyResourceToFirehose(res, includeEnv)
+		def, err := mapEntropyResourceToFirehose(res)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
@@ -195,6 +199,18 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 		if topicName != "" && def.Configs.EnvVars[confTopicName] != topicName {
 			continue
 		}
+
+		_, include := sinkTypes[def.Configs.EnvVars[confSinkType]]
+		if len(sinkTypes) > 0 && !include {
+			continue
+		}
+
+		// only return selected keys to reduce list response-size.
+		returnEnv := map[string]string{}
+		for _, key := range includeEnv {
+			returnEnv[key] = def.Configs.EnvVars[key]
+		}
+		def.Configs.EnvVars = returnEnv
 
 		arr = append(arr, *def)
 	}
@@ -253,7 +269,7 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource(), nil)
+	updatedFirehose, err := mapEntropyResourceToFirehose(rpcResp.GetResource())
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -319,4 +335,12 @@ func (api *firehoseAPI) getRevisions(ctx context.Context, urn string) ([]models.
 	}
 
 	return rh, nil
+}
+
+func sinkTypeSet(sinkTypes string) map[string]struct{} {
+	res := map[string]struct{}{}
+	for _, st := range strings.Split(sinkTypes, ",") {
+		res[strings.ToUpper(st)] = struct{}{}
+	}
+	return res
 }

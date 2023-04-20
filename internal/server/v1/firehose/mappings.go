@@ -80,7 +80,7 @@ func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	})
 }
 
-func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []string) (*models.Firehose, error) {
+func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (*models.Firehose, error) {
 	if res == nil || res.GetSpec() == nil {
 		return nil, errors.ErrInternal.WithCausef("spec is nil")
 	}
@@ -128,17 +128,9 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource, envKeysSubset []
 		streamName = modConf.EnvVariables[confStreamName]
 	}
 
-	returnEnv := cloneAndMergeMaps(modConf.EnvVariables, nil)
-	if envKeysSubset != nil {
-		returnEnv = map[string]string{}
-		for _, key := range envKeysSubset {
-			returnEnv[key] = modConf.EnvVariables[key]
-		}
-	}
-
 	firehoseDef.Configs = &models.FirehoseConfig{
 		Image:        modConf.ChartValues.ImageTag,
-		EnvVars:      returnEnv,
+		EnvVars:      modConf.EnvVariables,
 		Stopped:      modConf.Stopped,
 		StopTime:     stopTime,
 		Replicas:     float64(modConf.Replicas),

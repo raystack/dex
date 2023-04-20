@@ -602,7 +602,7 @@ func (a *Client) StartFirehose(params *StartFirehoseParams, opts ...ClientOption
 	}
 	op := &runtime.ClientOperation{
 		ID:                 "startFirehose",
-		Method:             "POST",
+		Method:             "PUT",
 		PathPattern:        "/dex/firehoses/{firehoseUrn}/start",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -642,7 +642,7 @@ func (a *Client) StopFirehose(params *StopFirehoseParams, opts ...ClientOption) 
 	}
 	op := &runtime.ClientOperation{
 		ID:                 "stopFirehose",
-		Method:             "POST",
+		Method:             "PUT",
 		PathPattern:        "/dex/firehoses/{firehoseUrn}/stop",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -722,7 +722,7 @@ func (a *Client) UpgradeFirehose(params *UpgradeFirehoseParams, opts ...ClientOp
 	}
 	op := &runtime.ClientOperation{
 		ID:                 "upgradeFirehose",
-		Method:             "POST",
+		Method:             "PUT",
 		PathPattern:        "/dex/firehoses/{firehoseUrn}/upgrade",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
