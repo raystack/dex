@@ -108,7 +108,6 @@ func (svc *Service) GetAlertPolicy(ctx context.Context, projectSlug, resource, r
 		if alertPolicy != nil {
 			for _, rule := range alertPolicy.Rules {
 				if rule.Template == template.Name {
-					rule.Variables = filterVariables(rule.Variables)
 					rules = append(rules, rule)
 					alertExist = true
 					break
@@ -202,6 +201,10 @@ func (svc *Service) getAlertPolicyForResource(ctx context.Context, providerNames
 			WithCausef("bad upstream response")
 	} else if len(alertPolicies) == 0 {
 		return nil, errors.ErrNotFound.WithMsgf(alertPolicyNotFound)
+	}
+
+	for i, rule := range alertPolicies[0].Rules {
+		alertPolicies[0].Rules[i].Variables = filterVariables(rule.Variables)
 	}
 
 	return &alertPolicies[0], nil
