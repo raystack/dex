@@ -14,6 +14,7 @@ import (
 )
 
 const firehoseOutputReleaseNameKey = "release_name"
+const resourceTag = "firehose"
 
 var suppliedAlertVariableNames = []string{"name", "team", "entity"}
 
@@ -71,7 +72,7 @@ func (api *firehoseAPI) handleGetAlertPolicy(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	policy, err := api.AlertSvc.GetAlertPolicy(r.Context(), prj.GetSlug(), releaseName)
+	policy, err := api.AlertSvc.GetAlertPolicy(r.Context(), prj.GetSlug(), releaseName, resourceTag)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return

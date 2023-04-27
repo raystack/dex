@@ -20,6 +20,8 @@ const (
 	projectSlugSirenLabelKey = "projects"
 )
 
+var sirenTemplateVariables = []string{"WARN_THRESHOLD", "CRIT_THRESHOLD"}
+
 type Service struct {
 	Siren sirenv1beta1grpc.SirenServiceClient
 }
@@ -81,15 +83,55 @@ func (svc *Service) UpsertAlertPolicy(ctx context.Context, projectSlug string, u
 	return alertPolicy, nil
 }
 
-func (svc *Service) GetAlertPolicy(ctx context.Context, projectSlug string, resource string) (*Policy, error) {
+func (svc *Service) GetAlertPolicy(ctx context.Context, projectSlug, resource, resourceTag string) (*Policy, error) {
 	ns, err := svc.getNamespaceForProject(ctx, projectSlug)
 	if err != nil {
 		return nil, err
 	}
 
-	alertPolicy, err := svc.getAlertPolicyForResource(ctx, ns.ID, resource)
+	var alertPolicy *Policy
+	alertPolicy, err = svc.getAlertPolicyForResource(ctx, ns.ID, resource)
+	if err != nil && !errors.Is(err, errors.ErrNotFound) {
+		return nil, err
+	}
+
+	templates, err := svc.ListAlertTemplates(ctx, resourceTag)
 	if err != nil {
 		return nil, err
+	}
+
+	var rules []Rule
+
+	for _, template := range templates {
+		alertExist := false
+
+		if alertPolicy != nil {
+			for _, rule := range alertPolicy.Rules {
+				if rule.Template == template.Name {
+					rule.Variables = filterVariables(rule.Variables)
+					rules = append(rules, rule)
+					alertExist = true
+					break
+				}
+			}
+		}
+
+		if !alertExist {
+			rule := Rule{
+				Variables: filterVariables(template.Variables),
+				Enabled:   false,
+				Template:  template.Name,
+				CreatedAt: template.CreatedAt,
+				UpdatedAt: template.UpdatedAt,
+			}
+
+			rules = append(rules, rule)
+		}
+	}
+
+	alertPolicy = &Policy{
+		Resource: resource,
+		Rules:    rules,
 	}
 
 	return alertPolicy, nil
@@ -188,4 +230,17 @@ func (svc *Service) GetProjectDataSource(ctx context.Context, projectSlug string
 	}
 
 	return ns.Name, nil
+}
+
+func filterVariables(variables []Variable) []Variable {
+	var allowedVariables []Variable
+	for _, variable := range variables {
+		for _, sirenTemplateVariable := range sirenTemplateVariables {
+			if variable.Name == sirenTemplateVariable {
+				allowedVariables = append(allowedVariables, variable)
+			}
+		}
+	}
+
+	return allowedVariables
 }

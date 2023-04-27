@@ -18,8 +18,8 @@ type Variable struct {
 }
 
 type Rule struct {
-	ID        string     `json:"id"`
-	Template  string     `json:"Template"`
+	ID        string     `json:"id,omitempty"`
+	Template  string     `json:"template"`
 	Enabled   bool       `json:"enabled"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
