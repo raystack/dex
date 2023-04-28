@@ -13,13 +13,15 @@ import (
 
 // serverConfig contains the application configuration.
 type serverConfig struct {
-	Log       logger.LogConfig `mapstructure:"log"`
-	Service   serveConfig      `mapstructure:"service"`
-	Shield    shieldConfig     `mapstructure:"shield"`
-	Entropy   entropyConfig    `mapstructure:"entropy"`
-	Siren     sirenConfig      `mapstructure:"siren"`
-	Telemetry telemetry.Config `mapstructure:"telemetry"`
-	Odin      odinConfig       `mapstructure:"odin"`
+	Log         logger.LogConfig `mapstructure:"log"`
+	Service     serveConfig      `mapstructure:"service"`
+	Shield      shieldConfig     `mapstructure:"shield"`
+	Entropy     entropyConfig    `mapstructure:"entropy"`
+	Siren       sirenConfig      `mapstructure:"siren"`
+	Telemetry   telemetry.Config `mapstructure:"telemetry"`
+	Odin        odinConfig       `mapstructure:"odin"`
+	Compass     compassConfig    `mapstructure:"compass"`
+	StencilAddr string           `mapstructure:"stencil_addr"`
 }
 
 type odinConfig struct {
@@ -35,6 +37,10 @@ type entropyConfig struct {
 }
 
 type sirenConfig struct {
+	Addr string `mapstructure:"addr"`
+}
+
+type compassConfig struct {
 	Addr string `mapstructure:"addr"`
 }
 

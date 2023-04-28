@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	"buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/compass/v1beta1/compassv1beta1grpc"
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
 	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	sirenv1beta1 "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
@@ -88,10 +89,17 @@ func runServer(baseCtx context.Context, nrApp *newrelic.Application, zapLog *zap
 		return err
 	}
 
+	compassConn, err := grpc.Dial(cfg.Compass.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+
 	return server.Serve(ctx, cfg.Service.Addr(), nrApp, zapLog,
 		shieldv1beta1.NewShieldServiceClient(shieldConn),
 		entropyv1beta1.NewResourceServiceClient(entropyConn),
 		sirenv1beta1.NewSirenServiceClient(sirenConn),
+		compassv1beta1grpc.NewCompassServiceClient(compassConn),
 		cfg.Odin.Addr,
+		cfg.StencilAddr,
 	)
 }

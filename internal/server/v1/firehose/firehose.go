@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/compass/v1beta1/compassv1beta1grpc"
 	entropyv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/entropy/v1beta1/entropyv1beta1grpc"
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	sirenv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/goto/dex/compass"
 	"github.com/goto/dex/generated/models"
 	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
 	"github.com/goto/dex/pkg/errors"
@@ -26,13 +28,17 @@ var errFirehoseNotFound = errors.ErrNotFound.WithMsgf("no firehose with given UR
 func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
 	shield shieldv1beta1rpc.ShieldServiceClient,
 	alertSvc *alertsv1.Service,
+	compassClient compassv1beta1grpc.CompassServiceClient,
 	odinAddr string,
+	stencilHost string,
 ) func(chi.Router) {
 	api := &firehoseAPI{
-		Shield:   shield,
-		Entropy:  entropy,
-		AlertSvc: alertSvc,
-		OdinAddr: odinAddr,
+		Shield:      shield,
+		Entropy:     entropy,
+		AlertSvc:    alertSvc,
+		Compass:     compassClient,
+		OdinAddr:    odinAddr,
+		StencilAddr: stencilHost,
 	}
 
 	return func(r chi.Router) {
@@ -60,13 +66,14 @@ func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
 }
 
 type firehoseAPI struct {
-	Entropy entropyv1beta1rpc.ResourceServiceClient
-	Shield  shieldv1beta1rpc.ShieldServiceClient
-	Siren   sirenv1beta1rpc.SirenServiceClient
-
+	Compass  compassv1beta1grpc.CompassServiceClient
+	Entropy  entropyv1beta1rpc.ResourceServiceClient
+	Shield   shieldv1beta1rpc.ShieldServiceClient
+	Siren    sirenv1beta1rpc.SirenServiceClient
 	AlertSvc *alertsv1.Service
 
-	OdinAddr string
+	OdinAddr    string
+	StencilAddr string
 }
 
 func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*models.Firehose, error) {
@@ -82,6 +89,14 @@ func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*m
 	}
 
 	return mapEntropyResourceToFirehose(resp.GetResource())
+}
+
+func (api *firehoseAPI) makeStencilURL(sc compass.Schema) string {
+	// Example: https://stencil-host.com/v1beta1/namespaces/{{namespace}}/schemas/{{schema}}
+	finalURL := strings.TrimSpace(api.StencilAddr)
+	finalURL = strings.ReplaceAll(finalURL, "{{schema}}", sc.SchemaID)
+	finalURL = strings.ReplaceAll(finalURL, "{{namespace}}", sc.NamespaceID)
+	return finalURL
 }
 
 func jsonDiff(left, right []byte) (string, error) {

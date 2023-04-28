@@ -22,6 +22,8 @@ const kubeClusterDependencyKey = "kube_cluster"
 // Refer https://odpf.github.io/firehose/advance/generic/
 const (
 	confSinkType              = "SINK_TYPE"
+	confStencilURL            = "SCHEMA_REGISTRY_STENCIL_URLS"
+	confProtoClassName        = "INPUT_SCHEMA_PROTO_CLASS"
 	confSourceKafkaBrokerAddr = "SOURCE_KAFKA_BROKERS"
 	confSourceKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
 )

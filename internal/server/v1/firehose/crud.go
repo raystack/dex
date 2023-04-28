@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/goto/dex/compass"
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/reqctx"
 	"github.com/goto/dex/internal/server/utils"
@@ -83,6 +84,22 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	def.Configs.EnvVars[confSourceKafkaBrokerAddr] = sourceKafkaBroker
+
+	// resolve stencil URL.
+	schema, err := compass.GetTopicSchema(
+		r.Context(),
+		api.Compass,
+		reqCtx.UserID,
+		prj.GetSlug(),
+		streamURN,
+		def.Configs.EnvVars[confTopicName],
+		strings.Split(def.Configs.EnvVars[confProtoClassName], ","),
+	)
+	if err != nil {
+		utils.WriteErr(w, err)
+		return
+	}
+	def.Configs.EnvVars[confStencilURL] = api.makeStencilURL(*schema)
 
 	res, err := mapFirehoseEntropyResource(def, prj)
 	if err != nil {
