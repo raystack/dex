@@ -146,9 +146,9 @@ func (api *firehoseAPI) executeAction(ctx context.Context, urn, actionType strin
 	if err != nil {
 		st := status.Convert(err)
 		if st.Code() == codes.InvalidArgument {
-			return nil, errors.ErrInvalid.WithCausef(st.Message())
+			return nil, errors.ErrInvalid.WithMsgf(st.Message())
 		} else if st.Code() == codes.NotFound {
-			return nil, errFirehoseNotFound.WithCausef(st.Message())
+			return nil, errFirehoseNotFound.WithMsgf(st.Message())
 		}
 		return nil, err
 	}
