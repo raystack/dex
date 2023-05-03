@@ -2,6 +2,7 @@ package firehose
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/compass/v1beta1/compassv1beta1grpc"
@@ -93,9 +94,8 @@ func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*m
 
 func (api *firehoseAPI) makeStencilURL(sc compass.Schema) string {
 	// Example: https://stencil-host.com/v1beta1/namespaces/{{namespace}}/schemas/{{schema}}
-	finalURL := strings.TrimSpace(api.StencilAddr)
-	finalURL = strings.ReplaceAll(finalURL, "{{schema}}", sc.SchemaID)
-	finalURL = strings.ReplaceAll(finalURL, "{{namespace}}", sc.NamespaceID)
+	schemaPath := fmt.Sprintf("/v1beta1/namespaces/%s/schemas/%s", sc.NamespaceID, sc.SchemaID)
+	finalURL := strings.TrimSuffix(strings.TrimSpace(api.StencilAddr), "/") + schemaPath
 	return finalURL
 }
 

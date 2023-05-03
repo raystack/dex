@@ -85,21 +85,23 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	def.Configs.EnvVars[confSourceKafkaBrokerAddr] = sourceKafkaBroker
 
-	// resolve stencil URL.
-	schema, err := compass.GetTopicSchema(
-		r.Context(),
-		api.Compass,
-		reqCtx.UserID,
-		prj.GetSlug(),
-		streamURN,
-		def.Configs.EnvVars[confTopicName],
-		strings.Split(def.Configs.EnvVars[confProtoClassName], ","),
-	)
-	if err != nil {
-		utils.WriteErr(w, err)
-		return
+	if def.Configs.EnvVars[confStencilURL] == "" {
+		// resolve stencil URL.
+		schema, err := compass.GetTopicSchema(
+			r.Context(),
+			api.Compass,
+			reqCtx.UserID,
+			prj.GetSlug(),
+			streamURN,
+			def.Configs.EnvVars[confTopicName],
+			strings.Split(def.Configs.EnvVars[confProtoClassName], ","),
+		)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+		def.Configs.EnvVars[confStencilURL] = api.makeStencilURL(*schema)
 	}
-	def.Configs.EnvVars[confStencilURL] = api.makeStencilURL(*schema)
 
 	res, err := mapFirehoseEntropyResource(def, prj)
 	if err != nil {
