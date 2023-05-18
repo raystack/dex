@@ -41,7 +41,7 @@ type FirehoseConfig struct {
 
 	// stop time
 	// Format: date-time
-	StopTime strfmt.DateTime `json:"stop_time,omitempty"`
+	StopTime *strfmt.DateTime `json:"stop_time,omitempty"`
 
 	// stopped
 	Stopped bool `json:"stopped,omitempty"`

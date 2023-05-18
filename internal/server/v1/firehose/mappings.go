@@ -23,6 +23,7 @@ const kubeClusterDependencyKey = "kube_cluster"
 const (
 	confSinkType              = "SINK_TYPE"
 	confStencilURL            = "SCHEMA_REGISTRY_STENCIL_URLS"
+	confStreamName            = "STREAM_NAME"
 	confProtoClassName        = "INPUT_SCHEMA_PROTO_CLASS"
 	confSourceKafkaBrokerAddr = "SOURCE_KAFKA_BROKERS"
 	confSourceKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
@@ -66,7 +67,8 @@ func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project)
 
 func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	var stopTime *time.Time
-	if t := time.Time(cfg.StopTime); !t.IsZero() {
+	if cfg.StopTime != nil {
+		t := time.Time(*cfg.StopTime)
 		stopTime = &t
 	}
 
@@ -112,9 +114,10 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (*models.Firehos
 		return nil, err
 	}
 
-	var stopTime strfmt.DateTime
+	var stopTime *strfmt.DateTime
 	if modConf.StopTime != nil {
-		stopTime = strfmt.DateTime(*modConf.StopTime)
+		dt := strfmt.DateTime(*modConf.StopTime)
+		stopTime = &dt
 	}
 
 	var kubeCluster string
@@ -126,7 +129,6 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (*models.Firehos
 
 	streamName := res.Labels[labelStream]
 	if streamName == "" {
-		const confStreamName = "STREAM_NAME"
 		streamName = modConf.EnvVariables[confStreamName]
 	}
 

@@ -53,6 +53,8 @@ type ClientService interface {
 
 	ListProjects(params *ListProjectsParams, opts ...ClientOption) (*ListProjectsOK, error)
 
+	PartialUpdateFirehose(params *PartialUpdateFirehoseParams, opts ...ClientOption) (*PartialUpdateFirehoseOK, error)
+
 	ResetOffset(params *ResetOffsetParams, opts ...ClientOption) (*ResetOffsetOK, error)
 
 	ScaleFirehose(params *ScaleFirehoseParams, opts ...ClientOption) (*ScaleFirehoseOK, error)
@@ -507,6 +509,46 @@ func (a *Client) ListProjects(params *ListProjectsParams, opts ...ClientOption) 
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for listProjects: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+PartialUpdateFirehose updates firehose configurations partially
+
+Update firehose configurations partially.
+*/
+func (a *Client) PartialUpdateFirehose(params *PartialUpdateFirehoseParams, opts ...ClientOption) (*PartialUpdateFirehoseOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPartialUpdateFirehoseParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "partialUpdateFirehose",
+		Method:             "PATCH",
+		PathPattern:        "/dex/firehoses/{firehoseUrn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PartialUpdateFirehoseReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*PartialUpdateFirehoseOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for partialUpdateFirehose: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

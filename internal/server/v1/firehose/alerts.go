@@ -13,8 +13,10 @@ import (
 	"github.com/goto/dex/pkg/errors"
 )
 
-const firehoseOutputReleaseNameKey = "release_name"
-const resourceTag = "firehose"
+const (
+	firehoseOutputReleaseNameKey = "release_name"
+	resourceTag                  = "firehose"
+)
 
 var suppliedAlertVariableNames = []string{"name", "team", "entity"}
 

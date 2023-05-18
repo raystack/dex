@@ -8,10 +8,9 @@ schemes:
 swagger: "2.0"
 
 info:
-  title:  dex_api
+  title: dex_api
   description: DEX API specifications.
   version: 0.1.0
-
 
 paths:
   /dex/projects:
@@ -205,6 +204,40 @@ paths:
           description: internal error
           schema:
             $ref: "#/definitions/ErrorResponse"
+    patch:
+      summary: Update firehose configurations partially.
+      description: Update firehose configurations partially.
+      operationId: partialUpdateFirehose
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+                example: "This firehose consumes from booking events and ingests to redis"
+              configs:
+                type: object
+                $ref: "#/definitions/FirehosePartialConfig"
+      responses:
+        "200":
+          description: Found firehose with given URN
+          schema:
+            $ref: "#/definitions/Firehose"
+        "400":
+          description: Update request is not valid.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Firehose with given URN was not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: internal error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   /dex/firehoses/{firehoseUrn}/reset:
     parameters:
       - in: path
@@ -307,7 +340,7 @@ paths:
           name: body
           schema:
             type: object
-            properties: {}
+            properties: { }
       responses:
         "200":
           description: Successfully applied update.
@@ -343,7 +376,7 @@ paths:
             type: object
             required:
               - "replicas"
-            properties: {}
+            properties: { }
       responses:
         "200":
           description: Successfully applied update.
@@ -708,6 +741,37 @@ definitions:
         additionalProperties:
           type: string
 
+  FirehosePartialConfig:
+    type: object
+    properties:
+      stopped:
+        type: boolean
+        x-nullable: true
+        default: null
+        description: Set to true/false to stop or start the firehose.
+      image:
+        type: string
+        example: "gotocompany/firehose:0.1.0"
+        description: Set to non-empty string to update
+      stream_name:
+        type: string
+        description: Set to non-empty string to update
+      replicas:
+        type: number
+        description: Set to a value greater than 0 to update.
+      stop_time:
+        type: string
+        x-nullable: true
+        description: |
+          - Omit this field to not update.
+          - Setting it to a non-empty string to update.
+          - Set it to empty string to remove the current stop_time.
+      env_vars:
+        type: object
+        description: If specified, it will be merged with the current configs.
+        additionalProperties:
+          type: string
+
   FirehoseConfig:
     type: object
     required:
@@ -732,6 +796,7 @@ definitions:
       stop_time:
         type: string
         format: date-time
+        x-nullable: true
       deployment_id:
         type: string
       env_vars:
@@ -792,7 +857,7 @@ definitions:
   AlertPolicy:
     type: object
     properties:
-      resource:   # siren calls it namespace, since on platform side we will use it for resources
+      resource: # siren calls it namespace, since on platform side we will use it for resources
         type: string
         readOnly: true
       rules:

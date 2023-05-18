@@ -48,6 +48,7 @@ func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
 		r.Post("/", api.handleCreate)
 		r.Get("/{urn}", api.handleGet)
 		r.Put("/{urn}", api.handleUpdate)
+		r.Patch("/{urn}", api.handlePartialUpdate)
 		r.Delete("/{urn}", api.handleDelete)
 		r.Get("/{urn}/logs", api.handleStreamLog)
 		r.Get("/{urn}/history", api.handleGetHistory)

@@ -27,7 +27,8 @@ type Schema struct {
 }
 
 func GetTopicSchema(ctx context.Context, cl compassv1beta1grpc.CompassServiceClient,
-	userID, projectSlug, stream, topic string, protoNames []string) (*Schema, error) {
+	userID, projectSlug, stream, topic string, protoNames []string,
+) (*Schema, error) {
 	md := metadata.New(map[string]string{"X-Shield-User-Id": userID})
 
 	res, err := cl.GetAllAssets(
