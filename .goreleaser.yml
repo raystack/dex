@@ -2,7 +2,6 @@ project_name: dex
 
 release:
   prerelease: auto
-  draft: true
 
 builds:
   - main: ./main.go
