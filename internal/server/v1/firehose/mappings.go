@@ -27,6 +27,7 @@ const (
 	confProtoClassName        = "INPUT_SCHEMA_PROTO_CLASS"
 	confSourceKafkaBrokerAddr = "SOURCE_KAFKA_BROKERS"
 	confSourceKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
+	confStencilRegistryToggle = "SCHEMA_REGISTRY_STENCIL_ENABLE"
 )
 
 const (

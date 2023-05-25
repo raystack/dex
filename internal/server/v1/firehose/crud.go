@@ -86,6 +86,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	def.Configs.EnvVars[confSourceKafkaBrokerAddr] = sourceKafkaBroker
 
+	def.Configs.EnvVars[confStencilRegistryToggle] = "true"
 	if def.Configs.EnvVars[confStencilURL] == "" {
 		// resolve stencil URL.
 		schema, err := compass.GetTopicSchema(
