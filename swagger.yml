@@ -946,8 +946,6 @@ definitions:
     properties:
       diff:
         type: object
-      labels:
-        type: object
       reason:
         type: string
       updated_at:

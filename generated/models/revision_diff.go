@@ -22,9 +22,6 @@ type RevisionDiff struct {
 	// diff
 	Diff interface{} `json:"diff,omitempty"`
 
-	// labels
-	Labels interface{} `json:"labels,omitempty"`
-
 	// reason
 	Reason string `json:"reason,omitempty"`
 
