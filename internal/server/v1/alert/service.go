@@ -136,7 +136,7 @@ func (svc *Service) GetAlertPolicy(ctx context.Context, projectSlug, resource, r
 	return alertPolicy, nil
 }
 
-func (svc *Service) ListAlerts(ctx context.Context, projectSlug string, resource string) ([]Alert, error) {
+func (svc *Service) ListAlerts(ctx context.Context, projectSlug, resource string) ([]Alert, error) {
 	ns, err := svc.getNamespaceForProject(ctx, projectSlug)
 	if err != nil {
 		return nil, err

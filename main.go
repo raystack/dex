@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -33,13 +33,13 @@ func execute(ctx context.Context) {
 	if err != nil {
 		if cmdx.IsCmdErr(err) {
 			if !strings.HasSuffix(err.Error(), "\n") {
-				fmt.Println()
+				log.Println()
 			}
-			fmt.Println(cmd.UsageString())
+			log.Println(cmd.UsageString())
 			os.Exit(exitUsageErr)
 		}
 
-		fmt.Println(term.Redf("Error: %v", err))
+		log.Println(term.Redf("Error: %v", err))
 		os.Exit(exitGeneralErr)
 		return
 	}

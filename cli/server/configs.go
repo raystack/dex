@@ -21,6 +21,7 @@ type serverConfig struct {
 	Telemetry   telemetry.Config `mapstructure:"telemetry"`
 	Odin        odinConfig       `mapstructure:"odin"`
 	Compass     compassConfig    `mapstructure:"compass"`
+	Optimus     optimusConfig    `mapstructure:"optimus"`
 	StencilAddr string           `mapstructure:"stencil_addr"`
 }
 
@@ -41,6 +42,10 @@ type sirenConfig struct {
 }
 
 type compassConfig struct {
+	Addr string `mapstructure:"addr"`
+}
+
+type optimusConfig struct {
 	Addr string `mapstructure:"addr"`
 }
 

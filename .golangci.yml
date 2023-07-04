@@ -1,5 +1,5 @@
 run:
-  go: "1.17"
+  go: '1.17'
   timeout: 10m
   skip-files:
     - expt/main.go
@@ -10,7 +10,9 @@ output:
 linters:
   enable-all: true
   disable:
-    - decorder
+    - gomnd
+    - depguard
+    - godot
     - exhaustruct
     - cyclop
     - exhaustive
@@ -40,18 +42,8 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
-    - forbidigo
-    - gomnd
 
 linters-settings:
-  decorder:
-    dec-order:
-      - type
-      - const
-      - var
-      - func
-    disable-dec-order-check: false
-    disable-init-func-first-check: false
   dupl:
     threshold: 100
   errcheck: # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
@@ -60,7 +52,7 @@ linters-settings:
     min-len: 2 # Minimal length of string constant.
     min-occurrences: 2 # Minimum occurrences of constant string count to trigger issue.
     ignore-tests: true
-    match-constant: false # Look for existing constants matching the values.
+    match-constant: false  # Look for existing constants matching the values.
     numbers: true # Search also for duplicated numbers.
     min: 2 # Minimum value, only works with goconst.numbers
     max: 2 # Maximum value, only works with goconst.numbers
@@ -95,17 +87,17 @@ linters-settings:
       - name: var-naming
   gomnd:
     ignored-numbers:
-      - "0o600"
-      - "0o644"
-      - "0o655"
-      - "0o666"
-      - "0o770"
-      - "0o755"
-      - "0o765"
-      - "0o777"
+      - '0o600'
+      - '0o644'
+      - '0o655'
+      - '0o666'
+      - '0o770'
+      - '0o755'
+      - '0o765'
+      - '0o777'
     ignored-functions:
-      - "args.Error"
-      - "strconv.ParseInt"
+      - 'args.Error'
+      - 'strconv.ParseInt'
   gosimple:
     go: "1.17"
     checks:
@@ -142,6 +134,7 @@ issues:
       linters:
         - gocritic
         - dupl
+        - goerr113
     - path: cli
       linters:
         - forbidigo

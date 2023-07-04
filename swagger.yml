@@ -632,7 +632,35 @@ paths:
           description: Internal Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
+  /dex/optimus/projects/{project}/jobs/{job}:
+    parameters:
+      - in: path
+        name: project
+        type: string
+        required: true
+        description: Unique identifier of the project.
+      - in: path
+        name: job
+        type: string
+        required: true
+        description: Optimus job's name.
+    get:
+      summary: Get Optimus Job Specification.
+      description: Get list of kubernetes in this project.
+      operationId: getOptimusJob
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties: 
+              job: 
+                type: object
+                description: Successful Operation. Schema can be checked on https://github.com/goto/optimus/blob/v0.8.2/protos/gotocompany/optimus/core/v1beta1/job_spec.swagger.json#L901.
+        "500":
+          description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 definitions:
   ErrorResponse:
     type: object
