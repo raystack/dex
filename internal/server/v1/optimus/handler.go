@@ -20,13 +20,11 @@ func (h *Handler) findJob(w http.ResponseWriter, r *http.Request) {
 	jobName := chi.URLParam(r, "job_name")
 	projectName := chi.URLParam(r, "project_name")
 
-	job, err := h.service.FindJobSpec(r.Context(), jobName, projectName)
+	jobSpecResp, err := h.service.FindJobSpec(r.Context(), jobName, projectName)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]any{
-		"job": job,
-	})
+	utils.WriteJSON(w, http.StatusOK, jobSpecResp)
 }

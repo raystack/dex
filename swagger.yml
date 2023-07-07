@@ -653,10 +653,7 @@ paths:
           description: Success
           schema:
             type: object
-            properties: 
-              job: 
-                type: object
-                description: Successful Operation. Schema can be checked on https://github.com/goto/optimus/blob/v0.8.2/protos/gotocompany/optimus/core/v1beta1/job_spec.swagger.json#L901.
+            description: Successful Operation. Schema can be checked on https://github.com/goto/optimus/blob/v0.8.2/protos/gotocompany/optimus/core/v1beta1/job_spec.swagger.json#L901.
         "500":
           description: Internal Error
           schema:

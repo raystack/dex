@@ -26,11 +26,15 @@ func TestRoutesFindJobSpec(t *testing.T) {
 	path := fmt.Sprintf("/projects/%s/jobs/%s", projectName, jobName)
 
 	t.Run("should return 200 with job spec", func(t *testing.T) {
-		jobSpec := &optimusv1beta1.JobSpecification{
-			Version:  1,
-			Name:     "sample-job",
-			Owner:    "goto",
-			TaskName: "sample-task-name",
+		jobSpecRes := &optimusv1beta1.JobSpecificationResponse{
+			ProjectName:   "test-project",
+			NamespaceName: "test-namespcace",
+			Job: &optimusv1beta1.JobSpecification{
+				Version:  1,
+				Name:     "sample-job",
+				Owner:    "goto",
+				TaskName: "sample-task-name",
+			},
 		}
 
 		client := new(mocks.JobSpecificationServiceClient)
@@ -39,7 +43,7 @@ func TestRoutesFindJobSpec(t *testing.T) {
 			JobName:     jobName,
 		}).Return(&optimusv1beta1.GetJobSpecificationsResponse{
 			JobSpecificationResponses: []*optimusv1beta1.JobSpecificationResponse{
-				{Job: jobSpec},
+				jobSpecRes,
 			},
 		}, nil)
 		defer client.AssertExpectations(t)
@@ -53,9 +57,7 @@ func TestRoutesFindJobSpec(t *testing.T) {
 		// assert
 		assert.Equal(t, http.StatusOK, response.Code)
 		resultJSON := response.Body.Bytes()
-		expectedJSON, err := json.Marshal(map[string]interface{}{
-			"job": jobSpec,
-		})
+		expectedJSON, err := json.Marshal(jobSpecRes)
 		require.NoError(t, err)
 		assert.JSONEq(t, string(expectedJSON), string(resultJSON))
 	})

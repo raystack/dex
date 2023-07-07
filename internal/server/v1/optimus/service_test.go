@@ -19,11 +19,15 @@ func TestServiceFindJobSpec(t *testing.T) {
 	projectName := "sample-project"
 
 	t.Run("should return job spec using job name and project name from argument", func(t *testing.T) {
-		jobSpec := &optimusv1beta1.JobSpecification{
-			Version:  1,
-			Name:     "sample-job",
-			Owner:    "goto",
-			TaskName: "sample-task-name",
+		jobSpecRes := &optimusv1beta1.JobSpecificationResponse{
+			ProjectName:   "test-project",
+			NamespaceName: "test-namespcace",
+			Job: &optimusv1beta1.JobSpecification{
+				Version:  1,
+				Name:     "sample-job",
+				Owner:    "goto",
+				TaskName: "sample-task-name",
+			},
 		}
 
 		client := new(mocks.JobSpecificationServiceClient)
@@ -32,7 +36,7 @@ func TestServiceFindJobSpec(t *testing.T) {
 			JobName:     jobName,
 		}).Return(&optimusv1beta1.GetJobSpecificationsResponse{
 			JobSpecificationResponses: []*optimusv1beta1.JobSpecificationResponse{
-				{Job: jobSpec},
+				jobSpecRes,
 			},
 		}, nil)
 		defer client.AssertExpectations(t)
@@ -40,7 +44,7 @@ func TestServiceFindJobSpec(t *testing.T) {
 		service := optimus.NewService(client)
 		job, err := service.FindJobSpec(context.TODO(), jobName, projectName)
 		assert.NoError(t, err)
-		assert.Equal(t, jobSpec, job)
+		assert.Equal(t, jobSpecRes, job)
 	})
 
 	t.Run("should return not found, if job could not be found", func(t *testing.T) {
