@@ -27,7 +27,7 @@ const (
 func (api *firehoseAPI) handleReset(w http.ResponseWriter, r *http.Request) {
 	var reqBody struct {
 		To       string     `json:"to"`
-		DateTime *time.Time `json:"date_time"`
+		DateTime *time.Time `json:"datetime"`
 	}
 
 	if err := utils.ReadJSON(r, &reqBody); err != nil {

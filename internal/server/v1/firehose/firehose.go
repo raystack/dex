@@ -2,6 +2,7 @@ package firehose
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -11,8 +12,7 @@ import (
 	sirenv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	"github.com/go-chi/chi/v5"
-	"github.com/yudai/gojsondiff"
-	"github.com/yudai/gojsondiff/formatter"
+	"github.com/wI2L/jsondiff"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -100,19 +100,13 @@ func (api *firehoseAPI) makeStencilURL(sc compass.Schema) string {
 	return finalURL
 }
 
-func jsonDiff(left, right []byte) (string, error) {
-	differ := gojsondiff.New()
-	compare, err := differ.Compare(left, right)
+func jsonDiff(left, right []byte) ([]byte, error) {
+	patch, err := jsondiff.CompareJSON(left, right)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	diffString, err := formatter.NewDeltaFormatter().Format(compare)
-	if err != nil {
-		return "", err
-	}
-
-	return diffString, nil
+	return json.Marshal(patch)
 }
 
 // Reference: https://github.com/orgs/odpf/discussions/12
