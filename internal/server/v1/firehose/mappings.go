@@ -68,7 +68,10 @@ func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project)
 
 func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	var stopTime *time.Time
-	if cfg.StopTime != nil {
+	if strings.ToUpper(cfg.EnvVars[confSinkType]) == "LOG" {
+		t := time.Now().UTC().Add(logSinkTTL)
+		stopTime = &t
+	} else if cfg.StopTime != nil {
 		t := time.Time(*cfg.StopTime)
 		stopTime = &t
 	}
