@@ -86,7 +86,7 @@ func (api *firehoseAPI) handleStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := struct {
-		StopTime *time.Time
+		StopTime *time.Time `json:"stop_time"`
 	}{}
 
 	// for LOG sinkType, updating stop_time
