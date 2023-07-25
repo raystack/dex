@@ -52,10 +52,8 @@ test-coverage: test
 	@echo "Generating coverage report..."
 	@go tool cover -html=${COVERAGE_DIR}/coverage.out
 
-build: clean
-	@mkdir -p ${BUILD_DIR}
-	@echo "Running build for '${VERSION}' in '${BUILD_DIR}/'..."
-	@CGO_ENABLED=0 go build -ldflags '-X "${NAME}/pkg/version.Version=${VERSION}" -X "${NAME}/pkg/version.Commit=${COMMIT}" -X "${NAME}/pkg/version.BuildTime=${BUILD_TIME}"' -o ${BUILD_DIR}/${EXE}
+build:
+	@goreleaser build --snapshot --rm-dist --single-target
 
 download:
 	@go mod download

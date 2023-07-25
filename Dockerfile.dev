@@ -1,0 +1,19 @@
+FROM goreleaser/goreleaser:v1.19.2 as base
+WORKDIR /build/
+COPY . .
+RUN ["goreleaser", "build", "--snapshot", "--rm-dist", "--single-target"]
+
+FROM alpine:3.13
+
+COPY --from=base /build/dist/dex_linux_amd64_v1/dex /usr/bin/dex
+RUN apk update
+RUN apk --no-cache add ca-certificates bash
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.5 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe
+
+# glibc compatibility library, since go binaries 
+# don't work well with musl libc that alpine uses
+RUN apk add libc6-compat
+
+CMD ["dex", "server", "start"]
