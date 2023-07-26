@@ -61,6 +61,7 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("project must be specified"))
 		return
 	}
+	def.Configs.StopTime = sanitizeFirehoseStopTime(def.Configs.StopTime)
 
 	def.Labels = cloneAndMergeMaps(def.Labels, map[string]string{
 		labelTitle:       *def.Title,
@@ -253,6 +254,7 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, err)
 		return
 	}
+	updates.Configs.StopTime = sanitizeFirehoseStopTime(updates.Configs.StopTime)
 
 	existingFirehose, err := api.getFirehose(r.Context(), urn)
 	if err != nil {
@@ -331,17 +333,17 @@ func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Reque
 	urn := chi.URLParam(r, pathParamURN)
 	reqCtx := reqctx.From(r.Context())
 
-	existing, err := api.getFirehose(r.Context(), urn)
-	if err != nil {
+	var req struct {
+		Description string                        `json:"description"`
+		Configs     *models.FirehosePartialConfig `json:"configs"`
+	}
+	if err := utils.ReadJSON(r, &req); err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	var req struct {
-		Description string                       `json:"description"`
-		Configs     models.FirehosePartialConfig `json:"configs"`
-	}
-	if err := utils.ReadJSON(r, &req); err != nil {
+	existing, err := api.getFirehose(r.Context(), urn)
+	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
