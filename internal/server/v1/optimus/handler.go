@@ -28,3 +28,15 @@ func (h *Handler) findJob(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusOK, jobSpecResp)
 }
+
+func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
+	projectName := chi.URLParam(r, "project_name")
+
+	listResp, err := h.service.ListJobs(r.Context(), projectName)
+	if err != nil {
+		utils.WriteErr(w, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, listResp)
+}

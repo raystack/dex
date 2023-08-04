@@ -35,3 +35,15 @@ func (svc *Service) FindJobSpec(ctx context.Context, jobName, projectName string
 
 	return list[0], nil
 }
+
+func (svc *Service) ListJobs(ctx context.Context, projectName string) (*optimusv1beta1.ListJobSpecificationResponse, error) {
+	res, err := svc.client.ListJobSpecification(ctx, &optimusv1beta1.ListJobSpecificationRequest{
+		ProjectName:   projectName,
+		NamespaceName: "smoke_test",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
