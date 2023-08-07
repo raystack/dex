@@ -52,12 +52,10 @@ func NewGetFirehoseHistoryParamsWithHTTPClient(client *http.Client) *GetFirehose
 	}
 }
 
-/*
-GetFirehoseHistoryParams contains all the parameters to send to the API endpoint
+/* GetFirehoseHistoryParams contains all the parameters to send to the API endpoint
+   for the get firehose history operation.
 
-	for the get firehose history operation.
-
-	Typically these are written to a http.Request.
+   Typically these are written to a http.Request.
 */
 type GetFirehoseHistoryParams struct {
 

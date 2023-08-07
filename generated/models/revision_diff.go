@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -20,9 +21,11 @@ import (
 type RevisionDiff struct {
 
 	// diff
+	// Example: {"configs":{"replicas":[3,2]},"labels":{"title":["old-title","new-title"]}}
 	Diff interface{} `json:"diff,omitempty"`
 
 	// reason
+	// Enum: [action:create action:update action:reset action:start action:stop action:upgrade]
 	Reason string `json:"reason,omitempty"`
 
 	// updated at
@@ -30,11 +33,19 @@ type RevisionDiff struct {
 	// Read Only: true
 	// Format: date-time
 	UpdatedAt strfmt.DateTime `json:"updated_at,omitempty"`
+
+	// updated by
+	// Example: john.doe@example.com
+	UpdatedBy string `json:"updated_by,omitempty"`
 }
 
 // Validate validates this revision diff
 func (m *RevisionDiff) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateReason(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateUpdatedAt(formats); err != nil {
 		res = append(res, err)
@@ -43,6 +54,60 @@ func (m *RevisionDiff) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var revisionDiffTypeReasonPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["action:create","action:update","action:reset","action:start","action:stop","action:upgrade"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		revisionDiffTypeReasonPropEnum = append(revisionDiffTypeReasonPropEnum, v)
+	}
+}
+
+const (
+
+	// RevisionDiffReasonActionCreate captures enum value "action:create"
+	RevisionDiffReasonActionCreate string = "action:create"
+
+	// RevisionDiffReasonActionUpdate captures enum value "action:update"
+	RevisionDiffReasonActionUpdate string = "action:update"
+
+	// RevisionDiffReasonActionReset captures enum value "action:reset"
+	RevisionDiffReasonActionReset string = "action:reset"
+
+	// RevisionDiffReasonActionStart captures enum value "action:start"
+	RevisionDiffReasonActionStart string = "action:start"
+
+	// RevisionDiffReasonActionStop captures enum value "action:stop"
+	RevisionDiffReasonActionStop string = "action:stop"
+
+	// RevisionDiffReasonActionUpgrade captures enum value "action:upgrade"
+	RevisionDiffReasonActionUpgrade string = "action:upgrade"
+)
+
+// prop value enum
+func (m *RevisionDiff) validateReasonEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, revisionDiffTypeReasonPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RevisionDiff) validateReason(formats strfmt.Registry) error {
+	if swag.IsZero(m.Reason) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateReasonEnum("reason", "body", m.Reason); err != nil {
+		return err
+	}
+
 	return nil
 }
 

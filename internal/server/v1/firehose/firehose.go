@@ -2,8 +2,6 @@ package firehose
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"strings"
 
 	"buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/compass/v1beta1/compassv1beta1grpc"
@@ -11,12 +9,12 @@ import (
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	sirenv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
+	"github.com/StewartJingga/gojsondiff"
+	"github.com/StewartJingga/gojsondiff/formatter"
 	"github.com/go-chi/chi/v5"
-	"github.com/wI2L/jsondiff"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/goto/dex/compass"
 	"github.com/goto/dex/generated/models"
 	alertsv1 "github.com/goto/dex/internal/server/v1/alert"
 	"github.com/goto/dex/pkg/errors"
@@ -54,8 +52,8 @@ func Routes(entropy entropyv1beta1rpc.ResourceServiceClient,
 		r.Get("/{urn}/history", api.handleGetHistory)
 
 		// Firehose Actions
-		r.Post("/{urn}/reset", api.handleReset)
-		r.Post("/{urn}/scale", api.handleScale)
+		r.Put("/{urn}/reset", api.handleReset)
+		r.Put("/{urn}/scale", api.handleScale)
 		r.Put("/{urn}/start", api.handleStart)
 		r.Put("/{urn}/stop", api.handleStop)
 		r.Put("/{urn}/upgrade", api.handleUpgrade)
@@ -78,35 +76,37 @@ type firehoseAPI struct {
 	StencilAddr string
 }
 
-func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (*models.Firehose, error) {
+func (api *firehoseAPI) getFirehose(ctx context.Context, firehoseURN string) (models.Firehose, error) {
+	var firehose models.Firehose
 	resp, err := api.Entropy.GetResource(ctx, &entropyv1beta1.GetResourceRequest{Urn: firehoseURN})
 	if err != nil {
 		st := status.Convert(err)
 		if st.Code() == codes.NotFound {
-			return nil, errFirehoseNotFound.WithCausef(st.Message())
+			return firehose, errFirehoseNotFound.WithCausef(st.Message())
 		}
-		return nil, err
+		return firehose, err
 	} else if resp.GetResource().GetKind() != kindFirehose {
-		return nil, errFirehoseNotFound
+		return firehose, errFirehoseNotFound
 	}
 
 	return mapEntropyResourceToFirehose(resp.GetResource())
 }
 
-func (api *firehoseAPI) makeStencilURL(sc compass.Schema) string {
-	// Example: https://stencil-host.com/v1beta1/namespaces/{{namespace}}/schemas/{{schema}}
-	schemaPath := fmt.Sprintf("/v1beta1/namespaces/%s/schemas/%s", sc.NamespaceID, sc.SchemaID)
-	finalURL := strings.TrimSuffix(strings.TrimSpace(api.StencilAddr), "/") + schemaPath
-	return finalURL
-}
-
-func jsonDiff(left, right []byte) ([]byte, error) {
-	patch, err := jsondiff.CompareJSON(left, right)
+func jsonDiff(prev, current []byte) (map[string]interface{}, error) {
+	differ := &gojsondiff.Differ{
+		TextDiffMinimumLength: 1000,
+	}
+	diff, err := differ.Compare(prev, current)
 	if err != nil {
 		return nil, err
 	}
 
-	return json.Marshal(patch)
+	diffMap, err := formatter.NewDeltaFormatter().FormatAsJson(diff)
+	if err != nil {
+		return nil, err
+	}
+
+	return diffMap, nil
 }
 
 // Reference: https://github.com/orgs/odpf/discussions/12

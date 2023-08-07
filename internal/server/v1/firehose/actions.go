@@ -7,6 +7,8 @@ import (
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
 	"github.com/go-chi/chi/v5"
+	entropyFirehose "github.com/goto/entropy/modules/firehose"
+	entropyKafka "github.com/goto/entropy/pkg/kafka"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -25,11 +27,7 @@ const (
 )
 
 func (api *firehoseAPI) handleReset(w http.ResponseWriter, r *http.Request) {
-	var reqBody struct {
-		To       string     `json:"to"`
-		DateTime *time.Time `json:"datetime"`
-	}
-
+	var reqBody entropyKafka.ResetParams
 	if err := utils.ReadJSON(r, &reqBody); err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -54,7 +52,6 @@ func (api *firehoseAPI) handleScale(w http.ResponseWriter, r *http.Request) {
 	var reqBody struct {
 		Replicas int `json:"replicas"`
 	}
-
 	if err := utils.ReadJSON(r, &reqBody); err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -68,7 +65,10 @@ func (api *firehoseAPI) handleScale(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedFirehose, err := api.executeAction(r.Context(), existingFirehose, actionScale, reqBody)
+	params := entropyFirehose.ScaleParams{
+		Replicas: reqBody.Replicas,
+	}
+	updatedFirehose, err := api.executeAction(r.Context(), existingFirehose, actionScale, params)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -85,10 +85,7 @@ func (api *firehoseAPI) handleStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := struct {
-		StopTime *time.Time `json:"stop_time"`
-	}{}
-
+	params := entropyFirehose.StartParams{}
 	// for LOG sinkType, updating stop_time
 	if existingFirehose.Configs.EnvVars[confSinkType] == logSinkType {
 		t := time.Now().UTC().Add(logSinkTTL)
@@ -124,7 +121,7 @@ func (api *firehoseAPI) handleStop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := api.stopAlerts(r.Context(), *updatedFirehose, projectSlugFromURN(urn)); err != nil {
+	if err := api.stopAlerts(r.Context(), updatedFirehose, projectSlugFromURN(urn)); err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
@@ -155,34 +152,30 @@ func (api *firehoseAPI) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, updatedFirehose)
 }
 
-func (api *firehoseAPI) executeAction(ctx context.Context, existingFirehose *models.Firehose, actionType string, params any) (*models.Firehose, error) {
+func (api *firehoseAPI) executeAction(ctx context.Context, existingFirehose models.Firehose, actionType string, params any) (models.Firehose, error) {
 	reqCtx := reqctx.From(ctx)
 
 	paramStruct, err := utils.GoValToProtoStruct(params)
 	if err != nil {
-		return nil, err
+		return models.Firehose{}, err
 	}
-
-	labels := cloneAndMergeMaps(existingFirehose.Labels, map[string]string{
-		labelUpdatedBy: reqCtx.UserEmail,
-	})
 
 	rpcReq := &entropyv1beta1.ApplyActionRequest{
 		Urn:    existingFirehose.Urn,
 		Action: actionType,
 		Params: paramStruct,
-		Labels: labels,
+		Labels: existingFirehose.Labels,
 	}
-
-	rpcResp, err := api.Entropy.ApplyAction(ctx, rpcReq)
+	entropyCtx := api.addUserMetadata(ctx, reqCtx.UserEmail)
+	rpcResp, err := api.Entropy.ApplyAction(entropyCtx, rpcReq)
 	if err != nil {
 		st := status.Convert(err)
 		if st.Code() == codes.InvalidArgument {
-			return nil, errors.ErrInvalid.WithMsgf(st.Message())
+			return models.Firehose{}, errors.ErrInvalid.WithMsgf(st.Message())
 		} else if st.Code() == codes.NotFound {
-			return nil, errFirehoseNotFound.WithMsgf(st.Message())
+			return models.Firehose{}, errFirehoseNotFound.WithMsgf(st.Message())
 		}
-		return nil, err
+		return models.Firehose{}, err
 	}
 
 	return mapEntropyResourceToFirehose(rpcResp.GetResource())

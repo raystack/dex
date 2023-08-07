@@ -2,8 +2,10 @@ package firehose
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/goto/dex/generated/models"
@@ -14,35 +16,27 @@ import (
 )
 
 const (
-	firehoseOutputReleaseNameKey = "release_name"
-	resourceTag                  = "firehose"
+	resourceTag = "firehose"
 )
 
 var suppliedAlertVariableNames = []string{"name", "team", "entity"}
 
 func (api *firehoseAPI) handleListAlerts(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
-	prjSlug := projectSlugFromURN(urn)
 
-	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
+	firehose, err := api.getFirehose(r.Context(), urn)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	firehoseDef, err := api.getFirehose(r.Context(), urn)
+	prj, err := project.GetProject(r.Context(), firehose.Project, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	name, err := getFirehoseReleaseName(*firehoseDef)
-	if err != nil {
-		utils.WriteErr(w, err)
-		return
-	}
-
-	alerts, err := api.AlertSvc.ListAlerts(r.Context(), prj.GetSlug(), name)
+	alerts, err := api.AlertSvc.ListAlerts(r.Context(), prj.GetSlug(), urn)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -54,27 +48,20 @@ func (api *firehoseAPI) handleListAlerts(w http.ResponseWriter, r *http.Request)
 
 func (api *firehoseAPI) handleGetAlertPolicy(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
-	prjSlug := projectSlugFromURN(urn)
 
-	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
+	firehose, err := api.getFirehose(r.Context(), urn)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	firehoseDef, err := api.getFirehose(r.Context(), urn)
+	prj, err := project.GetProject(r.Context(), firehose.Project, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	releaseName, err := getFirehoseReleaseName(*firehoseDef)
-	if err != nil {
-		utils.WriteErr(w, err)
-		return
-	}
-
-	policy, err := api.AlertSvc.GetAlertPolicy(r.Context(), prj.GetSlug(), releaseName, resourceTag)
+	policy, err := api.AlertSvc.GetAlertPolicy(r.Context(), prj.GetSlug(), urn, resourceTag)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -85,48 +72,49 @@ func (api *firehoseAPI) handleGetAlertPolicy(w http.ResponseWriter, r *http.Requ
 }
 
 func (api *firehoseAPI) handleUpsertAlertPolicy(w http.ResponseWriter, r *http.Request) {
+	urn := chi.URLParam(r, pathParamURN)
+
 	var policyDef alertsv1.Policy
 	if err := utils.ReadJSON(r, &policyDef); err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
-	urn := chi.URLParam(r, pathParamURN)
-	prjSlug := projectSlugFromURN(urn)
-
-	firehoseDef, err := api.getFirehose(r.Context(), urn)
+	firehose, err := api.getFirehose(r.Context(), urn)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
+	resp, err := api.Shield.GetGroup(r.Context(), &shieldv1beta1.GetGroupRequest{
+		Id: firehose.Group.String(),
+	})
+	if err != nil {
+		utils.WriteErr(w, fmt.Errorf("could not find group: %w", err))
+		return
+	}
+	group := resp.Group
 
-	name, err := getFirehoseReleaseName(*firehoseDef)
+	prj, err := project.GetProject(r.Context(), firehose.Project, api.Shield)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
-	group := firehoseDef.Group.String()
+	projectSlug := prj.GetSlug()
 
-	prj, err := project.GetProject(r.Context(), prjSlug, api.Shield)
-	if err != nil {
-		utils.WriteErr(w, err)
-		return
-	}
-
-	entity, err := api.AlertSvc.GetProjectDataSource(r.Context(), prj.GetSlug())
+	entity, err := api.AlertSvc.GetProjectDataSource(r.Context(), projectSlug)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
 	policyDef.Rules = alertsv1.AddSuppliedVariablesFromRules(policyDef.Rules, map[string]string{
-		"team":   group,
-		"name":   name,
+		"team":   group.Slug,
+		"name":   urn,
 		"entity": entity,
 	})
-	policyDef.Resource = name
+	policyDef.Resource = urn
 
-	alertPolicy, err := api.AlertSvc.UpsertAlertPolicy(r.Context(), prj.GetSlug(), policyDef)
+	alertPolicy, err := api.AlertSvc.UpsertAlertPolicy(r.Context(), projectSlug, policyDef)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -134,39 +122,15 @@ func (api *firehoseAPI) handleUpsertAlertPolicy(w http.ResponseWriter, r *http.R
 	utils.WriteJSON(w, http.StatusOK, alertPolicy)
 }
 
-func (api *firehoseAPI) stopAlerts(ctx context.Context, firehoseDef models.Firehose, prjSlug string) error {
-	name, err := getFirehoseReleaseName(firehoseDef)
-	if err != nil {
-		return err
-	}
-
+func (api *firehoseAPI) stopAlerts(ctx context.Context, firehose models.Firehose, prjSlug string) error {
 	policy := alertsv1.Policy{
-		Resource: name,
+		Resource: firehose.Urn,
 		Rules:    nil,
 	}
 
-	_, err = api.AlertSvc.UpsertAlertPolicy(ctx, prjSlug, policy)
+	_, err := api.AlertSvc.UpsertAlertPolicy(ctx, prjSlug, policy)
 	if errors.Is(err, errors.ErrNotFound) {
 		err = nil
 	}
 	return err
-}
-
-func getFirehoseReleaseName(firehoseDef models.Firehose) (string, error) {
-	errFail := errors.ErrInternal.WithMsgf("failed to parse release name")
-
-	if firehoseDef.State == nil {
-		return "", errFail.WithCausef("nil state")
-	}
-
-	output, ok := firehoseDef.State.Output.(map[string]any)
-	if !ok {
-		return "", errFail.WithCausef("output is not a map")
-	}
-
-	s, ok := output[firehoseOutputReleaseNameKey].(string)
-	if !ok {
-		return "", errFail.WithCausef("release name key not found")
-	}
-	return s, nil
 }

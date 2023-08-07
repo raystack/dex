@@ -245,7 +245,7 @@ paths:
         name: firehoseUrn
         description: URN of the firehose.
         required: true
-    post:
+    put:
       summary: Reset firehose consumption offset.
       description: Reset firehose consumption offset.
       operationId: resetOffset
@@ -291,7 +291,7 @@ paths:
         name: firehoseUrn
         description: URN of the firehose.
         required: true
-    post:
+    put:
       summary: Scale the number of instances of firehose.
       description: Scale the number of instances of firehose.
       operationId: scaleFirehose
@@ -580,7 +580,7 @@ paths:
         "200":
           description: History for given firehose URN.
           schema:
-            $ref: "#/definitions/History"
+            $ref: "#/definitions/HistoryResponse"
         "404":
           description: Firehose with given URN was not found
           schema:
@@ -740,6 +740,14 @@ definitions:
       project:
         type: string
         example: "g-goto-id"
+      created_by:
+        type: string
+        example: "john.doe@example.com"
+        readOnly: true
+      updated_by:
+        type: string
+        example: "jane.doe@example.com"
+        readOnly: true
       created_at:
         type: string
         format: date-time
@@ -959,10 +967,10 @@ definitions:
         items:
           $ref: "#/definitions/AlertTemplate"
 
-  History:
+  HistoryResponse:
     type: object
     properties:
-      items:
+      history:
         type: array
         items:
           $ref: "#/definitions/RevisionDiff"
@@ -971,14 +979,31 @@ definitions:
     properties:
       diff:
         type: object
+        example: {
+          configs: {
+            replicas: [3, 2]
+          },
+          labels: {
+            title: ["old-title", "new-title"]
+          }
+        }
       reason:
         type: string
+        enum:
+          - action:create
+          - action:update
+          - action:reset
+          - action:start
+          - action:stop
+          - action:upgrade
+      updated_by:
+        type: string
+        example: john.doe@example.com
       updated_at:
         type: string
         format: date-time
         example: "2022-06-23T16:49:15.885541Z"
         readOnly: true
-
   KubernetesArray:
     type: object
     properties:

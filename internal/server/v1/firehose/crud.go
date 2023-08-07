@@ -5,18 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sort"
 	"strings"
 	"time"
 
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
+	shieldv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/shield/v1beta1"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-openapi/strfmt"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 
-	"github.com/goto/dex/compass"
 	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/reqctx"
 	"github.com/goto/dex/internal/server/utils"
@@ -29,11 +28,6 @@ const (
 	kindFirehose  = "firehose"
 	confTopicName = "SOURCE_KAFKA_TOPIC"
 )
-
-type firehoseUpdates struct {
-	Description string                `json:"description"`
-	Configs     models.FirehoseConfig `json:"configs"`
-}
 
 func (api *firehoseAPI) handleGet(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
@@ -48,7 +42,8 @@ func (api *firehoseAPI) handleGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
-	reqCtx := reqctx.From(r.Context())
+	ctx := r.Context()
+	reqCtx := reqctx.From(ctx)
 
 	var def models.Firehose
 	if err := utils.ReadJSON(r, &def); err != nil {
@@ -63,23 +58,28 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	def.Configs.StopTime = sanitizeFirehoseStopTime(def.Configs.StopTime)
 
-	def.Labels = cloneAndMergeMaps(def.Labels, map[string]string{
-		labelTitle:       *def.Title,
-		labelGroup:       def.Group.String(),
-		labelStream:      *def.Configs.StreamName,
-		labelCreatedBy:   reqCtx.UserEmail,
-		labelUpdatedBy:   reqCtx.UserEmail,
-		labelDescription: def.Description,
-	})
-
-	prj, err := project.GetProject(r.Context(), def.Project, api.Shield)
+	groupID := def.Group.String()
+	groupSlug, err := api.getGroupSlug(ctx, groupID)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
 	}
 
+	def.Labels = cloneAndMergeMaps(def.Labels, map[string]string{
+		labelTitle:       *def.Title,
+		labelGroup:       groupID,
+		labelTeam:        groupSlug,
+		labelStream:      *def.Configs.StreamName,
+		labelDescription: def.Description,
+	})
+
+	prj, err := project.GetProject(ctx, def.Project, api.Shield)
+	if err != nil {
+		utils.WriteErr(w, err)
+		return
+	}
 	// resolve stream_name to kafka clusters.
-	streamURN := fmt.Sprintf("%s-%s", prj.GetSlug(), *def.Configs.StreamName)
+	streamURN := buildStreamURN(*def.Configs.StreamName, prj.GetSlug())
 	sourceKafkaBroker, err := odin.GetOdinStream(r.Context(), api.OdinAddr, streamURN)
 	if err != nil {
 		utils.WriteErr(w, err)
@@ -89,21 +89,20 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 
 	def.Configs.EnvVars[confStencilRegistryToggle] = "true"
 	if def.Configs.EnvVars[confStencilURL] == "" {
-		// resolve stencil URL.
-		schema, err := compass.GetTopicSchema(
+		stencilUrls, err := api.getStencilURLs(
 			r.Context(),
-			api.Compass,
 			reqCtx.UserID,
-			prj.GetSlug(),
-			streamURN,
 			def.Configs.EnvVars[confTopicName],
-			strings.Split(def.Configs.EnvVars[confProtoClassName], ","),
+			streamURN,
+			prj.GetSlug(),
+			def.Configs.EnvVars[confProtoClassName],
 		)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
-		def.Configs.EnvVars[confStencilURL] = api.makeStencilURL(*schema)
+
+		def.Configs.EnvVars[confStencilURL] = stencilUrls
 	}
 
 	res, err := mapFirehoseEntropyResource(def, prj)
@@ -112,8 +111,9 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	entropyCtx := api.addUserMetadata(ctx, reqCtx.UserEmail)
 	rpcReq := &entropyv1beta1.CreateResourceRequest{Resource: res}
-	rpcResp, err := api.Entropy.CreateResource(r.Context(), rpcReq)
+	rpcResp, err := api.Entropy.CreateResource(entropyCtx, rpcReq)
 	if err != nil {
 		outErr := errors.ErrInternal
 
@@ -235,7 +235,7 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 		}
 		def.Configs.EnvVars = returnEnv
 
-		arr = append(arr, *def)
+		arr = append(arr, def)
 	}
 
 	utils.WriteJSON(w, http.StatusOK,
@@ -244,14 +244,23 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 
 func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
-	reqCtx := reqctx.From(r.Context())
+	ctx := r.Context()
+	reqCtx := reqctx.From(ctx)
 
-	var updates firehoseUpdates
+	var updates struct {
+		Group       string                `json:"group"`
+		Description string                `json:"description"`
+		Configs     models.FirehoseConfig `json:"configs"`
+	}
 	if err := utils.ReadJSON(r, &updates); err != nil {
 		utils.WriteErr(w, err)
 		return
 	} else if err := updates.Configs.Validate(nil); err != nil {
 		utils.WriteErr(w, err)
+		return
+	} else if updates.Group == "" {
+		// TODO: move validation to be same with create
+		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("group is required"))
 		return
 	}
 	updates.Configs.StopTime = sanitizeFirehoseStopTime(updates.Configs.StopTime)
@@ -268,30 +277,36 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groupID := updates.Group
+	groupSlug, err := api.getGroupSlug(ctx, groupID)
+	if err != nil {
+		utils.WriteErr(w, err)
+		return
+	}
 	labels := cloneAndMergeMaps(existingFirehose.Labels, map[string]string{
-		labelUpdatedBy: reqCtx.UserEmail,
+		labelGroup: groupID,
+		labelTeam:  groupSlug,
 	})
 	if updates.Description != "" {
 		labels[labelDescription] = updates.Description
 	}
 
-	streamURN := fmt.Sprintf("%s-%s", existingFirehose.Project, *updates.Configs.StreamName)
+	streamURN := buildStreamURN(*updates.Configs.StreamName, existingFirehose.Project)
 	if updates.Configs.EnvVars[confStencilURL] == "" {
-		// resolve stencil URL.
-		schema, err := compass.GetTopicSchema(
+		stencilUrls, err := api.getStencilURLs(
 			r.Context(),
-			api.Compass,
 			reqCtx.UserID,
-			existingFirehose.Project,
-			streamURN,
 			updates.Configs.EnvVars[confTopicName],
-			strings.Split(updates.Configs.EnvVars[confProtoClassName], ","),
+			streamURN,
+			existingFirehose.Project,
+			updates.Configs.EnvVars[confProtoClassName],
 		)
 		if err != nil {
 			utils.WriteErr(w, err)
 			return
 		}
-		updates.Configs.EnvVars[confStencilURL] = api.makeStencilURL(*schema)
+
+		updates.Configs.EnvVars[confStencilURL] = stencilUrls
 	}
 
 	cfgStruct, err := makeConfigStruct(&updates.Configs)
@@ -308,7 +323,8 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	rpcResp, err := api.Entropy.UpdateResource(r.Context(), rpcReq)
+	entropyCtx := api.addUserMetadata(ctx, reqCtx.UserEmail)
+	rpcResp, err := api.Entropy.UpdateResource(entropyCtx, rpcReq)
 	if err != nil {
 		st := status.Convert(err)
 		if st.Code() == codes.InvalidArgument {
@@ -331,9 +347,11 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 
 func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Request) {
 	urn := chi.URLParam(r, pathParamURN)
-	reqCtx := reqctx.From(r.Context())
+	ctx := r.Context()
+	reqCtx := reqctx.From(ctx)
 
 	var req struct {
+		Group       string                        `json:"group"`
 		Description string                        `json:"description"`
 		Configs     *models.FirehosePartialConfig `json:"configs"`
 	}
@@ -348,11 +366,19 @@ func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	labels := cloneAndMergeMaps(existing.Labels, map[string]string{
-		labelUpdatedBy: reqCtx.UserEmail,
-	})
+	labels := existing.Labels
 	if req.Description != "" {
 		labels[labelDescription] = req.Description
+	}
+	if req.Group != "" {
+		groupID := req.Group
+		groupSlug, err := api.getGroupSlug(ctx, groupID)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+		labels[labelGroup] = groupID
+		labels[labelTeam] = groupSlug
 	}
 
 	if req.Configs.Stopped != nil {
@@ -369,6 +395,23 @@ func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Reque
 
 	if req.Configs.Replicas > 0 {
 		existing.Configs.Replicas = req.Configs.Replicas
+	}
+
+	if _, ok := req.Configs.EnvVars[confTopicName]; ok {
+		streamURN := buildStreamURN(req.Configs.StreamName, existing.Project)
+		stencilUrls, err := api.getStencilURLs(
+			r.Context(),
+			reqCtx.UserID,
+			req.Configs.EnvVars[confTopicName],
+			streamURN,
+			existing.Project,
+			req.Configs.EnvVars[confProtoClassName],
+		)
+		if err != nil {
+			utils.WriteErr(w, err)
+			return
+		}
+		existing.Configs.EnvVars[confStencilURL] = stencilUrls
 	}
 
 	if req.Configs.StopTime != nil {
@@ -406,7 +449,8 @@ func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Reque
 		},
 	}
 
-	rpcResp, err := api.Entropy.UpdateResource(r.Context(), rpcReq)
+	entropyCtx := api.addUserMetadata(ctx, reqCtx.UserEmail)
+	rpcResp, err := api.Entropy.UpdateResource(entropyCtx, rpcReq)
 	if err != nil {
 		st := status.Convert(err)
 		if st.Code() == codes.InvalidArgument {
@@ -435,7 +479,9 @@ func (api *firehoseAPI) handleGetHistory(w http.ResponseWriter, r *http.Request)
 		utils.WriteErr(w, err)
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, diffs)
+	utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"history": diffs,
+	})
 }
 
 func (api *firehoseAPI) getRevisions(ctx context.Context, urn string) ([]models.RevisionDiff, error) {
@@ -449,43 +495,61 @@ func (api *firehoseAPI) getRevisions(ctx context.Context, urn string) ([]models.
 		return nil, err
 	}
 
-	prevRevision := []byte("{}")
-	var rh []models.RevisionDiff
-
-	marshaller := protojson.MarshalOptions{
-		UseProtoNames: true,
-	}
-
 	revisions := rpcResp.GetRevisions()
+	revisionsLen := len(revisions)
 
-	sort.Slice(revisions, func(i, j int) bool {
-		return revisions[i].CreatedAt.AsTime().Before(revisions[j].CreatedAt.AsTime())
-	})
-
-	for _, revision := range revisions {
-		var rd models.RevisionDiff
-		fd := new(entropyv1beta1.ResourceRevision)
-		fd.Spec = revision.GetSpec()
-		fd.Labels = revision.GetLabels()
-
-		currentRevision, err := marshaller.Marshal(fd)
+	patches := make([]models.RevisionDiff, revisionsLen)
+	prevFirehoseJSON := []byte("{}")
+	for i := revisionsLen - 1; i >= 0; i-- {
+		revision := revisions[i]
+		firehose, err := mapEntropySpecAndLabels(models.Firehose{}, revision.GetSpec(), revision.GetLabels())
+		if err != nil {
+			return nil, err
+		}
+		currentJSON, err := json.Marshal(firehose)
 		if err != nil {
 			return nil, err
 		}
 
-		revisionDiff, err := jsonDiff(prevRevision, currentRevision)
-		if err != nil {
-			return nil, err
+		var revisionDiff map[string]interface{}
+		if revision.Reason != "action:create" {
+			revisionDiff, err = jsonDiff(prevFirehoseJSON, currentJSON)
+			if err != nil {
+				return nil, err
+			}
 		}
-		rd.Reason = revision.GetReason()
-		rd.Diff = json.RawMessage(revisionDiff)
-		rd.UpdatedAt = strfmt.DateTime(revision.GetCreatedAt().AsTime())
 
-		rh = append(rh, rd)
-		prevRevision = currentRevision
+		patch := models.RevisionDiff{
+			Reason:    revision.GetReason(),
+			UpdatedBy: revision.GetCreatedBy(),
+			UpdatedAt: strfmt.DateTime(revision.GetCreatedAt().AsTime()),
+			Diff:      revisionDiff,
+		}
+		patches[i] = patch
+
+		prevFirehoseJSON = currentJSON
 	}
 
-	return rh, nil
+	return patches, nil
+}
+
+func (api *firehoseAPI) getGroupSlug(ctx context.Context, groupID string) (string, error) {
+	resp, err := api.Shield.GetGroup(ctx, &shieldv1beta1.GetGroupRequest{Id: groupID})
+	if err != nil {
+		return "", fmt.Errorf("error getting group slug: %w", err)
+	}
+
+	return resp.Group.GetSlug(), nil
+}
+
+func (*firehoseAPI) addUserMetadata(ctx context.Context, userID string) context.Context {
+	return metadata.AppendToOutgoingContext(ctx,
+		"user-id", userID,
+	)
+}
+
+func buildStreamURN(streamName, projectSlug string) string {
+	return fmt.Sprintf("%s-%s", projectSlug, streamName)
 }
 
 func sinkTypeSet(sinkTypes string) map[string]struct{} {

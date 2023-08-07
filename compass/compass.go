@@ -28,7 +28,7 @@ type Schema struct {
 
 func GetTopicSchema(ctx context.Context, cl compassv1beta1grpc.CompassServiceClient,
 	userID, projectSlug, stream, topic string, protoNames []string,
-) (*Schema, error) {
+) (Schema, error) {
 	md := metadata.New(map[string]string{"X-Shield-User-Id": userID})
 
 	res, err := cl.GetAllAssets(
@@ -45,29 +45,29 @@ func GetTopicSchema(ctx context.Context, cl compassv1beta1grpc.CompassServiceCli
 		grpc.Header(&metadata.MD{}),
 	)
 	if err != nil {
-		return nil, err
+		return Schema{}, err
 	}
 
 	schemaSet := makeSet(protoNames)
 	for _, asset := range res.GetData() {
 		val, err := protojson.Marshal(asset.GetData())
 		if err != nil {
-			return nil, err
+			return Schema{}, err
 		}
 
 		var ad assetData
 		if err := json.Unmarshal(val, &ad); err != nil {
-			return nil, err
+			return Schema{}, err
 		}
 
 		for _, schema := range ad.Attributes.Schemas {
 			if _, found := schemaSet[schema.Name]; found {
-				return &schema, nil
+				return schema, nil
 			}
 		}
 	}
 
-	return nil, errors.ErrNotFound.WithMsgf("no schema found")
+	return Schema{}, errors.ErrNotFound.WithMsgf("no schema found")
 }
 
 func makeSet(arr []string) map[string]struct{} {

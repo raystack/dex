@@ -1,6 +1,7 @@
 package firehose
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -33,9 +34,8 @@ const (
 const (
 	labelTitle       = "title"
 	labelGroup       = "group"
+	labelTeam        = "team"
 	labelStream      = "stream_name"
-	labelCreatedBy   = "created_by"
-	labelUpdatedBy   = "updated_by"
 	labelDescription = "description"
 )
 
@@ -88,34 +88,51 @@ func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	})
 }
 
-func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (*models.Firehose, error) {
+func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (models.Firehose, error) {
 	if res == nil || res.GetSpec() == nil {
-		return nil, errors.ErrInternal.WithCausef("spec is nil")
+		return models.Firehose{}, errors.ErrInternal.WithCausef("spec is nil")
+	}
+
+	firehose := models.Firehose{
+		Urn:       res.GetUrn(),
+		Name:      res.GetName(),
+		Project:   res.Project,
+		CreatedBy: res.CreatedBy,
+		UpdatedBy: res.UpdatedBy,
+		CreatedAt: strfmt.DateTime(res.GetCreatedAt().AsTime()),
+		UpdatedAt: strfmt.DateTime(res.GetUpdatedAt().AsTime()),
+		State: &models.FirehoseState{
+			Status: res.GetState().GetStatus().String(),
+			Output: res.GetState().Output.GetStructValue().AsMap(),
+		},
 	}
 
 	labels := map[string]string{}
 	if err := mapstructure.Decode(res.GetLabels(), &labels); err != nil {
-		return nil, errors.ErrInternal.WithCausef(err.Error())
+		return firehose, fmt.Errorf("error when decoding: %w", err)
 	}
 
+	var err error
+	firehose, err = mapEntropySpecAndLabels(firehose, res.GetSpec(), labels)
+	if err != nil {
+		return firehose, errors.ErrInternal.WithCausef(err.Error())
+	}
+
+	return firehose, nil
+}
+
+func mapEntropySpecAndLabels(firehose models.Firehose, spec *entropyv1beta1.ResourceSpec, labels map[string]string) (models.Firehose, error) {
 	title := labels[labelTitle]
 	groupID := strfmt.UUID(labels[labelGroup])
 
-	firehoseDef := models.Firehose{
-		Urn:         res.GetUrn(),
-		Name:        res.GetName(),
-		Title:       &title,
-		Group:       &groupID,
-		Project:     res.Project,
-		Labels:      labels,
-		CreatedAt:   strfmt.DateTime(res.GetCreatedAt().AsTime()),
-		UpdatedAt:   strfmt.DateTime(res.GetUpdatedAt().AsTime()),
-		Description: labels[labelDescription],
-	}
+	firehose.Title = &title
+	firehose.Group = &groupID
+	firehose.Labels = labels
+	firehose.Description = labels[labelDescription]
 
 	var modConf entropyFirehose.Config
-	if err := utils.ProtoStructToGoVal(res.GetSpec().GetConfigs(), &modConf); err != nil {
-		return nil, err
+	if err := utils.ProtoStructToGoVal(spec.GetConfigs(), &modConf); err != nil {
+		return firehose, err
 	}
 
 	var stopTime *strfmt.DateTime
@@ -125,18 +142,18 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (*models.Firehos
 	}
 
 	var kubeCluster string
-	for _, dep := range res.GetSpec().GetDependencies() {
+	for _, dep := range spec.GetDependencies() {
 		if dep.GetKey() == kubeClusterDependencyKey {
 			kubeCluster = dep.GetValue()
 		}
 	}
 
-	streamName := res.Labels[labelStream]
+	streamName := labels[labelStream]
 	if streamName == "" {
 		streamName = modConf.EnvVariables[confStreamName]
 	}
 
-	firehoseDef.Configs = &models.FirehoseConfig{
+	firehose.Configs = &models.FirehoseConfig{
 		Image:        modConf.ChartValues.ImageTag,
 		EnvVars:      modConf.EnvVariables,
 		Stopped:      modConf.Stopped,
@@ -147,12 +164,7 @@ func mapEntropyResourceToFirehose(res *entropyv1beta1.Resource) (*models.Firehos
 		KubeCluster:  &kubeCluster,
 	}
 
-	firehoseDef.State = &models.FirehoseState{
-		Status: res.GetState().GetStatus().String(),
-		Output: res.GetState().Output.GetStructValue().AsMap(),
-	}
-
-	return &firehoseDef, nil
+	return firehose, nil
 }
 
 func slugify(s string) string {
