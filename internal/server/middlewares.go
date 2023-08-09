@@ -1,7 +1,10 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -106,14 +109,24 @@ func requestLogger(lg *zap.Logger) middleware {
 			t := time.Now()
 			span := trace.FromContext(req.Context())
 
-			clientID, _, _ := req.BasicAuth()
-			fields := []zap.Field{
-				zap.String("request_path", req.URL.Path),
-				zap.String("request_method", req.Method),
-				zap.String("request_id", req.Header.Get(headerRequestID)),
-				zap.String("client_id", clientID),
-				zap.String("trace_id", span.SpanContext().TraceID.String()),
+			buf, err := io.ReadAll(req.Body)
+			if err != nil {
+				lg.Debug("error reading request body: %v", zap.String("error", err.Error()))
+				http.Error(wr, err.Error(), http.StatusInternalServerError)
+				return
 			}
+			reader := io.NopCloser(bytes.NewBuffer(buf))
+			req.Body = reader
+
+			body := json.RawMessage(buf)
+			jsonBody, err := json.Marshal(body)
+			if err != nil {
+				lg.Debug("error marshling request body: %v", zap.String("error", err.Error()))
+				http.Error(wr, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			clientID, _, _ := req.BasicAuth()
 
 			wrapped := &wrappedWriter{ResponseWriter: wr, Status: http.StatusOK}
 
@@ -129,10 +142,17 @@ func requestLogger(lg *zap.Logger) middleware {
 			}
 
 			next.ServeHTTP(fr, req)
-			fields = append(fields,
+
+			fields := []zap.Field{
+				zap.String("request_path", req.URL.Path),
+				zap.String("request_method", req.Method),
+				zap.String("request_id", req.Header.Get(headerRequestID)),
+				zap.String("client_id", clientID),
+				zap.String("trace_id", span.SpanContext().TraceID.String()),
 				zap.String("response_time", time.Since(t).String()),
+				zap.String("request_body", string(jsonBody)),
 				zap.Int("status", wrapped.Status),
-			)
+			}
 
 			if !is2xx(wrapped.Status) {
 				lg.Warn("request handled with non-2xx response", fields...)
