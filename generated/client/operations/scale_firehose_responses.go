@@ -62,7 +62,7 @@ func NewScaleFirehoseOK() *ScaleFirehoseOK {
 }
 
 /*
-ScaleFirehoseOK describes a response with status code 200, with default header values.
+	ScaleFirehoseOK describes a response with status code 200, with default header values.
 
 Successfully applied update.
 */
@@ -70,39 +70,9 @@ type ScaleFirehoseOK struct {
 	Payload *models.Firehose
 }
 
-// IsSuccess returns true when this scale firehose o k response has a 2xx status code
-func (o *ScaleFirehoseOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this scale firehose o k response has a 3xx status code
-func (o *ScaleFirehoseOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this scale firehose o k response has a 4xx status code
-func (o *ScaleFirehoseOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this scale firehose o k response has a 5xx status code
-func (o *ScaleFirehoseOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this scale firehose o k response a status code equal to that given
-func (o *ScaleFirehoseOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *ScaleFirehoseOK) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
 }
-
-func (o *ScaleFirehoseOK) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseOK  %+v", 200, o.Payload)
-}
-
 func (o *ScaleFirehoseOK) GetPayload() *models.Firehose {
 	return o.Payload
 }
@@ -125,7 +95,7 @@ func NewScaleFirehoseBadRequest() *ScaleFirehoseBadRequest {
 }
 
 /*
-ScaleFirehoseBadRequest describes a response with status code 400, with default header values.
+	ScaleFirehoseBadRequest describes a response with status code 400, with default header values.
 
 Update request is not valid.
 */
@@ -133,39 +103,9 @@ type ScaleFirehoseBadRequest struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this scale firehose bad request response has a 2xx status code
-func (o *ScaleFirehoseBadRequest) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this scale firehose bad request response has a 3xx status code
-func (o *ScaleFirehoseBadRequest) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this scale firehose bad request response has a 4xx status code
-func (o *ScaleFirehoseBadRequest) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this scale firehose bad request response has a 5xx status code
-func (o *ScaleFirehoseBadRequest) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this scale firehose bad request response a status code equal to that given
-func (o *ScaleFirehoseBadRequest) IsCode(code int) bool {
-	return code == 400
-}
-
 func (o *ScaleFirehoseBadRequest) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
 }
-
-func (o *ScaleFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseBadRequest  %+v", 400, o.Payload)
-}
-
 func (o *ScaleFirehoseBadRequest) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -188,7 +128,7 @@ func NewScaleFirehoseNotFound() *ScaleFirehoseNotFound {
 }
 
 /*
-ScaleFirehoseNotFound describes a response with status code 404, with default header values.
+	ScaleFirehoseNotFound describes a response with status code 404, with default header values.
 
 Firehose with given URN was not found
 */
@@ -196,39 +136,9 @@ type ScaleFirehoseNotFound struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this scale firehose not found response has a 2xx status code
-func (o *ScaleFirehoseNotFound) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this scale firehose not found response has a 3xx status code
-func (o *ScaleFirehoseNotFound) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this scale firehose not found response has a 4xx status code
-func (o *ScaleFirehoseNotFound) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this scale firehose not found response has a 5xx status code
-func (o *ScaleFirehoseNotFound) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this scale firehose not found response a status code equal to that given
-func (o *ScaleFirehoseNotFound) IsCode(code int) bool {
-	return code == 404
-}
-
 func (o *ScaleFirehoseNotFound) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
 }
-
-func (o *ScaleFirehoseNotFound) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseNotFound  %+v", 404, o.Payload)
-}
-
 func (o *ScaleFirehoseNotFound) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -251,7 +161,7 @@ func NewScaleFirehoseInternalServerError() *ScaleFirehoseInternalServerError {
 }
 
 /*
-ScaleFirehoseInternalServerError describes a response with status code 500, with default header values.
+	ScaleFirehoseInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -259,39 +169,9 @@ type ScaleFirehoseInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this scale firehose internal server error response has a 2xx status code
-func (o *ScaleFirehoseInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this scale firehose internal server error response has a 3xx status code
-func (o *ScaleFirehoseInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this scale firehose internal server error response has a 4xx status code
-func (o *ScaleFirehoseInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this scale firehose internal server error response has a 5xx status code
-func (o *ScaleFirehoseInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this scale firehose internal server error response a status code equal to that given
-func (o *ScaleFirehoseInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *ScaleFirehoseInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *ScaleFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses/{firehoseUrn}/scale][%d] scaleFirehoseInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *ScaleFirehoseInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

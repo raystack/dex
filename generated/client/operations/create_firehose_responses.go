@@ -58,7 +58,7 @@ func NewCreateFirehoseCreated() *CreateFirehoseCreated {
 }
 
 /*
-CreateFirehoseCreated describes a response with status code 201, with default header values.
+	CreateFirehoseCreated describes a response with status code 201, with default header values.
 
 Successfully created
 */
@@ -66,39 +66,9 @@ type CreateFirehoseCreated struct {
 	Payload *models.Firehose
 }
 
-// IsSuccess returns true when this create firehose created response has a 2xx status code
-func (o *CreateFirehoseCreated) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this create firehose created response has a 3xx status code
-func (o *CreateFirehoseCreated) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this create firehose created response has a 4xx status code
-func (o *CreateFirehoseCreated) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this create firehose created response has a 5xx status code
-func (o *CreateFirehoseCreated) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this create firehose created response a status code equal to that given
-func (o *CreateFirehoseCreated) IsCode(code int) bool {
-	return code == 201
-}
-
 func (o *CreateFirehoseCreated) Error() string {
 	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
 }
-
-func (o *CreateFirehoseCreated) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseCreated  %+v", 201, o.Payload)
-}
-
 func (o *CreateFirehoseCreated) GetPayload() *models.Firehose {
 	return o.Payload
 }
@@ -121,7 +91,7 @@ func NewCreateFirehoseBadRequest() *CreateFirehoseBadRequest {
 }
 
 /*
-CreateFirehoseBadRequest describes a response with status code 400, with default header values.
+	CreateFirehoseBadRequest describes a response with status code 400, with default header values.
 
 Request was invalid.
 */
@@ -129,39 +99,9 @@ type CreateFirehoseBadRequest struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this create firehose bad request response has a 2xx status code
-func (o *CreateFirehoseBadRequest) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this create firehose bad request response has a 3xx status code
-func (o *CreateFirehoseBadRequest) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this create firehose bad request response has a 4xx status code
-func (o *CreateFirehoseBadRequest) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this create firehose bad request response has a 5xx status code
-func (o *CreateFirehoseBadRequest) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this create firehose bad request response a status code equal to that given
-func (o *CreateFirehoseBadRequest) IsCode(code int) bool {
-	return code == 400
-}
-
 func (o *CreateFirehoseBadRequest) Error() string {
 	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseBadRequest  %+v", 400, o.Payload)
 }
-
-func (o *CreateFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseBadRequest  %+v", 400, o.Payload)
-}
-
 func (o *CreateFirehoseBadRequest) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -184,7 +124,7 @@ func NewCreateFirehoseConflict() *CreateFirehoseConflict {
 }
 
 /*
-CreateFirehoseConflict describes a response with status code 409, with default header values.
+	CreateFirehoseConflict describes a response with status code 409, with default header values.
 
 A firehose with same unique identifier already exists.
 */
@@ -192,39 +132,9 @@ type CreateFirehoseConflict struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this create firehose conflict response has a 2xx status code
-func (o *CreateFirehoseConflict) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this create firehose conflict response has a 3xx status code
-func (o *CreateFirehoseConflict) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this create firehose conflict response has a 4xx status code
-func (o *CreateFirehoseConflict) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this create firehose conflict response has a 5xx status code
-func (o *CreateFirehoseConflict) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this create firehose conflict response a status code equal to that given
-func (o *CreateFirehoseConflict) IsCode(code int) bool {
-	return code == 409
-}
-
 func (o *CreateFirehoseConflict) Error() string {
 	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
 }
-
-func (o *CreateFirehoseConflict) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseConflict  %+v", 409, o.Payload)
-}
-
 func (o *CreateFirehoseConflict) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -247,7 +157,7 @@ func NewCreateFirehoseInternalServerError() *CreateFirehoseInternalServerError {
 }
 
 /*
-CreateFirehoseInternalServerError describes a response with status code 500, with default header values.
+	CreateFirehoseInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -255,39 +165,9 @@ type CreateFirehoseInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this create firehose internal server error response has a 2xx status code
-func (o *CreateFirehoseInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this create firehose internal server error response has a 3xx status code
-func (o *CreateFirehoseInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this create firehose internal server error response has a 4xx status code
-func (o *CreateFirehoseInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this create firehose internal server error response has a 5xx status code
-func (o *CreateFirehoseInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this create firehose internal server error response a status code equal to that given
-func (o *CreateFirehoseInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *CreateFirehoseInternalServerError) Error() string {
 	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *CreateFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[POST /dex/firehoses][%d] createFirehoseInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *CreateFirehoseInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

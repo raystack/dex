@@ -51,7 +51,8 @@ func NewGetFirehoseHistoryOK() *GetFirehoseHistoryOK {
 	return &GetFirehoseHistoryOK{}
 }
 
-/* GetFirehoseHistoryOK describes a response with status code 200, with default header values.
+/*
+	GetFirehoseHistoryOK describes a response with status code 200, with default header values.
 
 History for given firehose URN.
 */
@@ -83,7 +84,8 @@ func NewGetFirehoseHistoryNotFound() *GetFirehoseHistoryNotFound {
 	return &GetFirehoseHistoryNotFound{}
 }
 
-/* GetFirehoseHistoryNotFound describes a response with status code 404, with default header values.
+/*
+	GetFirehoseHistoryNotFound describes a response with status code 404, with default header values.
 
 Firehose with given URN was not found
 */
@@ -115,7 +117,8 @@ func NewGetFirehoseHistoryInternalServerError() *GetFirehoseHistoryInternalServe
 	return &GetFirehoseHistoryInternalServerError{}
 }
 
-/* GetFirehoseHistoryInternalServerError describes a response with status code 500, with default header values.
+/*
+	GetFirehoseHistoryInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */

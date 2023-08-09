@@ -46,7 +46,7 @@ func NewListProjectsOK() *ListProjectsOK {
 }
 
 /*
-ListProjectsOK describes a response with status code 200, with default header values.
+	ListProjectsOK describes a response with status code 200, with default header values.
 
 successful operation
 */
@@ -54,39 +54,9 @@ type ListProjectsOK struct {
 	Payload *models.ProjectArray
 }
 
-// IsSuccess returns true when this list projects o k response has a 2xx status code
-func (o *ListProjectsOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this list projects o k response has a 3xx status code
-func (o *ListProjectsOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list projects o k response has a 4xx status code
-func (o *ListProjectsOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list projects o k response has a 5xx status code
-func (o *ListProjectsOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this list projects o k response a status code equal to that given
-func (o *ListProjectsOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *ListProjectsOK) Error() string {
 	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsOK  %+v", 200, o.Payload)
 }
-
-func (o *ListProjectsOK) String() string {
-	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsOK  %+v", 200, o.Payload)
-}
-
 func (o *ListProjectsOK) GetPayload() *models.ProjectArray {
 	return o.Payload
 }
@@ -109,7 +79,7 @@ func NewListProjectsInternalServerError() *ListProjectsInternalServerError {
 }
 
 /*
-ListProjectsInternalServerError describes a response with status code 500, with default header values.
+	ListProjectsInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -117,39 +87,9 @@ type ListProjectsInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this list projects internal server error response has a 2xx status code
-func (o *ListProjectsInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this list projects internal server error response has a 3xx status code
-func (o *ListProjectsInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list projects internal server error response has a 4xx status code
-func (o *ListProjectsInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list projects internal server error response has a 5xx status code
-func (o *ListProjectsInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this list projects internal server error response a status code equal to that given
-func (o *ListProjectsInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *ListProjectsInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *ListProjectsInternalServerError) String() string {
-	return fmt.Sprintf("[GET /dex/projects][%d] listProjectsInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *ListProjectsInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

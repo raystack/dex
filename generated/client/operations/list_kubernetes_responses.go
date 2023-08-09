@@ -46,7 +46,7 @@ func NewListKubernetesOK() *ListKubernetesOK {
 }
 
 /*
-ListKubernetesOK describes a response with status code 200, with default header values.
+	ListKubernetesOK describes a response with status code 200, with default header values.
 
 Successful Operation.
 */
@@ -54,39 +54,9 @@ type ListKubernetesOK struct {
 	Payload *models.KubernetesArray
 }
 
-// IsSuccess returns true when this list kubernetes o k response has a 2xx status code
-func (o *ListKubernetesOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this list kubernetes o k response has a 3xx status code
-func (o *ListKubernetesOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list kubernetes o k response has a 4xx status code
-func (o *ListKubernetesOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list kubernetes o k response has a 5xx status code
-func (o *ListKubernetesOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this list kubernetes o k response a status code equal to that given
-func (o *ListKubernetesOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *ListKubernetesOK) Error() string {
 	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
 }
-
-func (o *ListKubernetesOK) String() string {
-	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesOK  %+v", 200, o.Payload)
-}
-
 func (o *ListKubernetesOK) GetPayload() *models.KubernetesArray {
 	return o.Payload
 }
@@ -109,7 +79,7 @@ func NewListKubernetesInternalServerError() *ListKubernetesInternalServerError {
 }
 
 /*
-ListKubernetesInternalServerError describes a response with status code 500, with default header values.
+	ListKubernetesInternalServerError describes a response with status code 500, with default header values.
 
 Internal Error
 */
@@ -117,39 +87,9 @@ type ListKubernetesInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this list kubernetes internal server error response has a 2xx status code
-func (o *ListKubernetesInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this list kubernetes internal server error response has a 3xx status code
-func (o *ListKubernetesInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list kubernetes internal server error response has a 4xx status code
-func (o *ListKubernetesInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list kubernetes internal server error response has a 5xx status code
-func (o *ListKubernetesInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this list kubernetes internal server error response a status code equal to that given
-func (o *ListKubernetesInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *ListKubernetesInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *ListKubernetesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /dex/kubernetes][%d] listKubernetesInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *ListKubernetesInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

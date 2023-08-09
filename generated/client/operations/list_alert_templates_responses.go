@@ -46,7 +46,7 @@ func NewListAlertTemplatesOK() *ListAlertTemplatesOK {
 }
 
 /*
-ListAlertTemplatesOK describes a response with status code 200, with default header values.
+	ListAlertTemplatesOK describes a response with status code 200, with default header values.
 
 successful operation
 */
@@ -54,39 +54,9 @@ type ListAlertTemplatesOK struct {
 	Payload *models.AlertTemplatesArray
 }
 
-// IsSuccess returns true when this list alert templates o k response has a 2xx status code
-func (o *ListAlertTemplatesOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this list alert templates o k response has a 3xx status code
-func (o *ListAlertTemplatesOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list alert templates o k response has a 4xx status code
-func (o *ListAlertTemplatesOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list alert templates o k response has a 5xx status code
-func (o *ListAlertTemplatesOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this list alert templates o k response a status code equal to that given
-func (o *ListAlertTemplatesOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *ListAlertTemplatesOK) Error() string {
 	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesOK  %+v", 200, o.Payload)
 }
-
-func (o *ListAlertTemplatesOK) String() string {
-	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesOK  %+v", 200, o.Payload)
-}
-
 func (o *ListAlertTemplatesOK) GetPayload() *models.AlertTemplatesArray {
 	return o.Payload
 }
@@ -109,7 +79,7 @@ func NewListAlertTemplatesInternalServerError() *ListAlertTemplatesInternalServe
 }
 
 /*
-ListAlertTemplatesInternalServerError describes a response with status code 500, with default header values.
+	ListAlertTemplatesInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -117,39 +87,9 @@ type ListAlertTemplatesInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this list alert templates internal server error response has a 2xx status code
-func (o *ListAlertTemplatesInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this list alert templates internal server error response has a 3xx status code
-func (o *ListAlertTemplatesInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list alert templates internal server error response has a 4xx status code
-func (o *ListAlertTemplatesInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list alert templates internal server error response has a 5xx status code
-func (o *ListAlertTemplatesInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this list alert templates internal server error response a status code equal to that given
-func (o *ListAlertTemplatesInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *ListAlertTemplatesInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *ListAlertTemplatesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /dex/alertTemplates][%d] listAlertTemplatesInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *ListAlertTemplatesInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

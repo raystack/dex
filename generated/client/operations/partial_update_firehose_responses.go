@@ -61,7 +61,7 @@ func NewPartialUpdateFirehoseOK() *PartialUpdateFirehoseOK {
 }
 
 /*
-PartialUpdateFirehoseOK describes a response with status code 200, with default header values.
+	PartialUpdateFirehoseOK describes a response with status code 200, with default header values.
 
 Found firehose with given URN
 */
@@ -69,39 +69,9 @@ type PartialUpdateFirehoseOK struct {
 	Payload *models.Firehose
 }
 
-// IsSuccess returns true when this partial update firehose o k response has a 2xx status code
-func (o *PartialUpdateFirehoseOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this partial update firehose o k response has a 3xx status code
-func (o *PartialUpdateFirehoseOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this partial update firehose o k response has a 4xx status code
-func (o *PartialUpdateFirehoseOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this partial update firehose o k response has a 5xx status code
-func (o *PartialUpdateFirehoseOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this partial update firehose o k response a status code equal to that given
-func (o *PartialUpdateFirehoseOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *PartialUpdateFirehoseOK) Error() string {
 	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseOK  %+v", 200, o.Payload)
 }
-
-func (o *PartialUpdateFirehoseOK) String() string {
-	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseOK  %+v", 200, o.Payload)
-}
-
 func (o *PartialUpdateFirehoseOK) GetPayload() *models.Firehose {
 	return o.Payload
 }
@@ -124,7 +94,7 @@ func NewPartialUpdateFirehoseBadRequest() *PartialUpdateFirehoseBadRequest {
 }
 
 /*
-PartialUpdateFirehoseBadRequest describes a response with status code 400, with default header values.
+	PartialUpdateFirehoseBadRequest describes a response with status code 400, with default header values.
 
 Update request is not valid.
 */
@@ -132,39 +102,9 @@ type PartialUpdateFirehoseBadRequest struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this partial update firehose bad request response has a 2xx status code
-func (o *PartialUpdateFirehoseBadRequest) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this partial update firehose bad request response has a 3xx status code
-func (o *PartialUpdateFirehoseBadRequest) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this partial update firehose bad request response has a 4xx status code
-func (o *PartialUpdateFirehoseBadRequest) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this partial update firehose bad request response has a 5xx status code
-func (o *PartialUpdateFirehoseBadRequest) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this partial update firehose bad request response a status code equal to that given
-func (o *PartialUpdateFirehoseBadRequest) IsCode(code int) bool {
-	return code == 400
-}
-
 func (o *PartialUpdateFirehoseBadRequest) Error() string {
 	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseBadRequest  %+v", 400, o.Payload)
 }
-
-func (o *PartialUpdateFirehoseBadRequest) String() string {
-	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseBadRequest  %+v", 400, o.Payload)
-}
-
 func (o *PartialUpdateFirehoseBadRequest) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -187,7 +127,7 @@ func NewPartialUpdateFirehoseNotFound() *PartialUpdateFirehoseNotFound {
 }
 
 /*
-PartialUpdateFirehoseNotFound describes a response with status code 404, with default header values.
+	PartialUpdateFirehoseNotFound describes a response with status code 404, with default header values.
 
 Firehose with given URN was not found
 */
@@ -195,39 +135,9 @@ type PartialUpdateFirehoseNotFound struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this partial update firehose not found response has a 2xx status code
-func (o *PartialUpdateFirehoseNotFound) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this partial update firehose not found response has a 3xx status code
-func (o *PartialUpdateFirehoseNotFound) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this partial update firehose not found response has a 4xx status code
-func (o *PartialUpdateFirehoseNotFound) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this partial update firehose not found response has a 5xx status code
-func (o *PartialUpdateFirehoseNotFound) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this partial update firehose not found response a status code equal to that given
-func (o *PartialUpdateFirehoseNotFound) IsCode(code int) bool {
-	return code == 404
-}
-
 func (o *PartialUpdateFirehoseNotFound) Error() string {
 	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseNotFound  %+v", 404, o.Payload)
 }
-
-func (o *PartialUpdateFirehoseNotFound) String() string {
-	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseNotFound  %+v", 404, o.Payload)
-}
-
 func (o *PartialUpdateFirehoseNotFound) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -250,7 +160,7 @@ func NewPartialUpdateFirehoseInternalServerError() *PartialUpdateFirehoseInterna
 }
 
 /*
-PartialUpdateFirehoseInternalServerError describes a response with status code 500, with default header values.
+	PartialUpdateFirehoseInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -258,39 +168,9 @@ type PartialUpdateFirehoseInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this partial update firehose internal server error response has a 2xx status code
-func (o *PartialUpdateFirehoseInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this partial update firehose internal server error response has a 3xx status code
-func (o *PartialUpdateFirehoseInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this partial update firehose internal server error response has a 4xx status code
-func (o *PartialUpdateFirehoseInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this partial update firehose internal server error response has a 5xx status code
-func (o *PartialUpdateFirehoseInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this partial update firehose internal server error response a status code equal to that given
-func (o *PartialUpdateFirehoseInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *PartialUpdateFirehoseInternalServerError) Error() string {
 	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *PartialUpdateFirehoseInternalServerError) String() string {
-	return fmt.Sprintf("[PATCH /dex/firehoses/{firehoseUrn}][%d] partialUpdateFirehoseInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *PartialUpdateFirehoseInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -344,8 +224,6 @@ func (o *PartialUpdateFirehoseBody) validateConfigs(formats strfmt.Registry) err
 		if err := o.Configs.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("body" + "." + "configs")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("body" + "." + "configs")
 			}
 			return err
 		}
@@ -374,8 +252,6 @@ func (o *PartialUpdateFirehoseBody) contextValidateConfigs(ctx context.Context, 
 		if err := o.Configs.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("body" + "." + "configs")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("body" + "." + "configs")
 			}
 			return err
 		}

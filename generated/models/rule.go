@@ -106,8 +106,6 @@ func (m *Rule) validateVariables(formats strfmt.Registry) error {
 			if err := m.Variables[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("variables" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("variables" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -179,8 +177,6 @@ func (m *Rule) contextValidateVariables(ctx context.Context, formats strfmt.Regi
 			if err := m.Variables[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("variables" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("variables" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

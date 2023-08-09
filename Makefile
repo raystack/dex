@@ -60,3 +60,4 @@ download:
 
 setup:
 	@go install github.com/vektra/mockery/v2@v2.30.1
+	@go install mvdan.cc/gofumpt@v0.5.0

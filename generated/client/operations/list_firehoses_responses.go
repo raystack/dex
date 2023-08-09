@@ -46,7 +46,7 @@ func NewListFirehosesOK() *ListFirehosesOK {
 }
 
 /*
-ListFirehosesOK describes a response with status code 200, with default header values.
+	ListFirehosesOK describes a response with status code 200, with default header values.
 
 successful operation
 */
@@ -54,39 +54,9 @@ type ListFirehosesOK struct {
 	Payload *models.FirehoseArray
 }
 
-// IsSuccess returns true when this list firehoses o k response has a 2xx status code
-func (o *ListFirehosesOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this list firehoses o k response has a 3xx status code
-func (o *ListFirehosesOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list firehoses o k response has a 4xx status code
-func (o *ListFirehosesOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list firehoses o k response has a 5xx status code
-func (o *ListFirehosesOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this list firehoses o k response a status code equal to that given
-func (o *ListFirehosesOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *ListFirehosesOK) Error() string {
 	return fmt.Sprintf("[GET /dex/firehoses][%d] listFirehosesOK  %+v", 200, o.Payload)
 }
-
-func (o *ListFirehosesOK) String() string {
-	return fmt.Sprintf("[GET /dex/firehoses][%d] listFirehosesOK  %+v", 200, o.Payload)
-}
-
 func (o *ListFirehosesOK) GetPayload() *models.FirehoseArray {
 	return o.Payload
 }
@@ -109,7 +79,7 @@ func NewListFirehosesInternalServerError() *ListFirehosesInternalServerError {
 }
 
 /*
-ListFirehosesInternalServerError describes a response with status code 500, with default header values.
+	ListFirehosesInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -117,39 +87,9 @@ type ListFirehosesInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this list firehoses internal server error response has a 2xx status code
-func (o *ListFirehosesInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this list firehoses internal server error response has a 3xx status code
-func (o *ListFirehosesInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this list firehoses internal server error response has a 4xx status code
-func (o *ListFirehosesInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this list firehoses internal server error response has a 5xx status code
-func (o *ListFirehosesInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this list firehoses internal server error response a status code equal to that given
-func (o *ListFirehosesInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *ListFirehosesInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /dex/firehoses][%d] listFirehosesInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *ListFirehosesInternalServerError) String() string {
-	return fmt.Sprintf("[GET /dex/firehoses][%d] listFirehosesInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *ListFirehosesInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

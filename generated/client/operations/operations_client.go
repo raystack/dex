@@ -43,6 +43,8 @@ type ClientService interface {
 
 	GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer, opts ...ClientOption) (*GetFirehoseLogsOK, error)
 
+	GetOptimusJob(params *GetOptimusJobParams, opts ...ClientOption) (*GetOptimusJobOK, error)
+
 	GetProjectBySlug(params *GetProjectBySlugParams, opts ...ClientOption) (*GetProjectBySlugOK, error)
 
 	ListAlertTemplates(params *ListAlertTemplatesParams, opts ...ClientOption) (*ListAlertTemplatesOK, error)
@@ -313,6 +315,46 @@ func (a *Client) GetFirehoseLogs(params *GetFirehoseLogsParams, writer io.Writer
 }
 
 /*
+GetOptimusJob gets optimus job specification
+
+Get list of kubernetes in this project.
+*/
+func (a *Client) GetOptimusJob(params *GetOptimusJobParams, opts ...ClientOption) (*GetOptimusJobOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetOptimusJobParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getOptimusJob",
+		Method:             "GET",
+		PathPattern:        "/dex/optimus/projects/{project}/jobs/{job}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetOptimusJobReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetOptimusJobOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getOptimusJob: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
 GetProjectBySlug gets project by slug
 
 Get project by its unique slug name.
@@ -564,7 +606,7 @@ func (a *Client) ResetOffset(params *ResetOffsetParams, opts ...ClientOption) (*
 	}
 	op := &runtime.ClientOperation{
 		ID:                 "resetOffset",
-		Method:             "POST",
+		Method:             "PUT",
 		PathPattern:        "/dex/firehoses/{firehoseUrn}/reset",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -604,7 +646,7 @@ func (a *Client) ScaleFirehose(params *ScaleFirehoseParams, opts ...ClientOption
 	}
 	op := &runtime.ClientOperation{
 		ID:                 "scaleFirehose",
-		Method:             "POST",
+		Method:             "PUT",
 		PathPattern:        "/dex/firehoses/{firehoseUrn}/scale",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},

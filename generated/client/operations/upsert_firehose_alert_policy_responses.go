@@ -52,7 +52,7 @@ func NewUpsertFirehoseAlertPolicyOK() *UpsertFirehoseAlertPolicyOK {
 }
 
 /*
-UpsertFirehoseAlertPolicyOK describes a response with status code 200, with default header values.
+	UpsertFirehoseAlertPolicyOK describes a response with status code 200, with default header values.
 
 Updated alert policy for firehose.
 */
@@ -60,39 +60,9 @@ type UpsertFirehoseAlertPolicyOK struct {
 	Payload *models.AlertPolicy
 }
 
-// IsSuccess returns true when this upsert firehose alert policy o k response has a 2xx status code
-func (o *UpsertFirehoseAlertPolicyOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this upsert firehose alert policy o k response has a 3xx status code
-func (o *UpsertFirehoseAlertPolicyOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this upsert firehose alert policy o k response has a 4xx status code
-func (o *UpsertFirehoseAlertPolicyOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this upsert firehose alert policy o k response has a 5xx status code
-func (o *UpsertFirehoseAlertPolicyOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this upsert firehose alert policy o k response a status code equal to that given
-func (o *UpsertFirehoseAlertPolicyOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *UpsertFirehoseAlertPolicyOK) Error() string {
 	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyOK  %+v", 200, o.Payload)
 }
-
-func (o *UpsertFirehoseAlertPolicyOK) String() string {
-	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyOK  %+v", 200, o.Payload)
-}
-
 func (o *UpsertFirehoseAlertPolicyOK) GetPayload() *models.AlertPolicy {
 	return o.Payload
 }
@@ -115,7 +85,7 @@ func NewUpsertFirehoseAlertPolicyNotFound() *UpsertFirehoseAlertPolicyNotFound {
 }
 
 /*
-UpsertFirehoseAlertPolicyNotFound describes a response with status code 404, with default header values.
+	UpsertFirehoseAlertPolicyNotFound describes a response with status code 404, with default header values.
 
 Firehose with given URN was not found
 */
@@ -123,39 +93,9 @@ type UpsertFirehoseAlertPolicyNotFound struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this upsert firehose alert policy not found response has a 2xx status code
-func (o *UpsertFirehoseAlertPolicyNotFound) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this upsert firehose alert policy not found response has a 3xx status code
-func (o *UpsertFirehoseAlertPolicyNotFound) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this upsert firehose alert policy not found response has a 4xx status code
-func (o *UpsertFirehoseAlertPolicyNotFound) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this upsert firehose alert policy not found response has a 5xx status code
-func (o *UpsertFirehoseAlertPolicyNotFound) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this upsert firehose alert policy not found response a status code equal to that given
-func (o *UpsertFirehoseAlertPolicyNotFound) IsCode(code int) bool {
-	return code == 404
-}
-
 func (o *UpsertFirehoseAlertPolicyNotFound) Error() string {
 	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
 }
-
-func (o *UpsertFirehoseAlertPolicyNotFound) String() string {
-	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyNotFound  %+v", 404, o.Payload)
-}
-
 func (o *UpsertFirehoseAlertPolicyNotFound) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -178,7 +118,7 @@ func NewUpsertFirehoseAlertPolicyInternalServerError() *UpsertFirehoseAlertPolic
 }
 
 /*
-UpsertFirehoseAlertPolicyInternalServerError describes a response with status code 500, with default header values.
+	UpsertFirehoseAlertPolicyInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -186,39 +126,9 @@ type UpsertFirehoseAlertPolicyInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this upsert firehose alert policy internal server error response has a 2xx status code
-func (o *UpsertFirehoseAlertPolicyInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this upsert firehose alert policy internal server error response has a 3xx status code
-func (o *UpsertFirehoseAlertPolicyInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this upsert firehose alert policy internal server error response has a 4xx status code
-func (o *UpsertFirehoseAlertPolicyInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this upsert firehose alert policy internal server error response has a 5xx status code
-func (o *UpsertFirehoseAlertPolicyInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this upsert firehose alert policy internal server error response a status code equal to that given
-func (o *UpsertFirehoseAlertPolicyInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *UpsertFirehoseAlertPolicyInternalServerError) Error() string {
 	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *UpsertFirehoseAlertPolicyInternalServerError) String() string {
-	return fmt.Sprintf("[PUT /dex/firehoses/{firehoseUrn}/alertPolicy][%d] upsertFirehoseAlertPolicyInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *UpsertFirehoseAlertPolicyInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }

@@ -62,7 +62,7 @@ func NewGetFirehoseLogsOK(writer io.Writer) *GetFirehoseLogsOK {
 }
 
 /*
-GetFirehoseLogsOK describes a response with status code 200, with default header values.
+	GetFirehoseLogsOK describes a response with status code 200, with default header values.
 
 Found logs for given firehose URN.
 */
@@ -70,39 +70,9 @@ type GetFirehoseLogsOK struct {
 	Payload io.Writer
 }
 
-// IsSuccess returns true when this get firehose logs o k response has a 2xx status code
-func (o *GetFirehoseLogsOK) IsSuccess() bool {
-	return true
-}
-
-// IsRedirect returns true when this get firehose logs o k response has a 3xx status code
-func (o *GetFirehoseLogsOK) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this get firehose logs o k response has a 4xx status code
-func (o *GetFirehoseLogsOK) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this get firehose logs o k response has a 5xx status code
-func (o *GetFirehoseLogsOK) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this get firehose logs o k response a status code equal to that given
-func (o *GetFirehoseLogsOK) IsCode(code int) bool {
-	return code == 200
-}
-
 func (o *GetFirehoseLogsOK) Error() string {
 	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
 }
-
-func (o *GetFirehoseLogsOK) String() string {
-	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsOK  %+v", 200, o.Payload)
-}
-
 func (o *GetFirehoseLogsOK) GetPayload() io.Writer {
 	return o.Payload
 }
@@ -123,7 +93,7 @@ func NewGetFirehoseLogsBadRequest() *GetFirehoseLogsBadRequest {
 }
 
 /*
-GetFirehoseLogsBadRequest describes a response with status code 400, with default header values.
+	GetFirehoseLogsBadRequest describes a response with status code 400, with default header values.
 
 Get logs request is not valid.
 */
@@ -131,39 +101,9 @@ type GetFirehoseLogsBadRequest struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this get firehose logs bad request response has a 2xx status code
-func (o *GetFirehoseLogsBadRequest) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this get firehose logs bad request response has a 3xx status code
-func (o *GetFirehoseLogsBadRequest) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this get firehose logs bad request response has a 4xx status code
-func (o *GetFirehoseLogsBadRequest) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this get firehose logs bad request response has a 5xx status code
-func (o *GetFirehoseLogsBadRequest) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this get firehose logs bad request response a status code equal to that given
-func (o *GetFirehoseLogsBadRequest) IsCode(code int) bool {
-	return code == 400
-}
-
 func (o *GetFirehoseLogsBadRequest) Error() string {
 	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsBadRequest  %+v", 400, o.Payload)
 }
-
-func (o *GetFirehoseLogsBadRequest) String() string {
-	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsBadRequest  %+v", 400, o.Payload)
-}
-
 func (o *GetFirehoseLogsBadRequest) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -186,7 +126,7 @@ func NewGetFirehoseLogsNotFound() *GetFirehoseLogsNotFound {
 }
 
 /*
-GetFirehoseLogsNotFound describes a response with status code 404, with default header values.
+	GetFirehoseLogsNotFound describes a response with status code 404, with default header values.
 
 Firehose with given URN was not found
 */
@@ -194,39 +134,9 @@ type GetFirehoseLogsNotFound struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this get firehose logs not found response has a 2xx status code
-func (o *GetFirehoseLogsNotFound) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this get firehose logs not found response has a 3xx status code
-func (o *GetFirehoseLogsNotFound) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this get firehose logs not found response has a 4xx status code
-func (o *GetFirehoseLogsNotFound) IsClientError() bool {
-	return true
-}
-
-// IsServerError returns true when this get firehose logs not found response has a 5xx status code
-func (o *GetFirehoseLogsNotFound) IsServerError() bool {
-	return false
-}
-
-// IsCode returns true when this get firehose logs not found response a status code equal to that given
-func (o *GetFirehoseLogsNotFound) IsCode(code int) bool {
-	return code == 404
-}
-
 func (o *GetFirehoseLogsNotFound) Error() string {
 	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsNotFound  %+v", 404, o.Payload)
 }
-
-func (o *GetFirehoseLogsNotFound) String() string {
-	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsNotFound  %+v", 404, o.Payload)
-}
-
 func (o *GetFirehoseLogsNotFound) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
@@ -249,7 +159,7 @@ func NewGetFirehoseLogsInternalServerError() *GetFirehoseLogsInternalServerError
 }
 
 /*
-GetFirehoseLogsInternalServerError describes a response with status code 500, with default header values.
+	GetFirehoseLogsInternalServerError describes a response with status code 500, with default header values.
 
 internal error
 */
@@ -257,39 +167,9 @@ type GetFirehoseLogsInternalServerError struct {
 	Payload *models.ErrorResponse
 }
 
-// IsSuccess returns true when this get firehose logs internal server error response has a 2xx status code
-func (o *GetFirehoseLogsInternalServerError) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this get firehose logs internal server error response has a 3xx status code
-func (o *GetFirehoseLogsInternalServerError) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this get firehose logs internal server error response has a 4xx status code
-func (o *GetFirehoseLogsInternalServerError) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this get firehose logs internal server error response has a 5xx status code
-func (o *GetFirehoseLogsInternalServerError) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this get firehose logs internal server error response a status code equal to that given
-func (o *GetFirehoseLogsInternalServerError) IsCode(code int) bool {
-	return code == 500
-}
-
 func (o *GetFirehoseLogsInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsInternalServerError  %+v", 500, o.Payload)
 }
-
-func (o *GetFirehoseLogsInternalServerError) String() string {
-	return fmt.Sprintf("[GET /dex/firehoses/{firehoseUrn}/logs][%d] getFirehoseLogsInternalServerError  %+v", 500, o.Payload)
-}
-
 func (o *GetFirehoseLogsInternalServerError) GetPayload() *models.ErrorResponse {
 	return o.Payload
 }
