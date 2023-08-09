@@ -27,8 +27,7 @@ type SubscriptionForm struct {
 
 	// channel criticality
 	// Required: true
-	// Enum: [INFO WARNING CRITICAL]
-	ChannelCriticality *string `json:"channel_criticality"`
+	ChannelCriticality *ChannelCriticality `json:"channel_criticality"`
 
 	// Shield's group id
 	// Example: 913464a1-4f87-4312-b4c8-5ac3ebd4f1f2
@@ -130,47 +129,23 @@ func (m *SubscriptionForm) validateAlertSeverity(formats strfmt.Registry) error 
 	return nil
 }
 
-var subscriptionFormTypeChannelCriticalityPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["INFO","WARNING","CRITICAL"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		subscriptionFormTypeChannelCriticalityPropEnum = append(subscriptionFormTypeChannelCriticalityPropEnum, v)
-	}
-}
-
-const (
-
-	// SubscriptionFormChannelCriticalityINFO captures enum value "INFO"
-	SubscriptionFormChannelCriticalityINFO string = "INFO"
-
-	// SubscriptionFormChannelCriticalityWARNING captures enum value "WARNING"
-	SubscriptionFormChannelCriticalityWARNING string = "WARNING"
-
-	// SubscriptionFormChannelCriticalityCRITICAL captures enum value "CRITICAL"
-	SubscriptionFormChannelCriticalityCRITICAL string = "CRITICAL"
-)
-
-// prop value enum
-func (m *SubscriptionForm) validateChannelCriticalityEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, subscriptionFormTypeChannelCriticalityPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (m *SubscriptionForm) validateChannelCriticality(formats strfmt.Registry) error {
 
 	if err := validate.Required("channel_criticality", "body", m.ChannelCriticality); err != nil {
 		return err
 	}
 
-	// value enum
-	if err := m.validateChannelCriticalityEnum("channel_criticality", "body", *m.ChannelCriticality); err != nil {
+	if err := validate.Required("channel_criticality", "body", m.ChannelCriticality); err != nil {
 		return err
+	}
+
+	if m.ChannelCriticality != nil {
+		if err := m.ChannelCriticality.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("channel_criticality")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -249,8 +224,31 @@ func (m *SubscriptionForm) validateResourceType(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this subscription form based on context it is used
+// ContextValidate validate this subscription form based on the context it is used
 func (m *SubscriptionForm) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateChannelCriticality(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SubscriptionForm) contextValidateChannelCriticality(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.ChannelCriticality != nil {
+		if err := m.ChannelCriticality.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("channel_criticality")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

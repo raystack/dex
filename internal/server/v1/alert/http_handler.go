@@ -206,3 +206,23 @@ func (h *Handler) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 		"message": "subscription removed",
 	})
 }
+
+func (h *Handler) getAlertChannels(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	groupIDStr := chi.URLParam(r, "group_id")
+
+	alertChannels, err := h.subscriptionService.GetAlertChannels(ctx, groupIDStr)
+	if err != nil {
+		if errors.Is(err, ErrNoShieldGroup) {
+			utils.WriteErrMsg(w, http.StatusNotFound, err.Error())
+		} else {
+			utils.WriteErr(w, err)
+		}
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"alert_channels": alertChannels,
+	})
+}

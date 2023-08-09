@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/goto/dex/generated/models"
 	"github.com/goto/dex/internal/server/v1/alert"
 	"github.com/goto/dex/mocks"
 )
@@ -269,6 +270,7 @@ func TestSubscriptionServiceCreateSubscription(t *testing.T) {
 	t.Run("should create subscription on success", func(t *testing.T) {
 		receiverID := uint64(15)
 		sirenNamespace := 5
+		channelName := "test-alert-channel"
 
 		// inputs
 		form := alert.SubscriptionForm{
@@ -292,7 +294,9 @@ func TestSubscriptionServiceCreateSubscription(t *testing.T) {
 			}),
 		}
 		sirenReceivers := []*sirenv1beta1.Receiver{
-			{Id: receiverID, Type: sirenReceiverPkg.TypeSlackChannel},
+			{Id: receiverID, Type: sirenReceiverPkg.TypeSlackChannel, Configurations: newStruct(t, map[string]interface{}{
+				"channel_name": channelName,
+			})},
 		}
 
 		// expectations
@@ -317,6 +321,7 @@ func TestSubscriptionServiceCreateSubscription(t *testing.T) {
 				"project_id":          form.ProjectID,
 				"project_slug":        shieldProject.Slug,
 				"channel_criticality": string(form.ChannelCriticality),
+				"channel_name":        channelName,
 			}),
 			CreatedBy: form.UserID,
 		}
@@ -483,6 +488,7 @@ func TestSubscriptionServiceUpdateSubscription(t *testing.T) {
 	t.Run("should update subscription on success", func(t *testing.T) {
 		receiverID := uint64(17)
 		sirenNamespace := 5
+		channelName := "test-channel-update"
 
 		// inputs
 		form := alert.SubscriptionForm{
@@ -506,7 +512,9 @@ func TestSubscriptionServiceUpdateSubscription(t *testing.T) {
 			}),
 		}
 		sirenReceivers := []*sirenv1beta1.Receiver{
-			{Id: receiverID, Type: sirenReceiverPkg.TypeSlackChannel},
+			{Id: receiverID, Type: sirenReceiverPkg.TypeSlackChannel, Configurations: newStruct(t, map[string]interface{}{
+				"channel_name": channelName,
+			})},
 		}
 
 		// expecations
@@ -532,6 +540,7 @@ func TestSubscriptionServiceUpdateSubscription(t *testing.T) {
 				"project_id":          form.ProjectID,
 				"project_slug":        shieldProject.Slug,
 				"channel_criticality": string(form.ChannelCriticality),
+				"channel_name":        channelName,
 			}),
 			UpdatedBy: form.UserID,
 		}
@@ -604,6 +613,107 @@ func TestSubscriptionServiceDeleteSubscription(t *testing.T) {
 		service := alert.NewSubscriptionService(client, shield)
 		err := service.DeleteSubscription(ctx, subscriptionID)
 		assert.ErrorIs(t, err, expectedError)
+	})
+}
+
+func TestSubscriptionServiceGetAlertChannels(t *testing.T) {
+	ctx := context.TODO()
+	groupID := "deafcced-845c-4089-89f0-06621486cb0a"
+
+	t.Run("should not return error if group is not found", func(t *testing.T) {
+		notFoundError := status.Error(codes.NotFound, "Not Found")
+
+		shield := new(mocks.ShieldServiceClient)
+		shield.On("GetGroup", ctx, &shieldv1beta1.GetGroupRequest{Id: groupID}).
+			Return(nil, notFoundError)
+		defer shield.AssertExpectations(t)
+		siren := new(mocks.SirenServiceClient)
+
+		service := alert.NewSubscriptionService(siren, shield)
+		_, err := service.GetAlertChannels(ctx, groupID)
+		assert.ErrorIs(t, err, alert.ErrNoShieldGroup)
+	})
+
+	t.Run("should return alert channels", func(t *testing.T) {
+		groupSlug := "test-group-30"
+		shieldGroup := &shieldv1beta1.Group{
+			Slug: groupSlug,
+		}
+		sirenReceivers := []*sirenv1beta1.Receiver{
+			{
+				Id:   54,
+				Name: "test-receiver-info-1",
+				Labels: map[string]string{
+					"severity": string(alert.AlertSeverityInfo),
+				},
+				Configurations: newStruct(t, map[string]interface{}{
+					"channel_name": "test-channel-info-1",
+				}),
+			},
+			{
+				Id:   55,
+				Name: "test-receiver-critical-1",
+				Labels: map[string]string{
+					"severity": string(alert.AlertSeverityCritical),
+				},
+				Configurations: newStruct(t, map[string]interface{}{
+					"channel_name": "test-channel-critical-1",
+				}),
+			},
+			{
+				Id:   56,
+				Name: "test-receiver-warning-1",
+				Labels: map[string]string{
+					"severity": string(alert.AlertSeverityWarning),
+				},
+				Configurations: newStruct(t, map[string]interface{}{
+					"channel_name": "test-channel-warning-1",
+				}),
+			},
+		}
+
+		expected := []models.AlertChannel{
+			{
+				ReceiverID:         fmt.Sprint(sirenReceivers[0].Id),
+				ReceiverName:       sirenReceivers[0].Name,
+				ChannelCriticality: models.NewChannelCriticality(models.ChannelCriticalityINFO),
+				ChannelName:        "test-channel-info-1",
+			},
+			{
+				ReceiverID:         fmt.Sprint(sirenReceivers[1].Id),
+				ReceiverName:       sirenReceivers[1].Name,
+				ChannelCriticality: models.NewChannelCriticality(models.ChannelCriticalityCRITICAL),
+				ChannelName:        "test-channel-critical-1",
+			},
+			{
+				ReceiverID:         fmt.Sprint(sirenReceivers[2].Id),
+				ReceiverName:       sirenReceivers[2].Name,
+				ChannelCriticality: models.NewChannelCriticality(models.ChannelCriticalityWARNING),
+				ChannelName:        "test-channel-warning-1",
+			},
+		}
+
+		shield := new(mocks.ShieldServiceClient)
+		shield.On("GetGroup", ctx, &shieldv1beta1.GetGroupRequest{Id: groupID}).
+			Return(&shieldv1beta1.GetGroupResponse{
+				Group: shieldGroup,
+			}, nil)
+		defer shield.AssertExpectations(t)
+		siren := new(mocks.SirenServiceClient)
+		siren.On("ListReceivers", ctx, &sirenv1beta1.ListReceiversRequest{
+			Labels: map[string]string{
+				"team": groupSlug,
+			},
+		}).
+			Return(&sirenv1beta1.ListReceiversResponse{
+				Receivers: sirenReceivers,
+			}, nil)
+		defer siren.AssertExpectations(t)
+
+		service := alert.NewSubscriptionService(siren, shield)
+		actual, err := service.GetAlertChannels(ctx, groupID)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, actual)
 	})
 }
 

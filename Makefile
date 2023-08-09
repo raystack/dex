@@ -35,6 +35,7 @@ generate:
 	@rm -rf generated/
 	@mkdir generated
 	@swagger generate client -t generated -f swagger.yml
+	@make format
 
 generate-mocks:
 	@mockery --srcpkg=buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc --name=SirenServiceClient

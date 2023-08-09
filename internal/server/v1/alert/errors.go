@@ -10,4 +10,5 @@ var (
 	ErrNoSirenReceiver           = errors.New("could not find siren's receiver")
 	ErrMultipleSirenReceiver     = errors.New("multiple siren's receivers found")
 	ErrInvalidSirenReceiver      = errors.New("invalid siren's receiver type")
+	ErrNoShieldGroup             = errors.New("could not find shield's group")
 )

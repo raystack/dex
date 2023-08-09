@@ -21,5 +21,7 @@ func SubscriptionRoutes(
 		r.Post("/", handler.createSubscription)
 		r.Put("/{subscription_id}", handler.updateSubscription)
 		r.Delete("/{subscription_id}", handler.deleteSubscription)
+
+		r.Get("/groups/{group_id}/alert_channels", handler.getAlertChannels)
 	}
 }

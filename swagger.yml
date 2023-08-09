@@ -789,6 +789,35 @@ paths:
           description: Not Found Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /dex/subscriptions/groups/{id}/alert_channels:
+    get:
+      summary: Get Group Alert Channels
+      description: Get Group available alert channels
+      operationId: getGroupAlertChannels
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Shield Group's ID
+      responses:
+        "200":
+          description: Successful Operation.
+          schema:
+            type: object
+            properties: 
+              alert_channels:
+                type: array
+                items: 
+                  $ref: "#/definitions/AlertChannel"
+        "404":
+          description: Group Not Found Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /dex/optimus/projects/{project}/jobs/{job}:
     parameters:
       - in: path
@@ -1228,6 +1257,21 @@ definitions:
         format: date-time
         example: "2022-06-23T16:49:15.885541Z"
         readOnly: true
+  AlertChannel:
+    type: object
+    properties:
+      receiver_id:
+        type: string
+        example: "47"
+        readOnly: true
+      receiver_name:
+        type: string
+        example: "pilot-team-de-slack-warning"
+      channel_name:
+        type: string
+        example: test-channel-name
+      channel_criticality:
+        $ref: "#/definitions/ChannelCriticality"
   SubscriptionForm:
     type: object
     required:
@@ -1263,9 +1307,12 @@ definitions:
           - WARNING
           - CRITICAL
       channel_criticality:
-        type: string
-        default: CRITICAL
-        enum:
-          - INFO
-          - WARNING
-          - CRITICAL
+        $ref: "#/definitions/ChannelCriticality"
+  ChannelCriticality:
+    type: string
+    default: CRITICAL
+    enum:
+      - INFO
+      - WARNING
+      - CRITICAL
+        
