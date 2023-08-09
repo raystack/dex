@@ -20,7 +20,7 @@ import (
 
 const kubeClusterDependencyKey = "kube_cluster"
 
-// Refer https://odpf.github.io/firehose/advance/generic/
+// Refer https://goto.github.io/firehose/advance/generic/
 const (
 	confSinkType              = "SINK_TYPE"
 	confStencilURL            = "SCHEMA_REGISTRY_STENCIL_URLS"

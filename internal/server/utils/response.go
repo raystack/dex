@@ -40,3 +40,13 @@ func WriteErr(w http.ResponseWriter, err error) {
 	e := errors.E(err)
 	WriteJSON(w, e.HTTPStatus(), e)
 }
+
+// WriteErr interprets the given error as one of the errors defined
+// in errors package and writes the error response.
+func WriteErrMsg(w http.ResponseWriter, statusCode int, message string) {
+	err := errors.Error{
+		Message: message,
+		Status:  statusCode,
+	}
+	WriteJSON(w, err.HTTPStatus(), err)
+}

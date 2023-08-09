@@ -625,11 +625,168 @@ paths:
           collectionFormat: multi
       responses:
         "200":
-          description: Successful Operation.
+          description: Successful Operation. 
           schema:
             $ref: "#/definitions/KubernetesArray"
         "500":
           description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /dex/subscriptions:
+    get:
+      summary: Get a list of subscriptions
+      description: Get a list of Siren's alert subscription.
+      operationId: getSubscriptionList
+      parameters:
+        - in: query
+          name: group_id
+          type: string
+          description: Shield's group id
+          required: false
+        - in: query
+          name: resource_id
+          type: string
+          description: Resource unique identifier, e.g. firehose's urn
+          required: false
+        - in: query
+          name: resource_type
+          type: string
+          description: Resource type, e.g. firehose, dagger, optimus, etc. This is required if "resource_id" is passed.
+          required: false
+      responses:
+        "200":
+          description: Successful Operation.
+          schema:
+            type: object
+            properties: 
+              subscriptions:
+                type: array
+                items: 
+                  $ref: "#/definitions/Subscription"
+        "400":
+          description: Validation Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      summary: Create a new alert subscription
+      description: Create a new Siren's alert subscription.
+      operationId: newAlertSubscription
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/SubscriptionForm"
+      responses:
+        "201":
+          description: Successful Operation.
+          schema:
+            type: object
+            properties: 
+              subscription:
+                $ref: "#/definitions/Subscription"
+        "400":
+          description: Validation Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "409":
+          description: Duplicate subscription
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: "Missing namespace and slack channel in shield"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /dex/subscriptions/{id}:
+    get:
+      summary: Get existing Siren subscription
+      description: Get an existing Siren's alert subscription.
+      operationId: getAlertSubscription
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: Successful Operation.
+          schema:
+            type: object
+            properties: 
+              subscription:
+                $ref: "#/definitions/Subscription"
+        "404":
+          description: Not Found Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      summary: Update existing Siren subscription
+      description: Update an existing Siren's alert subscription.
+      operationId: updateAlertSubscription
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/SubscriptionForm"
+      responses:
+        "200":
+          description: Successful Operation.
+          schema:
+            type: object
+            properties: 
+              subscription:
+                $ref: "#/definitions/Subscription"
+        "400":
+          description: Validation Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Not Found Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "409":
+          description: Duplicate subscription
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: "Missing namespace and slack channel in shield"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Internal Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete existing Siren subscription
+      description: Delete an existing Siren's alert subscription.
+      operationId: deleteAlertSubscription
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: Successful Operation.
+          schema:
+            $ref: "#/definitions/Response"
+        "404":
+          description: Not Found Error
           schema:
             $ref: "#/definitions/ErrorResponse"
   /dex/optimus/projects/{project}/jobs/{job}:
@@ -659,6 +816,12 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 definitions:
+  Response:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Sample Message"
   ErrorResponse:
     type: object
     properties:
@@ -773,7 +936,6 @@ definitions:
         type: object
         additionalProperties:
           type: string
-
   FirehosePartialConfig:
     type: object
     properties:
@@ -804,7 +966,6 @@ definitions:
         description: If specified, it will be merged with the current configs.
         additionalProperties:
           type: string
-
   FirehoseConfig:
     type: object
     required:
@@ -853,7 +1014,6 @@ definitions:
           type: string
         filter:
           type: object
-
   Rule:
     type: object
     properties:
@@ -966,7 +1126,44 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/AlertTemplate"
-
+  Subscription:
+    type: object
+    description: "Siren subscription model: https://github.com/goto/siren/blob/v0.6.4/proto/siren.swagger.yaml#L1325"
+    properties:
+      id:
+        type: string
+        format: uint64
+      urn:
+        type: string
+      namespace:
+        type: string
+        format: uint64
+      receivers:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uint64
+            configuration:
+              type: object
+      match:
+        type: object
+        additionalProperties:
+          type: string
+      created_at:
+        type: string
+        format: date-time
+      updated_at:
+        type: string
+        format: date-time
+      metadata:
+        type: object
+      created_by:
+        type: string
+      updated_by:
+        type: string
   HistoryResponse:
     type: object
     properties:
@@ -1031,3 +1228,44 @@ definitions:
         format: date-time
         example: "2022-06-23T16:49:15.885541Z"
         readOnly: true
+  SubscriptionForm:
+    type: object
+    required:
+      - project_id
+      - resource_id
+      - resource_type
+      - group_id
+      - alert_severity
+      - channel_criticality
+    properties: 
+      project_id:
+        type: string
+        example: "113564a1-4f87-4312-b4c8-53c3ebd4f1f2"
+      resource_id:
+        type: string
+        description: Firehose Unique Identifier
+      resource_type:
+        type: string
+        default: firehose
+        enum:
+          - firehose
+          - dagger
+          - optimus
+      group_id:
+        type: string
+        description: Shield's group id
+        example: "913464a1-4f87-4312-b4c8-5ac3ebd4f1f2"
+      alert_severity:
+        type: string
+        default: CRITICAL
+        enum:
+          - INFO
+          - WARNING
+          - CRITICAL
+      channel_criticality:
+        type: string
+        default: CRITICAL
+        enum:
+          - INFO
+          - WARNING
+          - CRITICAL
