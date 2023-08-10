@@ -109,26 +109,40 @@ func requestLogger(lg *zap.Logger) middleware {
 			t := time.Now()
 			span := trace.FromContext(req.Context())
 
-			buf, err := io.ReadAll(req.Body)
-			if err != nil {
-				lg.Debug("error reading request body: %v", zap.String("error", err.Error()))
-				http.Error(wr, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			reader := io.NopCloser(bytes.NewBuffer(buf))
-			req.Body = reader
-
-			body := json.RawMessage(buf)
-			jsonBody, err := json.Marshal(body)
-			if err != nil {
-				lg.Debug("error marshling request body: %v", zap.String("error", err.Error()))
-				http.Error(wr, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
 			clientID, _, _ := req.BasicAuth()
 
 			wrapped := &wrappedWriter{ResponseWriter: wr, Status: http.StatusOK}
+
+			fields := []zap.Field{
+				zap.String("request_path", req.URL.Path),
+				zap.String("request_method", req.Method),
+				zap.String("request_id", req.Header.Get(headerRequestID)),
+				zap.String("client_id", clientID),
+				zap.String("trace_id", span.SpanContext().TraceID.String()),
+				zap.String("response_time", time.Since(t).String()),
+				zap.Int("status", wrapped.Status),
+			}
+
+			switch req.Method {
+			case http.MethodGet:
+				break
+			default:
+				buf, err := io.ReadAll(req.Body)
+				if err != nil {
+					lg.Debug("error reading request body: %v", zap.String("error", err.Error()))
+				} else if len(buf) > 0 {
+					dst := &bytes.Buffer{}
+					err := json.Compact(dst, buf)
+					if err != nil {
+						lg.Debug("error json compacting request body: %v", zap.String("error", err.Error()))
+					} else {
+						fields = append(fields, zap.String("request_body", dst.String()))
+					}
+				}
+
+				reader := io.NopCloser(bytes.NewBuffer(buf))
+				req.Body = reader
+			}
 
 			var fr http.ResponseWriter
 			flusher, ok := wr.(http.Flusher)
@@ -142,17 +156,6 @@ func requestLogger(lg *zap.Logger) middleware {
 			}
 
 			next.ServeHTTP(fr, req)
-
-			fields := []zap.Field{
-				zap.String("request_path", req.URL.Path),
-				zap.String("request_method", req.Method),
-				zap.String("request_id", req.Header.Get(headerRequestID)),
-				zap.String("client_id", clientID),
-				zap.String("trace_id", span.SpanContext().TraceID.String()),
-				zap.String("response_time", time.Since(t).String()),
-				zap.String("request_body", string(jsonBody)),
-				zap.Int("status", wrapped.Status),
-			}
 
 			if !is2xx(wrapped.Status) {
 				lg.Warn("request handled with non-2xx response", fields...)

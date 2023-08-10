@@ -1547,6 +1547,8 @@ github.com/ncw/swift v1.0.47/go.mod h1:23YIA4yWVnGwv2dQlN4bB7egfYX6YLn0Yo/S6zZO/
 github.com/neo4j/neo4j-go-driver v1.8.1-0.20200803113522-b626aa943eba/go.mod h1:ncO5VaFWh0Nrt+4KT4mOZboaczBZcLuHrG+/sUeP8gI=
 github.com/newrelic/go-agent/v3 v3.20.2 h1:EqFMriW3Bv3on4tqKzI+fJmNYOEG55yw54v6yv8L+x8=
 github.com/newrelic/go-agent/v3 v3.20.2/go.mod h1:rT6ZUxJc5rQbWLyCtjqQCOcfb01lKRFbc1yMQkcboWM=
+github.com/newrelic/go-agent/v3 v3.24.0 h1:DPfbd+p0akRjv6UpWzWJl+pfOMSs+QkAeNRUp0fPLZI=
+github.com/newrelic/go-agent/v3 v3.24.0/go.mod h1:7GnP0o5ZwEsnC001iDSoZRJ63jS6AtoAOggpg5XVJh8=
 github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0 h1:BjzhyzSrzc8/WtyZDWBF8XATW4M92EoZiy38kgL3gfo=
 github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0/go.mod h1:gSMlmRnmdRq5c2NTNuh+JtBGXSvnJDqIudxiXwQ07m0=
 github.com/newrelic/newrelic-telemetry-sdk-go v0.2.0/go.mod h1:G9MqE/cHGv3Hx3qpYhfuyFUsGx2DpVcGi1iJIqTg+JQ=

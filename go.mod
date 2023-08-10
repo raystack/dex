@@ -21,7 +21,7 @@ require (
 	github.com/goto/salt v0.3.0
 	github.com/goto/siren v0.6.5
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/newrelic/go-agent/v3 v3.20.2
+	github.com/newrelic/go-agent/v3 v3.24.0
 	github.com/newrelic/newrelic-opencensus-exporter-go v0.4.0
 	github.com/rs/xid v1.4.0
 	github.com/spf13/cobra v1.6.1
