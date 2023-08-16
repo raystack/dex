@@ -113,6 +113,23 @@ func requestLogger(lg *zap.Logger) middleware {
 
 			wrapped := &wrappedWriter{ResponseWriter: wr, Status: http.StatusOK}
 
+			var fr http.ResponseWriter
+			flusher, ok := wr.(http.Flusher)
+			if !ok {
+				fr = wrapped
+			} else {
+				fr = struct {
+					*wrappedWriter
+					http.Flusher
+				}{wrapped, flusher}
+			}
+
+			next.ServeHTTP(fr, req)
+
+			if req.URL.Path == "/ping" {
+				return
+			}
+
 			fields := []zap.Field{
 				zap.String("request_path", req.URL.Path),
 				zap.String("request_method", req.Method),
@@ -143,19 +160,6 @@ func requestLogger(lg *zap.Logger) middleware {
 				reader := io.NopCloser(bytes.NewBuffer(buf))
 				req.Body = reader
 			}
-
-			var fr http.ResponseWriter
-			flusher, ok := wr.(http.Flusher)
-			if !ok {
-				fr = wrapped
-			} else {
-				fr = struct {
-					*wrappedWriter
-					http.Flusher
-				}{wrapped, flusher}
-			}
-
-			next.ServeHTTP(fr, req)
 
 			if !is2xx(wrapped.Status) {
 				lg.Warn("request handled with non-2xx response", fields...)
