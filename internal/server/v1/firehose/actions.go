@@ -87,7 +87,7 @@ func (api *firehoseAPI) handleStart(w http.ResponseWriter, r *http.Request) {
 
 	params := entropyFirehose.StartParams{}
 	// for LOG sinkType, updating stop_time
-	if existingFirehose.Configs.EnvVars[confSinkType] == logSinkType {
+	if existingFirehose.Configs.EnvVars[configSinkType] == logSinkType {
 		t := time.Now().UTC().Add(logSinkTTL)
 		params.StopTime = &t
 	}

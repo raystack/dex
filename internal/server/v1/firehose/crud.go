@@ -20,13 +20,11 @@ import (
 	"github.com/goto/dex/internal/server/reqctx"
 	"github.com/goto/dex/internal/server/utils"
 	"github.com/goto/dex/internal/server/v1/project"
-	"github.com/goto/dex/odin"
 	"github.com/goto/dex/pkg/errors"
 )
 
 const (
-	kindFirehose  = "firehose"
-	confTopicName = "SOURCE_KAFKA_TOPIC"
+	kindFirehose = "firehose"
 )
 
 func (api *firehoseAPI) handleGet(w http.ResponseWriter, r *http.Request) {
@@ -78,31 +76,12 @@ func (api *firehoseAPI) handleCreate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, err)
 		return
 	}
-	// resolve stream_name to kafka clusters.
-	streamURN := buildStreamURN(*def.Configs.StreamName, prj.GetSlug())
-	sourceKafkaBroker, err := odin.GetOdinStream(r.Context(), api.OdinAddr, streamURN)
+	def.Project = prj.GetSlug()
+
+	err = api.buildEnvVars(r.Context(), &def, reqCtx.UserID, true)
 	if err != nil {
-		utils.WriteErr(w, err)
+		utils.WriteErr(w, fmt.Errorf("error building env vars: %w", err))
 		return
-	}
-	def.Configs.EnvVars[confSourceKafkaBrokerAddr] = sourceKafkaBroker
-
-	def.Configs.EnvVars[confStencilRegistryToggle] = "true"
-	if def.Configs.EnvVars[confStencilURL] == "" {
-		stencilUrls, err := api.getStencilURLs(
-			r.Context(),
-			reqCtx.UserID,
-			def.Configs.EnvVars[confTopicName],
-			streamURN,
-			prj.GetSlug(),
-			def.Configs.EnvVars[confProtoClassName],
-		)
-		if err != nil {
-			utils.WriteErr(w, err)
-			return
-		}
-
-		def.Configs.EnvVars[confStencilURL] = stencilUrls
 	}
 
 	res, err := mapFirehoseEntropyResource(def, prj)
@@ -199,9 +178,9 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	includeEnv := []string{
-		confSinkType,
-		confTopicName,
-		confSourceKafkaConsumerID,
+		configSinkType,
+		configSourceKafkaTopic,
+		configSourceKafkaConsumerGroup,
 	}
 
 	topicName := q.Get("topic_name")
@@ -219,11 +198,11 @@ func (api *firehoseAPI) handleList(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if topicName != "" && def.Configs.EnvVars[confTopicName] != topicName {
+		if topicName != "" && def.Configs.EnvVars[configSourceKafkaTopic] != topicName {
 			continue
 		}
 
-		_, include := sinkTypes[def.Configs.EnvVars[confSinkType]]
+		_, include := sinkTypes[def.Configs.EnvVars[configSinkType]]
 		if len(sinkTypes) > 0 && !include {
 			continue
 		}
@@ -263,7 +242,6 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("group is required"))
 		return
 	}
-	updates.Configs.StopTime = sanitizeFirehoseStopTime(updates.Configs.StopTime)
 
 	existingFirehose, err := api.getFirehose(r.Context(), urn)
 	if err != nil {
@@ -276,8 +254,12 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		utils.WriteErr(w, errors.ErrInvalid.WithMsgf("kube_cluster cannot be updated"))
 		return
 	}
+	existingFirehose.Group = (*strfmt.UUID)(&updates.Group)
+	existingFirehose.Description = updates.Description
+	existingFirehose.Configs = &updates.Configs
+	existingFirehose.Configs.StopTime = sanitizeFirehoseStopTime(updates.Configs.StopTime)
 
-	groupID := updates.Group
+	groupID := existingFirehose.Group.String()
 	groupSlug, err := api.getGroupSlug(ctx, groupID)
 	if err != nil {
 		utils.WriteErr(w, err)
@@ -288,28 +270,16 @@ func (api *firehoseAPI) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		labelTeam:  groupSlug,
 	})
 	if updates.Description != "" {
-		labels[labelDescription] = updates.Description
+		labels[labelDescription] = existingFirehose.Description
 	}
 
-	streamURN := buildStreamURN(*updates.Configs.StreamName, existingFirehose.Project)
-	if updates.Configs.EnvVars[confStencilURL] == "" {
-		stencilUrls, err := api.getStencilURLs(
-			r.Context(),
-			reqCtx.UserID,
-			updates.Configs.EnvVars[confTopicName],
-			streamURN,
-			existingFirehose.Project,
-			updates.Configs.EnvVars[confProtoClassName],
-		)
-		if err != nil {
-			utils.WriteErr(w, err)
-			return
-		}
-
-		updates.Configs.EnvVars[confStencilURL] = stencilUrls
+	err = api.buildEnvVars(r.Context(), &existingFirehose, reqCtx.UserID, true)
+	if err != nil {
+		utils.WriteErr(w, fmt.Errorf("error building env vars: %w", err))
+		return
 	}
 
-	cfgStruct, err := makeConfigStruct(&updates.Configs)
+	cfgStruct, err := makeConfigStruct(existingFirehose.Configs)
 	if err != nil {
 		utils.WriteErr(w, err)
 		return
@@ -397,23 +367,6 @@ func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Reque
 		existing.Configs.Replicas = req.Configs.Replicas
 	}
 
-	if _, ok := req.Configs.EnvVars[confTopicName]; ok {
-		streamURN := buildStreamURN(req.Configs.StreamName, existing.Project)
-		stencilUrls, err := api.getStencilURLs(
-			r.Context(),
-			reqCtx.UserID,
-			req.Configs.EnvVars[confTopicName],
-			streamURN,
-			existing.Project,
-			req.Configs.EnvVars[confProtoClassName],
-		)
-		if err != nil {
-			utils.WriteErr(w, err)
-			return
-		}
-		existing.Configs.EnvVars[confStencilURL] = stencilUrls
-	}
-
 	if req.Configs.StopTime != nil {
 		if *req.Configs.StopTime == "" {
 			existing.Configs.StopTime = nil
@@ -434,6 +387,13 @@ func (api *firehoseAPI) handlePartialUpdate(w http.ResponseWriter, r *http.Reque
 		existing.Configs.EnvVars,
 		req.Configs.EnvVars,
 	)
+
+	_, hasTopicUpdate := req.Configs.EnvVars[configSourceKafkaTopic]
+	err = api.buildEnvVars(r.Context(), &existing, reqCtx.UserID, hasTopicUpdate)
+	if err != nil {
+		utils.WriteErr(w, fmt.Errorf("error building env vars: %w", err))
+		return
+	}
 
 	cfgStruct, err := makeConfigStruct(existing.Configs)
 	if err != nil {

@@ -101,9 +101,9 @@ paths:
           enum:
             - "LOG"
             - "HTTP"
-            - "POSTGRES"
+            - "JDBC"
             - "INFLUXDB"
-            - "ELASTIC"
+            - "ELASTICSEARCH"
             - "REDIS"
             - "GRPC"
             - "PROMETHEUS"
@@ -1020,6 +1020,10 @@ definitions:
         type: string
         format: date-time
         x-nullable: true
+      reset_offset:
+        type: string
+        example: "latest"
+        readOnly: true
       deployment_id:
         type: string
       env_vars:

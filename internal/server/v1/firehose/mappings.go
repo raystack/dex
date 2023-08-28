@@ -20,17 +20,6 @@ import (
 
 const kubeClusterDependencyKey = "kube_cluster"
 
-// Refer https://goto.github.io/firehose/advance/generic/
-const (
-	confSinkType              = "SINK_TYPE"
-	confStencilURL            = "SCHEMA_REGISTRY_STENCIL_URLS"
-	confStreamName            = "STREAM_NAME"
-	confProtoClassName        = "INPUT_SCHEMA_PROTO_CLASS"
-	confSourceKafkaBrokerAddr = "SOURCE_KAFKA_BROKERS"
-	confSourceKafkaConsumerID = "SOURCE_KAFKA_CONSUMER_GROUP_ID"
-	confStencilRegistryToggle = "SCHEMA_REGISTRY_STENCIL_ENABLE"
-)
-
 const (
 	labelTitle       = "title"
 	labelGroup       = "group"
@@ -68,7 +57,7 @@ func mapFirehoseEntropyResource(def models.Firehose, prj *shieldv1beta1.Project)
 
 func makeConfigStruct(cfg *models.FirehoseConfig) (*structpb.Value, error) {
 	var stopTime *time.Time
-	if strings.ToUpper(cfg.EnvVars[confSinkType]) == "LOG" {
+	if strings.ToUpper(cfg.EnvVars[configSinkType]) == logSinkType {
 		t := time.Now().UTC().Add(logSinkTTL)
 		stopTime = &t
 	} else if cfg.StopTime != nil {
@@ -150,7 +139,7 @@ func mapEntropySpecAndLabels(firehose models.Firehose, spec *entropyv1beta1.Reso
 
 	streamName := labels[labelStream]
 	if streamName == "" {
-		streamName = modConf.EnvVariables[confStreamName]
+		streamName = modConf.EnvVariables[configStreamName]
 	}
 
 	firehose.Configs = &models.FirehoseConfig{
@@ -158,6 +147,7 @@ func mapEntropySpecAndLabels(firehose models.Firehose, spec *entropyv1beta1.Reso
 		EnvVars:      modConf.EnvVariables,
 		Stopped:      modConf.Stopped,
 		StopTime:     stopTime,
+		ResetOffset:  modConf.ResetOffset,
 		Replicas:     float64(modConf.Replicas),
 		StreamName:   &streamName,
 		DeploymentID: modConf.DeploymentID,

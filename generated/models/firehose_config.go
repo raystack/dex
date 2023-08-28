@@ -39,6 +39,11 @@ type FirehoseConfig struct {
 	// Minimum: 1
 	Replicas float64 `json:"replicas,omitempty"`
 
+	// reset offset
+	// Example: latest
+	// Read Only: true
+	ResetOffset string `json:"reset_offset,omitempty"`
+
 	// stop time
 	// Format: date-time
 	StopTime *strfmt.DateTime `json:"stop_time,omitempty"`
@@ -132,8 +137,26 @@ func (m *FirehoseConfig) validateStreamName(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this firehose config based on context it is used
+// ContextValidate validate this firehose config based on the context it is used
 func (m *FirehoseConfig) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateResetOffset(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *FirehoseConfig) contextValidateResetOffset(ctx context.Context, formats strfmt.Registry) error {
+
+	if err := validate.ReadOnly(ctx, "reset_offset", "body", string(m.ResetOffset)); err != nil {
+		return err
+	}
+
 	return nil
 }
 
