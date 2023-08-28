@@ -9,7 +9,6 @@ require (
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
 	github.com/BurntSushi/toml v1.0.0
 	github.com/MakeNowJust/heredoc v1.0.0
-	github.com/StewartJingga/gojsondiff v0.0.0-20230726042605-339ce16d300b
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-openapi/errors v0.20.3
@@ -18,6 +17,7 @@ require (
 	github.com/go-openapi/swag v0.22.3
 	github.com/go-openapi/validate v0.22.0
 	github.com/goto/entropy v0.7.5
+	github.com/goto/gojsondiff v0.0.0-20230828102327-0bcf3724fe2e
 	github.com/goto/salt v0.3.0
 	github.com/goto/siren v0.6.5
 	github.com/mitchellh/mapstructure v1.5.0

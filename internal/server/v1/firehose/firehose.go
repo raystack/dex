@@ -9,9 +9,9 @@ import (
 	shieldv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/shield/v1beta1/shieldv1beta1grpc"
 	sirenv1beta1rpc "buf.build/gen/go/gotocompany/proton/grpc/go/gotocompany/siren/v1beta1/sirenv1beta1grpc"
 	entropyv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/entropy/v1beta1"
-	"github.com/StewartJingga/gojsondiff"
-	"github.com/StewartJingga/gojsondiff/formatter"
 	"github.com/go-chi/chi/v5"
+	"github.com/goto/gojsondiff"
+	"github.com/goto/gojsondiff/formatter"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
