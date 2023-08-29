@@ -15,3 +15,10 @@ const (
 	ChannelCriticalityWarning  ChannelCriticality = "WARNING"
 	ChannelCriticalityCritical ChannelCriticality = "CRITICAL"
 )
+
+type ChannelType string
+
+const (
+	ChannelTypeSlack     ChannelType = "slack_channel"
+	ChannelTypePagerduty ChannelType = "pagerduty"
+)

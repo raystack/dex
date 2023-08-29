@@ -1,10 +1,14 @@
 package alert
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
 	sirenv1beta1 "buf.build/gen/go/gotocompany/proton/protocolbuffers/go/gotocompany/siren/v1beta1"
+	sirenReceiverPkg "github.com/goto/siren/core/receiver"
+
+	"github.com/goto/dex/generated/models"
 )
 
 const defaultDecimalBase = 10
@@ -190,5 +194,57 @@ func mapProtoNamespaceToNamespace(ns *sirenv1beta1.Namespace) *namespace {
 		Labels:      ns.GetLabels(),
 		CreatedAt:   ns.GetCreatedAt().AsTime(),
 		UpdatedAt:   ns.GetUpdatedAt().AsTime(),
+	}
+}
+
+func mapSirenReceiverToAlertChannel(recv *sirenv1beta1.Receiver) models.AlertChannel {
+	channelCriticality := recv.Labels[sirenReceiverLabelKeySeverity]
+
+	configMap := recv.Configurations.AsMap()
+	var channelName string
+	channelNameAny, exists := configMap[sirenReceiverConfigKeyChannelName]
+	if exists {
+		channelName = fmt.Sprintf("%v", channelNameAny)
+	}
+
+	var serviceKey string
+	serviceKeyAny, exists := configMap[sirenReceiverConfigKeyServiceKey]
+	if exists {
+		serviceKey = fmt.Sprintf("%v", serviceKeyAny)
+	}
+
+	return models.AlertChannel{
+		ReceiverID:          fmt.Sprintf("%d", recv.Id),
+		ReceiverName:        recv.Name,
+		ChannelName:         channelName,
+		ChannelCriticality:  models.NewChannelCriticality(models.ChannelCriticality(channelCriticality)),
+		ChannelType:         mapReceiverTypeToChannelType(recv.Type),
+		PagerdutyServiceKey: serviceKey,
+	}
+}
+
+func mapReceiverTypeToChannelType(receiverType string) *models.AlertChannelType {
+	if receiverType == "" {
+		return nil
+	}
+
+	var val models.AlertChannelType
+	switch receiverType {
+	case sirenReceiverPkg.TypePagerDuty:
+		val = models.AlertChannelTypePagerduty
+	case sirenReceiverPkg.TypeSlackChannel:
+		val = models.AlertChannelTypeSlackChannel
+	}
+
+	return models.NewAlertChannelType(val)
+}
+
+func isValidReceiverType(val string) bool {
+	switch val {
+	case sirenReceiverPkg.TypePagerDuty,
+		sirenReceiverPkg.TypeSlackChannel:
+		return true
+	default:
+		return false
 	}
 }

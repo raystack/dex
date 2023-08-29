@@ -14,38 +14,30 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AlertChannel alert channel
+// AlertChannelForm alert channel form
 //
-// swagger:model AlertChannel
-type AlertChannel struct {
+// swagger:model AlertChannelForm
+type AlertChannelForm struct {
 
 	// channel criticality
-	ChannelCriticality *ChannelCriticality `json:"channel_criticality,omitempty"`
+	// Required: true
+	ChannelCriticality *ChannelCriticality `json:"channel_criticality"`
 
 	// channel name
 	// Example: test-channel-name
 	ChannelName string `json:"channel_name,omitempty"`
 
 	// channel type
-	ChannelType *AlertChannelType `json:"channel_type,omitempty"`
+	// Required: true
+	ChannelType *AlertChannelType `json:"channel_type"`
 
 	// pagerduty service key
 	// Example: sjand91299asldkla
 	PagerdutyServiceKey string `json:"pagerduty_service_key,omitempty"`
-
-	// receiver id
-	// Example: 47
-	// Read Only: true
-	ReceiverID string `json:"receiver_id,omitempty"`
-
-	// receiver name
-	// Example: pilot-team-de-slack-warning
-	// Read Only: true
-	ReceiverName string `json:"receiver_name,omitempty"`
 }
 
-// Validate validates this alert channel
-func (m *AlertChannel) Validate(formats strfmt.Registry) error {
+// Validate validates this alert channel form
+func (m *AlertChannelForm) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateChannelCriticality(formats); err != nil {
@@ -62,9 +54,14 @@ func (m *AlertChannel) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AlertChannel) validateChannelCriticality(formats strfmt.Registry) error {
-	if swag.IsZero(m.ChannelCriticality) { // not required
-		return nil
+func (m *AlertChannelForm) validateChannelCriticality(formats strfmt.Registry) error {
+
+	if err := validate.Required("channel_criticality", "body", m.ChannelCriticality); err != nil {
+		return err
+	}
+
+	if err := validate.Required("channel_criticality", "body", m.ChannelCriticality); err != nil {
+		return err
 	}
 
 	if m.ChannelCriticality != nil {
@@ -79,9 +76,14 @@ func (m *AlertChannel) validateChannelCriticality(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *AlertChannel) validateChannelType(formats strfmt.Registry) error {
-	if swag.IsZero(m.ChannelType) { // not required
-		return nil
+func (m *AlertChannelForm) validateChannelType(formats strfmt.Registry) error {
+
+	if err := validate.Required("channel_type", "body", m.ChannelType); err != nil {
+		return err
+	}
+
+	if err := validate.Required("channel_type", "body", m.ChannelType); err != nil {
+		return err
 	}
 
 	if m.ChannelType != nil {
@@ -96,8 +98,8 @@ func (m *AlertChannel) validateChannelType(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validate this alert channel based on the context it is used
-func (m *AlertChannel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validate this alert channel form based on the context it is used
+func (m *AlertChannelForm) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.contextValidateChannelCriticality(ctx, formats); err != nil {
@@ -108,21 +110,13 @@ func (m *AlertChannel) ContextValidate(ctx context.Context, formats strfmt.Regis
 		res = append(res, err)
 	}
 
-	if err := m.contextValidateReceiverID(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidateReceiverName(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
 }
 
-func (m *AlertChannel) contextValidateChannelCriticality(ctx context.Context, formats strfmt.Registry) error {
+func (m *AlertChannelForm) contextValidateChannelCriticality(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.ChannelCriticality != nil {
 		if err := m.ChannelCriticality.ContextValidate(ctx, formats); err != nil {
@@ -136,7 +130,7 @@ func (m *AlertChannel) contextValidateChannelCriticality(ctx context.Context, fo
 	return nil
 }
 
-func (m *AlertChannel) contextValidateChannelType(ctx context.Context, formats strfmt.Registry) error {
+func (m *AlertChannelForm) contextValidateChannelType(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.ChannelType != nil {
 		if err := m.ChannelType.ContextValidate(ctx, formats); err != nil {
@@ -150,26 +144,8 @@ func (m *AlertChannel) contextValidateChannelType(ctx context.Context, formats s
 	return nil
 }
 
-func (m *AlertChannel) contextValidateReceiverID(ctx context.Context, formats strfmt.Registry) error {
-
-	if err := validate.ReadOnly(ctx, "receiver_id", "body", string(m.ReceiverID)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AlertChannel) contextValidateReceiverName(ctx context.Context, formats strfmt.Registry) error {
-
-	if err := validate.ReadOnly(ctx, "receiver_name", "body", string(m.ReceiverName)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // MarshalBinary interface implementation
-func (m *AlertChannel) MarshalBinary() ([]byte, error) {
+func (m *AlertChannelForm) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -177,8 +153,8 @@ func (m *AlertChannel) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AlertChannel) UnmarshalBinary(b []byte) error {
-	var res AlertChannel
+func (m *AlertChannelForm) UnmarshalBinary(b []byte) error {
+	var res AlertChannelForm
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
