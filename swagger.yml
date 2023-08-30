@@ -1200,6 +1200,58 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/AlertTemplate"
+  Dlq:
+    type: object
+    properties:
+      date:
+        type: string
+        format: date
+        example: "2012-08-25"
+      size_in_kb:
+        type: integer
+      topic_name:
+        type: string
+  DlqJob:
+    type: object
+    properties:
+      urn:
+        type: string
+      project:
+        type: string
+        description: "Shield's project slug"
+      date:
+        type: string
+        example: "2012-10-30"
+      status:
+        type: string
+        enum:
+          - pending
+          - error
+          - running
+          - stopped
+      topic:
+        type: string
+      firehose_urn:
+        type: string
+      error_types:
+        type: string
+        description: "List of firehose error types, comma separated"
+      batch_size:
+        type: integer
+      num_threads:
+        type: integer
+      blob_batch:
+        type: integer
+      created_by:
+        type: string
+      updated_by:
+        type: string
+      created_at:
+        type: string
+        format: date-time
+      updated_at:
+        type: string
+        format: date-time
   Subscription:
     type: object
     description: "Siren subscription model: https://github.com/goto/siren/blob/v0.6.4/proto/siren.swagger.yaml#L1325"
